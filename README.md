@@ -67,8 +67,6 @@ npm run acceptance -- <path-to-novel.txt>
 在左下角“模型与偏好”中填写 API Base URL、模型和 API Key。默认使用 Responses API 与结构化输出；没有密钥时选择“离线验收”，所有基础功能仍可运行。
 
 详细的数据流、质量门和相对移动端的改进见 [docs/architecture.md](docs/architecture.md)。
-Huobao Drama 的来源、许可边界和架构映射见
-[docs/huobao-integration.md](docs/huobao-integration.md)。
 
 ## 原生 macOS 版
 
@@ -79,5 +77,3 @@ cd macos
 swift run ScriptForgeMac
 bash scripts/build-app.sh
 ```
-
-详细说明见 [`macos/README.md`](macos/README.md)。当前 Windows 工作机不能执行 Xcode/codesign，因此 macOS 的最终编译签名需要在真实 Mac 上完成。
