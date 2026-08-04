@@ -137,10 +137,11 @@ enum BookAnalysisPipeline {
         }
 
         progress("正在执行结构、人物与商业专项分析", groups.count, groups.count, 0.56)
+        let finalDigests = digests
         async let metaCall: MetaResponse = client.structured(
             stage: .bookAnalysisStructure,
             instructions: baseInstruction(prompts) + "\n生成全书元信息，结论必须来自证据摘要。",
-            input: json(digests),
+            input: json(finalDigests),
             name: "book_meta",
             schema: metaSchema
         )
@@ -148,7 +149,7 @@ enum BookAnalysisPipeline {
             ids: ["overview", "structure"],
             focus: "内容概览、开篇钩子、阶段划分、节奏密度、高潮低谷和伏笔兑现",
             stage: .bookAnalysisStructure,
-            digests: digests,
+            digests: finalDigests,
             prompts: prompts,
             client: client
         )
@@ -156,7 +157,7 @@ enum BookAnalysisPipeline {
             ids: ["characters"],
             focus: "主角目标与弧光、反派动机、配角功能、人物关系变化和角色使用效率",
             stage: .bookAnalysisCharacters,
-            digests: digests,
+            digests: finalDigests,
             prompts: prompts,
             client: client
         )
@@ -164,7 +165,7 @@ enum BookAnalysisPipeline {
             ids: ["highlights", "style", "learning"],
             focus: "爽点机制与间隔、文风和对白、可复用创作技法、仿写方向与版权边界",
             stage: .bookAnalysisCommercial,
-            digests: digests,
+            digests: finalDigests,
             prompts: prompts,
             client: client
         )

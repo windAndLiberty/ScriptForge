@@ -430,7 +430,7 @@ final class AppModel: ObservableObject {
         saveText(
             BookAnalysisPipeline.renderMarkdown(report),
             suggestedName: "\(report.title)·拆书报告",
-            type: .markdown
+            type: UTType(filenameExtension: "md") ?? .plainText
         )
     }
 
@@ -504,7 +504,7 @@ final class AppModel: ObservableObject {
     private func saveText(_ value: String, suggestedName: String, type: UTType) {
         let panel = NSSavePanel()
         panel.title = "导出文件"
-        panel.nameFieldStringValue = "\(safeFileName(suggestedName)).\(type == .markdown ? "md" : "txt")"
+        panel.nameFieldStringValue = "\(safeFileName(suggestedName)).\(type.preferredFilenameExtension ?? "txt")"
         panel.allowedContentTypes = [type]
         guard panel.runModal() == .OK, let url = panel.url else { return }
         do {
