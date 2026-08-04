@@ -366,5 +366,826 @@ private struct StudioInspectorView: View {
                             }
                             Text(character.role + " Â· " + character.nameSource.rawValue)
                                 .font(.system(size: 9))
-                                .foregroundStyle(Colï½µ¶‰ËkºwµçU¥¡Ğè€ÌØÀ¤(€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€¹Á…‘‘¥¹œ ÈĞ¤(€€€€€€€€€€€ô(€€€€€€€ô(€€€ô((€€€ÁÉ¥Ù…Ñ”™Õ¹Œµ•ÑÉ¥…É¡|Ñ¥Ñ±”èMÑÉ¥¹œ°|Ù…±Õ”èMÑÉ¥¹œ¤€´øÍ½µ”Y¥•Üì(€€€€€€€YMÑ…¬¡…±¥¹µ•¹Ğè€¹±•…‘¥¹œ°ÍÁ…¥¹œè€Ğ¤ì(€€€€€€€€€€€Q•áĞ¡Ù…±Õ”¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÈÈ°İ•¥¡Ğè€¹‰½±¤¤(€€€€€€€€€€€Q•áĞ¡Ñ¥Ñ±”¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄÀ¤¤¹™½É•É½Õ¹‘MÑå±”¡½±½È¹Í•½¹‘…ÉåQ•áĞ¤(€€€€€€€ô(€€€€€€€€¹™É…µ”¡µ…á]¥‘Ñ è€¹¥¹™¥¹¥Ñä°…±¥¹µ•¹Ğè€¹±•…‘¥¹œ¤(€€€€€€€€¹Á…¹•±…É ¤(€€€ô)ô()ÁÉ¥Ù…Ñ”ÍÑÉÕĞAÉ½©•ÑÉ¡¥Ù•Y¥•ÜèY¥•Üì(€€€¹Ù¥É½¹µ•¹Ñ=‰©•ĞÁÉ¥Ù…Ñ”Ù…Èµ½‘•°èÁÁ5½‘•°(€€€¹Ù¥É½¹µ•¹Ñ=‰©•ĞÁÉ¥Ù…Ñ”Ù…È±½…±¥é…Ñ¥½¸è1½…±¥é…Ñ¥½¹MÑ½É”(€€€MÑ…Ñ”ÁÉ¥Ù…Ñ”Ù…ÈÍ•±•Ñ•€ô1¥‰É…ÉåY¥•Ü¹É••¹Ğ((€€€ÁÉ¥Ù…Ñ”•¹Õ´1¥‰É…ÉåY¥•ÜèÅÕ…Ñ…‰±”ì…Í”É••¹Ğ°…É¡¥Ù•ô((€€€Ù…È‰½‘äèÍ½µ”Y¥•Üì(€€€€€€€MÉ½±±Y¥•Üì(€€€€€€€€€€€YMÑ…¬¡…±¥¹µ•¹Ğè€¹±•…‘¥¹œ°ÍÁ…¥¹œè€ÈÀ¤ì(€€€€€€€€€€€€€€€!MÑ…¬ì(€€€€€€€€€€€€€€€€€€€YMÑ…¬¡…±¥¹µ•¹Ğè€¹±•…‘¥¹œ°ÍÁ…¥¹œè€Ô¤ì(€€€€€€€€€€€€€€€€€€€€€€€Q•áĞ¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹¦†çn»š†š† ˆ¤¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÈÜ°İ•¥¡Ğè€¹‰½±¤¤(€€€€€€€€€€€€€€€€€€€€€€€Q•áĞ¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹šr¢şGšr–’k’şwVdÔÃ’â«¾ò3¢Ú–ë–B;¢«–*£–öKš†¾òo–öKš†¦†çn»’â7’òk¢«–*£–"ƒ¦f“ˆ¤¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€¹™½É•É½Õ¹‘MÑå±”¡½±½È¹Í•½¹‘…ÉåQ•áĞ¤(€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€€€€MÁ…•È ¤(€€€€€€€€€€€€€€€€€€€	ÕÑÑ½¸¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹šZÃ–îë¦†çn¸ˆ¤¤ìµ½‘•°¹¹•İAÉ½©•Ğ ¤ô(€€€€€€€€€€€€€€€€€€€€€€€€¹‰ÕÑÑ½¹MÑå±”¡AÉ¥µ…Éå	ÕÑÑ½¹MÑå±” ¤¤(€€€€€€€€€€€€€€€ô((€€€€€€€€€€€€€€€!MÑ…¬¡ÍÁ…¥¹œè€ÄÈ¤ì(€€€€€€€€€€€€€€€€€€€ÍÕµµ…Éå	ÕÑÑ½¸ ‰p¡µ½‘•°¹É••¹ÑAÉ½©•ÑÌ¹½Õ¹Ğ¤ˆ°€‹šr¢şG¦†çn¸ˆ°Í•±•Ñ•€ôô€¹É••¹Ğ¤ìÍ•±•Ñ•€ô€¹É••¹Ğô(€€€€€€€€€€€€€€€€€€€ÍÕµµ…Éå	ÕÑÑ½¸ ‰p¡µ½‘•°¹…É¡¥Ù•‘AÉ½©•ÑÌ¹½Õ¹Ğ¤ˆ°€‹–ŞË–öKš†Œˆ°Í•±•Ñ•€ôô€¹…É¡¥Ù•¤ìÍ•±•Ñ•€ô€¹…É¡¥Ù•ô(€€€€€€€€€€€€€€€€€€€ÍÕµµ…ÉåMÑ…Ñ¥Œ ‰p¡µ½‘•°¹ÁÉ½©•Ñ1¥‰É…Éä¹É•‘Õ” À¤ì€À€¬€Ä¹¡…ÁÑ•É½Õ¹Ğô¤ˆ°€‹Ò¿¢º‡®ƒ¢*ˆ¤(€€€€€€€€€€€€€€€€€€€ÍÕµµ…ÉåMÑ…Ñ¥Œ ‰p¡µ½‘•°¹ÁÉ½©•Ñ1¥‰É…Éä¹É•‘Õ” À¤ì€À€¬€Ä¹•¹•É…Ñ•‘Á¥Í½‘•½Õ¹Ğô¤ˆ°€‹–ŞËRš"C¦nšVÀˆ¤(€€€€€€€€€€€€€€€ô((€€€€€€€€€€€€€€€±•ĞÙ¥Í¥‰±”€ôÍ•±•Ñ•€ôô€¹É••¹Ğ€üµ½‘•°¹É••¹ÑAÉ½©•ÑÌ€èµ½‘•°¹…É¡¥Ù•‘AÉ½©•ÑÌ(€€€€€€€€€€€€€€€¥˜Ù¥Í¥‰±”¹¥ÍµÁÑäì(€€€€€€€€€€€€€€€€€€€µÁÑåMÑ…Ñ”¡¥½¸è€‰…É¡¥Ù•‰½àˆ°Ñ¥Ñ±”è±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹šÊ‡šr'¦†çn¸ˆ¤¤(€€€€€€€€€€€€€€€€€€€€€€€€¹™É…µ”¡¡•¥¡Ğè€ÌĞÀ¤(€€€€€€€€€€€€€€€ô•±Í”ì(€€€€€€€€€€€€€€€€€€€1…éåYÉ¥¡½±Õµ¹ÌèmÉ¥‘%Ñ•´ ¹…‘…ÁÑ¥Ù”¡µ¥¹¥µÕ´è€ÈÜÀ¤°ÍÁ…¥¹œè€ÄĞ¥t°ÍÁ…¥¹œè€ÄĞ¤ì(€€€€€€€€€€€€€€€€€€€€€€€½É… ¡Ù¥Í¥‰±”¤ìÁÉ½©•Ğ¥¸(€€€€€€€€€€€€€€€€€€€€€€€€€€€ÁÉ½©•Ñ…É¡ÁÉ½©•Ğ¤(€€€€€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€ô(€€€€€€€€€€€€¹Á…‘‘¥¹œ ÈĞ¤(€€€€€€€ô(€€€ô((€€€ÁÉ¥Ù…Ñ”™Õ¹ŒÍÕµµ…Éå	ÕÑÑ½¸¡|Ù…±Õ”èMÑÉ¥¹œ°|Ñ¥Ñ±”èMÑÉ¥¹œ°|…Ñ¥Ù”è	½½°°…Ñ¥½¸è•Í…Á¥¹œ€ ¤€´øY½¥¤€´øÍ½µ”Y¥•Üì(€€€€€€€	ÕÑÑ½¸¡…Ñ¥½¸è…Ñ¥½¸¤ì(€€€€€€€€€€€ÍÕµµ…Éå½¹Ñ•¹Ğ¡Ù…±Õ”°Ñ¥Ñ±”¤(€€€€€€€€€€€€€€€€¹‰…­É½Õ¹¡…Ñ¥Ù”€ü½±½È¹‰É…¹¹½Á…¥Ñä À¸Ä¤€è½±½È¹Á…¹•°¤(€€€€€€€€€€€€€€€€¹½Ù•É±…ä¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€ÄÀ¤¹ÍÑÉ½­”¡…Ñ¥Ù”€ü½±½È¹‰É…¹€è½±½È¹‰½É‘•È¤¤(€€€€€€€ô(€€€€€€€€¹‰ÕÑÑ½¹MÑå±” ¹Á±…¥¸¤(€€€ô((€€€ÁÉ¥Ù…Ñ”™Õ¹ŒÍÕµµ…ÉåMÑ…Ñ¥Œ¡|Ù…±Õ”èMÑÉ¥¹œ°|Ñ¥Ñ±”èMÑÉ¥¹œ¤€´øÍ½µ”Y¥•Üì(€€€€€€€ÍÕµµ…Éå½¹Ñ•¹Ğ¡Ù…±Õ”°Ñ¥Ñ±”¤(€€€€€€€€€€€€¹‰…­É½Õ¹¡½±½È¹Á…¹•°¤(€€€€€€€€€€€€¹½Ù•É±…ä¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€ÄÀ¤¹ÍÑÉ½­”¡½±½È¹‰½É‘•È¤¤(€€€ô((€€€ÁÉ¥Ù…Ñ”™Õ¹ŒÍÕµµ…Éå½¹Ñ•¹Ğ¡|Ù…±Õ”èMÑÉ¥¹œ°|Ñ¥Ñ±”èMÑÉ¥¹œ¤€´øÍ½µ”Y¥•Üì(€€€€€€€YMÑ…¬¡…±¥¹µ•¹Ğè€¹±•…‘¥¹œ°ÍÁ…¥¹œè€Ô¤ì(€€€€€€€€€€€Q•áĞ¡Ù…±Õ”¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÈĞ°İ•¥¡Ğè€¹‰½±¤¤(€€€€€€€€€€€Q•áĞ¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ¡Ñ¥Ñ±”¤¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄÀ¤¤¹™½É•É½Õ¹‘MÑå±”¡½±½È¹Í•½¹‘…ÉåQ•áĞ¤(€€€€€€€ô(€€€€€€€€¹™É…µ”¡µ…á]¥‘Ñ è€¹¥¹™¥¹¥Ñä°…±¥¹µ•¹Ğè€¹±•…‘¥¹œ¤(€€€€€€€€¹Á…‘‘¥¹œ ÄĞ¤(€€€€€€€€¹±¥ÁM¡…Á”¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€ÄÀ¤¤(€€€ô((€€€ÁÉ¥Ù…Ñ”™Õ¹ŒÁÉ½©•Ñ…É¡|ÁÉ½©•ĞèMÑ½É•‘AÉ½©•Ğ¤€´øÍ½µ”Y¥•Üì(€€€€€€€YMÑ…¬¡…±¥¹µ•¹Ğè€¹±•…‘¥¹œ°ÍÁ…¥¹œè€ÄÈ¤ì(€€€€€€€€€€€!MÑ…¬¡…±¥¹µ•¹Ğè€¹Ñ½À¤ì(€€€€€€€€€€€€€€€I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€à¤(€€€€€€€€€€€€€€€€€€€€¹™¥±°¡½±½È¹‰É…¹¹½Á…¥Ñä À¸Ä¤¤(€€€€€€€€€€€€€€€€€€€€¹½Ù•É±…ä¡%µ…”¡ÍåÍÑ•µ9…µ”è€‰‘½Œ¹É¥¡Ñ•áĞ¹™¥±°ˆ¤¹™½É•É½Õ¹‘MÑå±”¡½±½È¹‰É…¹¤¤(€€€€€€€€€€€€€€€€€€€€¹™É…µ”¡İ¥‘Ñ è€ĞØ°¡•¥¡Ğè€Ôà¤(€€€€€€€€€€€€€€€YMÑ…¬¡…±¥¹µ•¹Ğè€¹±•…‘¥¹œ°ÍÁ…¥¹œè€Ğ¤ì(€€€€€€€€€€€€€€€€€€€Q•áĞ¡ÁÉ½©•Ğ¹¹…µ”¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄĞ°İ•¥¡Ğè€¹‰½±¤¤¹±¥¹•1¥µ¥Ğ È¤(€€€€€€€€€€€€€€€€€€€Q•áĞ¡ÁÉ½©•Ğ¹‘½Õµ•¹Ğü¹Ñ¥Ñ±”€üü±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹–Âkšr«–¾ó–”ˆ¤¤(€€€€€€€€€€€€€€€€€€€€€€€€¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄÀ¤¤¹™½É•É½Õ¹‘MÑå±”¡½±½È¹Í•½¹‘…ÉåQ•áĞ¤(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€MÁ…•È ¤(€€€€€€€€€€€ô(€€€€€€€€€€€!MÑ…¬ì(€€€€€€€€€€€€€€€1…‰•° ‰p¡ÁÉ½©•Ğ¹¡…ÁÑ•É½Õ¹Ğ¤ˆ°ÍåÍÑ•µ%µ…”è€‰‰½½¬¹Á…•Ìˆ¤(€€€€€€€€€€€€€€€1…‰•° ‰p¡ÁÉ½©•Ğ¹•¹•É…Ñ•‘Á¥Í½‘•½Õ¹Ğ¤ˆ°ÍåÍÑ•µ%µ…”è€‰Á±…ä¹É•Ñ…¹±”ˆ¤(€€€€€€€€€€€€€€€MÁ…•È ¤(€€€€€€€€€€€€€€€Q•áĞ¡ÁÉ½©•Ğ¹ÕÁ‘…Ñ•‘Ğ¹™½Éµ…ÑÑ•¡‘…Ñ”è€¹…‰‰É•Ù¥…Ñ•°Ñ¥µ”è€¹Í¡½ÉÑ•¹•¤¤(€€€€€€€€€€€ô(€€€€€€€€€€€€¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ä¤¤¹™½É•É½Õ¹‘MÑå±”¡½±½È¹Í•½¹‘…ÉåQ•áĞ¤(€€€€€€€€€€€¥Ù¥‘•È ¤(€€€€€€€€€€€!MÑ…¬¡ÍÁ…¥¹œè€à¤ì(€€€€€€€€€€€€€€€	ÕÑÑ½¸¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹š&O–ò ˆ¤¤ìµ½‘•°¹½Á•¹AÉ½©•Ğ¡ÁÉ½©•Ğ¤ô(€€€€€€€€€€€€€€€€€€€€¹‰ÕÑÑ½¹MÑå±”¡M•½¹‘…Éå	ÕÑÑ½¹MÑå±” ¤¤(€€€€€€€€€€€€€€€	ÕÑÑ½¸¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹–"o–îë–&¿šr°ˆ¤¤ìµ½‘•°¹‘ÕÁ±¥…Ñ•AÉ½©•Ğ¡ÁÉ½©•Ğ¤ô(€€€€€€€€€€€€€€€€€€€€¹‰ÕÑÑ½¹MÑå±”¡M•½¹‘…Éå	ÕÑÑ½¹MÑå±” ¤¤(€€€€€€€€€€€€€€€MÁ…•È ¤(€€€€€€€€€€€€€€€¥˜ÁÉ½©•Ğ¹…É¡¥Ù•‘Ğ€ôô¹¥°ì(€€€€€€€€€€€€€€€€€€€	ÕÑÑ½¸¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹–öKš†Œˆ¤¤ìµ½‘•°¹…É¡¥Ù•AÉ½©•Ğ¡ÁÉ½©•Ğ¤ô(€€€€€€€€€€€€€€€€€€€€€€€€¹‰ÕÑÑ½¹MÑå±”¡M•½¹‘…Éå	ÕÑÑ½¹MÑå±” ¤¤(€€€€€€€€€€€€€€€ô•±Í”ì(€€€€€€€€€€€€€€€€€€€	ÕÑÑ½¸¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹š‹–’4ˆ¤¤ìµ½‘•°¹É•ÍÑ½É•AÉ½©•Ğ¡ÁÉ½©•Ğ¤ô(€€€€€€€€€€€€€€€€€€€€€€€€¹‰ÕÑÑ½¹MÑå±”¡M•½¹‘…Éå	ÕÑÑ½¹MÑå±” ¤¤(€€€€€€€€€€€€€€€€€€€	ÕÑÑ½¸¡É½±”è€¹‘•ÍÑÉÕÑ¥Ù”¤ìµ½‘•°¹É•ÅÕ•ÍÑ•±•Ñ”¡ÁÉ½©•Ğ¤ô±…‰•°èì(€€€€€€€€€€€€€€€€€€€€€€€%µ…”¡ÍåÍÑ•µ9…µ”è€‰ÑÉ…Í ˆ¤(€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€€€€€¹‰ÕÑÑ½¹MÑå±”¡%½¹	ÕÑÑ½¹MÑå±” ¤¤(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€ô(€€€€€€€ô(€€€€€€€€¹Á…¹•±…É ¤(€€€€€€€€¹½¹Ñ•¹ÑM¡…Á”¡I•Ñ…¹±” ¤¤(€€€€€€€€¹½¹Q…Á•ÍÑÕÉ”ìµ½‘•°¹½Á•¹AÉ½©•Ğ¡ÁÉ½©•Ğ¤ô(€€€ô)ô()ÁÉ¥Ù…Ñ”ÍÑÉÕĞAÉ½µÁÑÍÍ•ÑÍY¥•ÜèY¥•Üì(€€€¹Ù¥É½¹µ•¹Ñ=‰©•ĞÁÉ¥Ù…Ñ”Ù…Èµ½‘•°èÁÁ5½‘•°(€€€¹Ù¥É½¹µ•¹Ñ=‰©•ĞÁÉ¥Ù…Ñ”Ù…È±½…±¥é…Ñ¥½¸è1½…±¥é…Ñ¥½¹MÑ½É”(€€€MÑ…Ñ”ÁÉ¥Ù…Ñ”Ù…ÈÍ•±•Ñ•‘%èMÑÉ¥¹œü€ôAÉ½µÁÑÍÍ•ÑÌ¹‘•™…Õ±ÑÌ¹™¥ÉÍĞü¹¥((€€€Ù…È‰½‘äèÍ½µ”Y¥•Üì(€€€€€€€!MÑ…¬¡ÍÁ…¥¹œè€À¤ì(€€€€€€€€€€€1¥ÍĞ¡µ½‘•°¹ÁÉ½µÁÑÍÍ•ÑÌ°Í•±•Ñ¥½¸è€‘Í•±•Ñ•‘%¤ì…ÍÍ•Ğ¥¸(€€€€€€€€€€€€€€€YMÑ…¬¡…±¥¹µ•¹Ğè€¹±•…‘¥¹œ°ÍÁ…¥¹œè€Ğ¤ì(€€€€€€€€€€€€€€€€€€€!MÑ…¬ì(€€€€€€€€€€€€€€€€€€€€€€€Q•áĞ¡…ÍÍ•Ğ¹Ñ¥Ñ±”¤¹™½¹Ñ]•¥¡Ğ ¹Í•µ¥‰½±¤(€€€€€€€€€€€€€€€€€€€€€€€%µ…”¡ÍåÍÑ•µ9…µ”è€‰¥¹™¼¹¥É±”ˆ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄÀ¤¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€¹™½É•É½Õ¹‘MÑå±”¡½±½È¹Í•½¹‘…ÉåQ•áĞ¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€€¹¡•±À¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹–öÇ–N7¢2–nĞˆ¤€¬€‹¾òhˆ€¬…ÍÍ•Ğ¹¥¹™±Õ•¹”¤(€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€€€€Q•áĞ¡…ÍÍ•Ğ¹Í½Á”¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ä¤¤¹™½É•É½Õ¹‘MÑå±”¡½±½È¹Í•½¹‘…ÉåQ•áĞ¤(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€¹Ñ…œ¡…ÍÍ•Ğ¹¥¤(€€€€€€€€€€€ô(€€€€€€€€€€€€¹±¥ÍÑMÑå±” ¹Í¥‘•‰…È¤(€€€€€€€€€€€€¹™É…µ”¡İ¥‘Ñ è€ÈÜÀ¤(€€€€€€€€€€€¥Ù¥‘•È ¤(€€€€€€€€€€€¥˜±•Ğ…ÍÍ•Ğ€ôµ½‘•°¹ÁÉ½µÁÑÍÍ•ÑÌ¹™¥ÉÍĞ¡İ¡•É”èìÍ•±•Ñ•‘%€ôô€À¹¥ô¤ì(€€€€€€€€€€€€€€€YMÑ…¬¡…±¥¹µ•¹Ğè€¹±•…‘¥¹œ°ÍÁ…¥¹œè€ÄĞ¤ì(€€€€€€€€€€€€€€€€€€€!MÑ…¬ì(€€€€€€€€€€€€€€€€€€€€€€€YMÑ…¬¡…±¥¹µ•¹Ğè€¹±•…‘¥¹œ°ÍÁ…¥¹œè€Ğ¤ì(€€€€€€€€€€€€€€€€€€€€€€€€€€€Q•áĞ¡…ÍÍ•Ğ¹Ñ¥Ñ±”¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÈÈ°İ•¥¡Ğè€¹‰½±¤¤(€€€€€€€€€€€€€€€€€€€€€€€€€€€Q•áĞ¡…ÍÍ•Ğ¹Í½Á”¤¹™½É•É½Õ¹‘MÑå±”¡½±½È¹Í•½¹‘…ÉåQ•áĞ¤(€€€€€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€€€€€€€€MÁ…•È ¤(€€€€€€€€€€€€€€€€€€€€€€€	ÕÑÑ½¸¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹š‹–’7¦îc¢ºˆ¤¤ìµ½‘•°¹É•Í•ÑAÉ½µÁÑÍÍ•Ğ¡¥è…ÍÍ•Ğ¹¥¤ô(€€€€€€€€€€€€€€€€€€€€€€€€€€€€¹‰ÕÑÑ½¹MÑå±”¡M•½¹‘…Éå	ÕÑÑ½¹MÑå±” ¤¤(€€€€€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€€€€1…‰•°¡…ÍÍ•Ğ¹¥¹™±Õ•¹”°ÍåÍÑ•µ%µ…”è€‰¥¹™¼¹¥É±”¹™¥±°ˆ¤(€€€€€€€€€€€€€€€€€€€€€€€€¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄÄ¤¤(€€€€€€€€€€€€€€€€€€€€€€€€¹™½É•É½Õ¹‘MÑå±”¡½±½È¹‰É…¹¤(€€€€€€€€€€€€€€€€€€€€€€€€¹Á…‘‘¥¹œ ÄÀ¤(€€€€€€€€€€€€€€€€€€€€€€€€¹‰…­É½Õ¹¡½±½È¹‰É…¹¹½Á…¥Ñä À¸Àà¤¤(€€€€€€€€€€€€€€€€€€€€€€€€¹±¥ÁM¡…Á”¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€à¤¤(€€€€€€€€€€€€€€€€€€€Q•áÑ‘¥Ñ½È (€€€€€€€€€€€€€€€€€€€€€€€Ñ•áĞè	¥¹‘¥¹œ (€€€€€€€€€€€€€€€€€€€€€€€€€€€•Ğèì(€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€µ½‘•°¹ÁÉ½µÁÑÍÍ•ÑÌ¹™¥ÉÍĞ¡İ¡•É”èì€À¹¥€ôô…ÍÍ•Ğ¹¥ô¤ü¹¥¹ÍÑÉÕÑ¥½¸€üü€ˆˆ(€€€€€€€€€€€€€€€€€€€€€€€€€€€ô°(€€€€€€€€€€€€€€€€€€€€€€€€€€€Í•Ğèìµ½‘•°¹ÕÁ‘…Ñ•AÉ½µÁÑÍÍ•Ğ¡¥è…ÍÍ•Ğ¹¥°¥¹ÍÑÉÕÑ¥½¸è€À¤ô(€€€€€€€€€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€€€€€€€€€€¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄÌ°‘•Í¥¸è€¹µ½¹½ÍÁ…•¤¤(€€€€€€€€€€€€€€€€€€€€¹Á…‘‘¥¹œ ÄÈ¤(€€€€€€€€€€€€€€€€€€€€¹‰…­É½Õ¹¡½±½È¹•‘¥Ñ½ÉA…Á•È¤(€€€€€€€€€€€€€€€€€€€€¹±¥ÁM¡…Á”¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€ÄÀ¤¤(€€€€€€€€€€€€€€€€€€€€¹½Ù•É±…ä¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€ÄÀ¤¹ÍÑÉ½­”¡½±½È¹‰½É‘•È¤¤(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€¹Á…‘‘¥¹œ ÈĞ¤(€€€€€€€€€€€ô(€€€€€€€ô(€€€ô)ô()ÁÉ¥Ù…Ñ”ÍÑÉÕĞM•ÑÑ¥¹ÍY¥•ÜèY¥•Üì(€€€¹Ù¥É½¹µ•¹Ñ=‰©•ĞÁÉ¥Ù…Ñ”Ù…Èµ½‘•°èÁÁ5½‘•°(€€€¹Ù¥É½¹µ•¹Ñ=‰©•ĞÁÉ¥Ù…Ñ”Ù…È±½…±¥é…Ñ¥½¸è1½…±¥é…Ñ¥½¹MÑ½É”(€€€¹Ù¥É½¹µ•¹Ğ¡p¹‘¥Íµ¥ÍÌ¤ÁÉ¥Ù…Ñ”Ù…È‘¥Íµ¥ÍÌ(€€€MÑ…Ñ”ÁÉ¥Ù…Ñ”Ù…ÈÍ•ÑÑ¥¹Ìè5½‘•±M•ÑÑ¥¹Ì(€€€MÑ…Ñ”ÁÉ¥Ù…Ñ”Ù…È…Á¥-•ä€ô€ˆˆ(€€€MÑ…Ñ”ÁÉ¥Ù…Ñ”Ù…È½¹Í•¹ÑÉ…¹Ñ•è	½½°((€€€¥¹¥Ğ ¤ì(€€€€€€€}Í•ÑÑ¥¹Ì€ôMÑ…Ñ”¡¥¹¥Ñ¥…±Y…±Õ”è5½‘•±M•ÑÑ¥¹Ì ¤¤(€€€€€€€}½¹Í•¹ÑÉ…¹Ñ•€ôMÑ…Ñ”¡¥¹¥Ñ¥…±Y…±Õ”è™…±Í”¤(€€€ô((€€€Ù…È‰½‘äèÍ½µ”Y¥•Üì(€€€€€€€YMÑ…¬¡…±¥¹µ•¹Ğè€¹±•…‘¥¹œ°ÍÁ…¥¹œè€ÄØ¤ì(€€€€€€€€€€€!MÑ…¬ì(€€€€€€€€€€€€€€€Q•áĞ¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹š¢‡–z/’â;–º'–£¢ºûö¸ˆ¤¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÈÄ°İ•¥¡Ğè€¹‰½±¤¤(€€€€€€€€€€€€€€€MÁ…•È ¤(€€€€€€€€€€€€€€€	ÕÑÑ½¸ì‘¥Íµ¥ÍÌ ¤ô±…‰•°èì%µ…”¡ÍåÍÑ•µ9…µ”è€‰áµ…É¬ˆ¤ô(€€€€€€€€€€€€€€€€€€€€¹‰ÕÑÑ½¹MÑå±”¡%½¹	ÕÑÑ½¹MÑå±” ¤¤(€€€€€€€€€€€ô(€€€€€€€€€€€Q½±”¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹–B¿R£–r£êÿ–>3š¢‡–z/º‡êüˆ¤°¥Í=¸è€‘Í•ÑÑ¥¹Ì¹ÕÍ•=¹±¥¹”¤(€€€€€€€€€€€Í•ÑÑ¥¹¥•± ‰A$	…Í”UI0ˆ¤ìQ•áÑ¥•± ‰¡ÑÑÁÌè¼½…Á¤¹½Á•¹…¤¹½´½ØÄˆ°Ñ•áĞè€‘Í•ÑÑ¥¹Ì¹‰…Í•UI0¤ô(€€€€€€€€€€€Í•ÑÑ¥¹¥•± ‹–"o’ösš¢‡–z/¾ò!AÉ¿¾ò$ˆ¤ìQ•áÑ¥•± ‰ÁĞ´Ô¸ØµÍ½°ˆ°Ñ•áĞè€‘Í•ÑÑ¥¹Ì¹ÁÉ¥µ…Éå5½‘•°¤ô(€€€€€€€€€€€Í•ÑÑ¥¹¥•± ‹¦®c¦š¢‡–z/¾ò!±…Í£¾ò$ˆ¤ìQ•áÑ¥•± ‰ÁĞ´Ô¸ØµÑ•ÉÉ„ˆ°Ñ•áĞè€‘Í•ÑÑ¥¹Ì¹™±…Í¡5½‘•°¤ô(€€€€€€€€€€€Í•ÑÑ¥¹¥•± ‹š:£B–òë–ê˜ˆ¤ì(€€€€€€€€€€€€€€€A¥­•È ˆˆ°Í•±•Ñ¥½¸è€‘Í•ÑÑ¥¹Ì¹É•…Í½¹¥¹™™½ÉĞ¤ì(€€€€€€€€€€€€€€€€€€€½É… ¡l‰¹½¹”ˆ°€‰±½Üˆ°€‰µ•‘¥Õ´ˆ°€‰¡¥ ‰t°¥èp¹Í•±˜¤ìQ•áĞ À¤¹Ñ…œ À¤ô(€€€€€€€€€€€€€€€ô¹±…‰•±Í!¥‘‘•¸ ¤(€€€€€€€€€€€ô(€€€€€€€€€€€Í•ÑÑ¥¹¥•± ‰A$-•äˆ¤ì(€€€€€€€€€€€€€€€M•ÕÉ•¥•±¡µ½‘•°¹¡…ÍA%-•ä€ü€‹Š‹Š‹Š‹Š‹Š‹Š‹Š‹Šˆ€¡Í…Ù•¤ˆ€è€‰Í¬·Š˜ˆ°Ñ•áĞè€‘…Á¥-•ä¤(€€€€€€€€€€€ô(€€€€€€€€€€€Q½±”¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹–B3š?–>G¦–"Ã–öO–&7®¿
-äˆ¤°¥Í=¸è€‘½¹Í•¹ÑÉ…¹Ñ•¤(€€€€€€€€€€€Q•áĞ¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹–r£êÿšRçò[’òkš*+š&¦'–Â?¢¾Ó&šº×–>G¦–"Ã’â+šZç–~–B7–¾¦J—’î’şw–¶c–r µ…=L-•å¡…¥»ˆ¤¤(€€€€€€€€€€€€€€€€¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄÄ¤¤(€€€€€€€€€€€€€€€€¹™½É•É½Õ¹‘MÑå±”¡½±½È¹Í•½¹‘…ÉåQ•áĞ¤(€€€€€€€€€€€€€€€€¹Á…‘‘¥¹œ ÄÀ¤(€€€€€€€€€€€€€€€€¹‰…­É½Õ¹¡½±½È¹İ½É­ÍÁ…”¤(€€€€€€€€€€€€€€€€¹±¥ÁM¡…Á”¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€à¤¤(€€€€€€€€€€€!MÑ…¬ì(€€€€€€€€€€€€€€€MÁ…•È ¤(€€€€€€€€€€€€€€€	ÕÑÑ½¸¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹–>[šÚ ˆ¤¤ì‘¥Íµ¥ÍÌ ¤ô(€€€€€€€€€€€€€€€€€€€€¹‰ÕÑÑ½¹MÑå±”¡M•½¹‘…Éå	ÕÑÑ½¹MÑå±” ¤¤(€€€€€€€€€€€€€€€	ÕÑÑ½¸¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ ‹’şw–¶c¢ş{š:”ˆ¤¤ì(€€€€€€€€€€€€€€€€€€€µ½‘•°¹Í…Ù•M•ÑÑ¥¹Ì¡Í•ÑÑ¥¹Ì°…Á¥-•äè…Á¥-•ä°½¹Í•¹ÑÉ…¹Ñ•è½¹Í•¹ÑÉ…¹Ñ•¤(€€€€€€€€€€€€€€€ô(€€€€€€€€€€€€€€€€¹‰ÕÑÑ½¹MÑå±”¡AÉ¥µ…Éå	ÕÑÑ½¹MÑå±” ¤¤(€€€€€€€€€€€€€€€€¹‘¥Í…‰±•¡Í•ÑÑ¥¹Ì¹ÕÍ•=¹±¥¹”€˜˜€…½¹Í•¹ÑÉ…¹Ñ•¤(€€€€€€€€€€€ô(€€€€€€€ô(€€€€€€€€¹Á…‘‘¥¹œ ÈĞ¤(€€€€€€€€¹™É…µ”¡İ¥‘Ñ è€ÔØÀ¤(€€€€€€€€¹½¹ÁÁ•…Èì(€€€€€€€€€€€Í•ÑÑ¥¹Ì€ôµ½‘•°¹µ½‘•±M•ÑÑ¥¹Ì(€€€€€€€€€€€½¹Í•¹ÑÉ…¹Ñ•€ôµ½‘•°¹µ½‘•±M•ÑÑ¥¹Ì¹¡…Í¹‘Á½¥¹Ñ½¹Í•¹Ğ(€€€€€€€ô(€€€ô((€€€ÁÉ¥Ù…Ñ”™Õ¹ŒÍ•ÑÑ¥¹¥•±ñ½¹Ñ•¹ĞèY¥•Üø¡|Ñ¥Ñ±”èMÑÉ¥¹œ°Y¥•İ	Õ¥±‘•È½¹Ñ•¹Ğè€ ¤€´ø½¹Ñ•¹Ğ¤€´øÍ½µ”Y¥•Üì(€€€€€€€!MÑ…¬ì(€€€€€€€€€€€Q•áĞ¡±½…±¥é…Ñ¥½¸¹Ñ•áĞ¡Ñ¥Ñ±”¤¤¹™É…µ”¡İ¥‘Ñ è€ÄÔÀ°…±¥¹µ•¹Ğè€¹±•…‘¥¹œ¤(€€€€€€€€€€€½¹Ñ•¹Ğ ¤¹Ñ•áÑ¥•±‘MÑå±” ¹É½Õ¹‘•‘	½É‘•È¤(€€€€€€€ô(€€€ô)ô()ÁÉ¥Ù…Ñ”ÍÑÉÕĞµÁÑåMÑ…Ñ”èY¥•Üì(€€€±•Ğ¥½¸èMÑÉ¥¹œ(€€€±•ĞÑ¥Ñ±”èMÑÉ¥¹œ((€€€Ù…È‰½‘äèÍ½µ”Y¥•Üì(€€€€€€€YMÑ…¬¡ÍÁ…¥¹œè€ÄÈ¤ì(€€€€€€€€€€€%µ…”¡ÍåÍÑ•µ9…µ”è¥½¸¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÌØ¤¤¹™½É•É½Õ¹‘MÑå±”¡½±½È¹‰É…¹¹½Á…¥Ñä À¸Ü¤¤(€€€€€€€€€€€Q•áĞ¡Ñ¥Ñ±”¤¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄĞ°İ•¥¡Ğè€¹Í•µ¥‰½±¤¤¹™½É•É½Õ¹‘MÑå±”¡½±½È¹Í•½¹‘…ÉåQ•áĞ¤(€€€€€€€ô(€€€€€€€€¹™É…µ”¡µ…á]¥‘Ñ è€¹¥¹™¥¹¥Ñä°µ…á!•¥¡Ğè€¹¥¹™¥¹¥Ñä¤(€€€ô)ô()ÁÉ¥Ù…Ñ”•áÑ•¹Í¥½¸Y¥•Üì(€€€™Õ¹ŒÁ…¹•±…É ¤€´øÍ½µ”Y¥•Üì(€€€€€€€Í•±˜(€€€€€€€€€€€€¹Á…‘‘¥¹œ ÄĞ¤(€€€€€€€€€€€€¹™É…µ”¡µ…á]¥‘Ñ è€¹¥¹™¥¹¥Ñä°…±¥¹µ•¹Ğè€¹±•…‘¥¹œ¤(€€€€€€€€€€€€¹‰…­É½Õ¹¡½±½È¹Á…¹•°¤(€€€€€€€€€€€€¹±¥ÁM¡…Á”¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€ÄÀ¤¤(€€€€€€€€€€€€¹½Ù•É±…ä¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€ÄÀ¤¹ÍÑÉ½­”¡½±½È¹‰½É‘•È¤¤(€€€ô)ô()ÁÉ¥Ù…Ñ”ÍÑÉÕĞAÉ¥µ…Éå	ÕÑÑ½¹MÑå±”è	ÕÑÑ½¹MÑå±”ì(€€€™Õ¹Œµ…­•	½‘ä¡½¹™¥ÕÉ…Ñ¥½¸è½¹™¥ÕÉ…Ñ¥½¸¤€´øÍ½µ”Y¥•Üì(€€€€€€€½¹™¥ÕÉ…Ñ¥½¸¹±…‰•°(€€€€€€€€€€€€¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄÈ°İ•¥¡Ğè€¹Í•µ¥‰½±¤¤(€€€€€€€€€€€€¹™½É•É½Õ¹‘MÑå±” ¹İ¡¥Ñ”¤(€€€€€€€€€€€€¹Á…‘‘¥¹œ ¹¡½É¥é½¹Ñ…°°€ÄĞ¤(€€€€€€€€€€€€¹™É…µ”¡µ¥¹!•¥¡Ğè€ÌĞ¤(€€€€€€€€€€€€¹‰…­É½Õ¹¡½¹™¥ÕÉ…Ñ¥½¸¹¥ÍAÉ•ÍÍ•€ü½±½È¹‰É…¹¹½Á…¥Ñä À¸ÜÔ¤€è½±½È¹‰É…¹¤(€€€€€€€€€€€€¹±¥ÁM¡…Á”¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€à¤¤(€€€ô)ô()ÁÉ¥Ù…Ñ”ÍÑÉÕĞM•½¹‘…Éå	ÕÑÑ½¹MÑå±”è	ÕÑÑ½¹MÑå±”ì(€€€™Õ¹Œµ…­•	½‘ä¡½¹™¥ÕÉ…Ñ¥½¸è½¹™¥ÕÉ…Ñ¥½¸¤€´øÍ½µ”Y¥•Üì(€€€€€€€½¹™¥ÕÉ…Ñ¥½¸¹±…‰•°(€€€€€€€€€€€€¹™½¹Ğ ¹ÍåÍÑ•´¡Í¥é”è€ÄÄ°İ•¥¡Ğè€¹Í•µ¥‰½±¤¤(€€€€€€€€€€€€¹™½É•É½Õ¹‘MÑå±”¡½±½È¹ÁÉ¥µ…ÉåQ•áĞ¤(€€€€€€€€€€€€¹Á…‘‘¥¹œ ¹¡½É¥é½¹Ñ…°°€ÄÈ¤(€€€€€€€€€€€€¹™É…µ”¡µ¥¹!•¥¡Ğè€ÌÈ¤(€€€€€€€€€€€€¹‰…­É½Õ¹¡½¹™¥ÕÉ…Ñ¥½¸¹¥ÍAÉ•ÍÍ•€ü½±½È¹‰½É‘•È€è½±½È¹Á…¹•°¤(€€€€€€€€€€€€¹±¥ÁM¡…Á”¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€à¤¤(€€€€€€€€€€€€¹½Ù•É±…ä¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€à¤¹ÍÑÉ½­”¡½±½È¹‰½É‘•È¤¤(€€€ô)ô()ÁÉ¥Ù…Ñ”ÍÑÉÕĞ%½¹	ÕÑÑ½¹MÑå±”è	ÕÑÑ½¹MÑå±”ì(€€€™Õ¹Œµ…­•	½‘ä¡½¹™¥ÕÉ…Ñ¥½¸è½¹™¥ÕÉ…Ñ¥½¸¤€´øÍ½µ”Y¥•Üì(€€€€€€€½¹™¥ÕÉ…Ñ¥½¸¹±…‰•°(€€€€€€€€€€€€¹™½É•É½Õ¹‘MÑå±”¡½±½È¹ÁÉ¥µ…ÉåQ•áĞ¤(€€€€€€€€€€€€¹™É…µ”¡İ¥‘Ñ è€ÌÈ°¡•¥¡Ğè€ÌÈ¤(€€€€€€€€€€€€¹‰…­É½Õ¹¡½¹™¥ÕÉ…Ñ¥½¸¹¥ÍAÉ•ÍÍ•€ü½±½È¹‰½É‘•È€è½±½È¹Á…¹•°¤(€€€€€€€€€€€€¹±¥ÁM¡…Á”¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€à¤¤(€€€€€€€€€€€€¹½Ù•É±…ä¡I½Õ¹‘•‘I•Ñ…¹±”¡½É¹•ÉI…‘¥ÕÌè€à¤¹ÍÑÉ½­”¡½±½È¹‰½É‘•È¤¤(€€€ô)ô()ÁÉ¥Ù…Ñ”•áÑ•¹Í¥½¸EÕ…±¥Ñå1•Ù•°ì(€€€Ù…È½±½Èè½±½Èì(€€€€€€€Íİ¥Ñ Í•±˜ì(€€€€€€€…Í”€¹½½è€¹É••¸(€€€€€€€…Í”€¹İ…É¹¥¹œè€¹½É…¹”(€€€€€€€…Í”€¹‰…è€¹É•(€€€€€€€ô(€€€ô)ô()ÁÉ¥Ù…Ñ”•áÑ•¹Í¥½¸½±½Èì(€€€ÍÑ…Ñ¥Œ±•Ğ‰É…¹€ô½±½È¡É•è€À¸Üà°É••¸è€À¸ÈÌ°‰±Õ”è€À¸ÄØ¤(€€€ÍÑ…Ñ¥Œ±•Ğ‰É…¹‘1¥¡Ğ€ô½±½È¡É•è€À¸äØ°É••¸è€À¸ÔĞ°‰±Õ”è€À¸ĞÈ¤(€€€ÍÑ…Ñ¥Œ±•ĞÍ¥‘•‰…È€ô½±½È¡É•è€À¸ÄÀ°É••¸è€À¸ÄÄ°‰±Õ”è€À¸ÄÈ¤(€€€ÍÑ…Ñ¥Œ±•Ğİ½É­ÍÁ…”€ô½±½È¡É•è€À¸äÔ°É••¸è€À¸äĞ°‰±Õ”è€À¸äÄ¤(€€€ÍÑ…Ñ¥Œ±•ĞÁ…¹•°€ô½±½È¡É•è€À¸äàÔ°É••¸è€À¸äà°‰±Õ”è€À¸äØÔ¤(€€€ÍÑ…Ñ¥Œ±•Ğ•‘¥Ñ½ÉA…Á•È€ô½±½È¡É•è€À¸ää°É••¸è€À¸äàÔ°‰±Õ”è€À¸äÜ¤(€€€ÍÑ…Ñ¥Œ±•Ğ‰½É‘•È€ô½±½È¹‰±…¬¹½Á…¥Ñä À¸Àä¤(€€€ÍÑ…Ñ¥Œ±•ĞÁÉ¥µ…ÉåQ•áĞ€ô½±½È¡É•è€À¸ÄÌ°É••¸è€À¸ÄĞ°‰±Õ”è€À¸ÄÔ¤(€€€ÍÑ…Ñ¥Œ±•ĞÍ•½¹‘…ÉåQ•áĞ€ô½±½È¡É•è€À¸Ìä°É••¸è€À¸ĞÀ°‰±Õ”è€À¸ĞÄ¤)ô(
+                                .foregroundStyle(Color.secondaryText)
+                        }
+                    }
+                }
+
+                inspectorSection(localization.text("æ”¹ç¼–è§„æ ¼")) {
+                    Stepper(
+                        value: Binding(
+                            get: { model.project.options.episodeCount },
+                            set: { value in model.updateOptions { $0.episodeCount = value } }
+                        ),
+                        in: 1...100
+                    ) {
+                        specRow(localization.text("ç›®æ ‡é›†æ•°"), "\(model.project.options.episodeCount)")
+                    }
+                    Picker(
+                        localization.text("å•é›†æ—¶é•¿"),
+                        selection: Binding(
+                            get: { model.project.options.durationSeconds },
+                            set: { value in model.updateOptions { $0.durationSeconds = value } }
+                        )
+                    ) {
+                        ForEach([60, 90, 120], id: \.self) { Text("\($0)s").tag($0) }
+                    }
+                    Text(localization.text("åœºæ¬¡æ•°ç”±æ¨¡å‹åŠ¨æ€å†³å®š"))
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(Color.brand)
+                    TextField(
+                        localization.text("é¢˜æ"),
+                        text: Binding(
+                            get: { model.project.options.genre },
+                            set: { value in model.updateOptions { $0.genre = value } }
+                        )
+                    )
+                    TextField(
+                        localization.text("åŸºè°ƒ"),
+                        text: Binding(
+                            get: { model.project.options.tone },
+                            set: { value in model.updateOptions { $0.tone = value } }
+                        )
+                    )
+                    Picker(
+                        localization.text("åˆ›ä½œç­–ç•¥"),
+                        selection: Binding(
+                            get: { model.project.options.trendPreset },
+                            set: { value in model.updateOptions { $0.trendPreset = value } }
+                        )
+                    ) {
+                        ForEach(TrendPreset.allCases) { Text(localization.text($0.rawValue)).tag($0) }
+                    }
+                }
+
+                VStack(spacing: 10) {
+                    Button {
+                        model.runAdaptation()
+                    } label: {
+                        HStack {
+                            if model.isRunning { ProgressView().controlSize(.small) }
+                            Text(localization.text(model.project.result == nil ? "å¼€å§‹æ”¹ç¼–" : "é‡æ–°ç”Ÿæˆ"))
+                            Spacer()
+                            Image(systemName: "arrow.right")
+                        }
+                        .padding(.horizontal, 14)
+                        .frame(height: 42)
+                    }
+                    .buttonStyle(PrimaryButtonStyle())
+                    .disabled(model.isRunning || model.isNaming)
+
+                    if model.isRunning {
+                        Button(localization.text("å–æ¶ˆä»»åŠ¡")) { model.cancelCurrentTask() }
+                            .buttonStyle(SecondaryButtonStyle())
+                    }
+                    Label(
+                        localization.text(model.modelReady ? "åŒæ¨¡å‹å¯ä¿¡ç®¡çº¿" : "æœ¬åœ°åŸºç¡€ç®¡çº¿"),
+                        systemImage: model.modelReady ? "bolt.shield.fill" : "laptopcomputer"
+                    )
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(Color.secondaryText)
+                }
+            }
+            .padding(18)
+        }
+        .background(Color.panel)
+    }
+
+    private func inspectorSection<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 11) {
+            Text(title.uppercased())
+                .font(.system(size: 10, weight: .bold))
+                .tracking(1)
+                .foregroundStyle(Color.secondaryText)
+            content()
+        }
+    }
+
+    private func metric(_ value: String, _ label: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(value).font(.system(size: 18, weight: .bold))
+            Text(label).font(.system(size: 9)).foregroundStyle(Color.secondaryText)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func specRow(_ title: String, _ value: String) -> some View {
+        HStack { Text(title); Spacer(); Text(value).fontWeight(.bold) }
+    }
+}
+
+private struct PipelineProgressView: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        VStack(spacing: 7) {
+            HStack {
+                Text(model.pipelineProgress.detail.isEmpty ? "Pipeline ready" : model.pipelineProgress.detail)
+                    .font(.system(size: 11, weight: .semibold))
+                Spacer()
+                Text("\(Int(model.pipelineProgress.fraction * 100))%")
+                    .font(.system(size: 11, weight: .bold))
+            }
+            ProgressView(value: model.pipelineProgress.fraction)
+                .tint(Color.brand)
+        }
+        .padding(.horizontal, 18)
+        .frame(height: 58)
+        .background(Color.panel)
+    }
+}
+
+private struct StudioTabsView: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var localization: LocalizationStore
+
+    var body: some View {
+        HStack(spacing: 5) {
+            tab(.outline, "åˆ†é›†è®¾è®¡", "rectangle.grid.1x2")
+            tab(.bible, "æ•…äº‹åœ£ç»", "network")
+            tab(.script, "å‰§æœ¬ç¼–è¾‘", "doc.text")
+            tab(.quality, "è´¨æ£€æŠ¥å‘Š", "checkmark.shield")
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 46)
+        .background(Color.panel)
+    }
+
+    private func tab(_ value: StudioTab, _ title: String, _ icon: String) -> some View {
+        Button {
+            model.activeTab = value
+        } label: {
+            Label(localization.text(title), systemImage: icon)
+                .font(.system(size: 11, weight: .semibold))
+                .padding(.horizontal, 11)
+                .frame(height: 30)
+                .foregroundStyle(model.activeTab == value ? Color.brand : Color.secondaryText)
+                .background(model.activeTab == value ? Color.brand.opacity(0.09) : Color.clear)
+                .clipShape(RoundedRectangle(cornerRadius: 7))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct EpisodeOutlineView: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var localization: LocalizationStore
+
+    var body: some View {
+        if let result = model.project.result {
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    ForEach(result.episodes) { episode in
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("EP \(episode.number)")
+                                    .font(.system(size: 10, weight: .bold))
+                                    .foregroundStyle(Color.brand)
+                                Text("ã€Š\(episode.title)ã€‹").font(.system(size: 16, weight: .bold))
+                                Spacer()
+                                Label(
+                                    "\(episode.scenes.count) " + localization.text("åŠ¨æ€åœºæ¬¡"),
+                                    systemImage: "camera.fill"
+                                )
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color.secondaryText)
+                            }
+                            HStack(alignment: .top, spacing: 10) {
+                                contractCell("å†·å¼€åœº", episode.openingHook)
+                                contractCell("æœ¬é›†ç›®æ ‡", episode.objective)
+                                contractCell("ä¸­æ®µåè½¬", episode.reversal)
+                                contractCell("ç»“å°¾å¡ç‚¹", episode.endHook)
+                            }
+                            Text(episode.contract.transitionFromPrevious)
+                                .font(.system(size: 10))
+                                .foregroundStyle(Color.secondaryText)
+                        }
+                        .panelCard()
+                    }
+                }
+                .padding(20)
+            }
+        } else {
+            EmptyState(icon: "rectangle.grid.1x2", title: localization.text("å°šæœªç”Ÿæˆå‰§æœ¬"))
+        }
+    }
+
+    private func contractCell(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(localization.text(label)).font(.system(size: 9, weight: .bold)).foregroundStyle(Color.brand)
+            Text(value).font(.system(size: 11)).lineLimit(4)
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .padding(9)
+        .background(Color.workspace)
+        .clipShape(RoundedRectangle(cornerRadius: 7))
+    }
+}
+
+private struct StoryBibleView: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var localization: LocalizationStore
+
+    var body: some View {
+        if let bible = model.project.result?.storyBible {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(bible.premise).font(.system(size: 16, weight: .semibold)).panelCard()
+                    bibleSection("Characters") {
+                        ForEach(bible.canonicalCharacters) { character in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(character.scriptName).fontWeight(.bold)
+                                Text(character.role + " Â· " + character.relationships.joined(separator: "ï¼›"))
+                                    .font(.system(size: 11)).foregroundStyle(Color.secondaryText)
+                            }
+                        }
+                    }
+                    bibleSection("World Rules") {
+                        ForEach(bible.worldRules) { rule in
+                            Text("â€¢ \(rule.subject)ï¼š\(rule.fact)ï¼ˆ\(rule.cause)ï¼‰").font(.system(size: 11))
+                        }
+                    }
+                    bibleSection("Timeline") {
+                        ForEach(bible.timeline) { event in
+                            Text("\(event.order). \(event.event) â†’ \(event.effect)").font(.system(size: 11))
+                        }
+                    }
+                }
+                .padding(20)
+            }
+        } else {
+            EmptyState(icon: "network", title: localization.text("å°šæœªç”Ÿæˆå‰§æœ¬"))
+        }
+    }
+
+    private func bibleSection<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title).font(.system(size: 13, weight: .bold)).foregroundStyle(Color.brand)
+            content()
+        }
+        .panelCard()
+    }
+}
+
+private struct ScriptEditorView: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var localization: LocalizationStore
+
+    var body: some View {
+        if let result = model.project.result, !result.episodes.isEmpty {
+            HStack(spacing: 0) {
+                List {
+                    ForEach(Array(result.episodes.enumerated()), id: \.offset) { index, episode in
+                        Button {
+                            model.selectedEpisode = index
+                        } label: {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("EP \(episode.number) Â· \(episode.title)").fontWeight(.semibold)
+                                Text("\(episode.scenes.count) scenes Â· \(episode.runtime?.estimatedSeconds ?? 0, specifier: "%.1f")s")
+                                    .font(.system(size: 9)).foregroundStyle(Color.secondaryText)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 4)
+                            .background(model.selectedEpisode == index ? Color.brand.opacity(0.08) : Color.clear)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .listStyle(.sidebar)
+                .frame(width: 220)
+                Divider()
+                if result.episodes.indices.contains(model.selectedEpisode) {
+                    VStack(spacing: 0) {
+                        HStack {
+                            Text("EP \(result.episodes[model.selectedEpisode].number)")
+                                .font(.system(size: 11, weight: .bold)).foregroundStyle(Color.brand)
+                            Spacer()
+                            Text(localization.text("å‰§æœ¬ç¼–è¾‘"))
+                                .font(.system(size: 10)).foregroundStyle(Color.secondaryText)
+                        }
+                        .padding(.horizontal, 18)
+                        .frame(height: 42)
+                        TextEditor(
+                            text: Binding(
+                                get: {
+                                    guard let latest = model.project.result,
+                                          latest.episodes.indices.contains(model.selectedEpisode) else { return "" }
+                                    return latest.episodes[model.selectedEpisode].content
+                                },
+                                set: model.updateEpisodeContent
+                            )
+                        )
+                        .font(.system(size: 14, design: .monospaced))
+                        .scrollContentBackground(.hidden)
+                        .padding(18)
+                        .background(Color.editorPaper)
+                    }
+                }
+            }
+        } else {
+            EmptyState(icon: "doc.text", title: localization.text("å°šæœªç”Ÿæˆå‰§æœ¬"))
+        }
+    }
+}
+
+private struct QualityReportView: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var localization: LocalizationStore
+
+    var body: some View {
+        if let quality = model.project.result?.quality {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(spacing: 18) {
+                        VStack(alignment: .leading) {
+                            Text("\(quality.score)").font(.system(size: 44, weight: .bold))
+                            Text(localization.text("ç»¼åˆåˆ†")).foregroundStyle(Color.secondaryText)
+                        }
+                        Divider().frame(height: 54)
+                        Label(
+                            localization.text(quality.passed ? "è¾¾åˆ°äº¤ä»˜çº¿" : "éœ€è¦äººå·¥å¤æ ¸"),
+                            systemImage: quality.passed ? "checkmark.shield.fill" : "exclamationmark.shield.fill"
+                        )
+                        .foregroundStyle(quality.passed ? Color.green : Color.orange)
+                        Spacer()
+                        if let gate = quality.gate {
+                            VStack(alignment: .trailing) {
+                                Text("\(gate.openIssueCount)").font(.system(size: 22, weight: .bold))
+                                Text(localization.text("å¼€æ”¾é—®é¢˜")).font(.system(size: 10)).foregroundStyle(Color.secondaryText)
+                            }
+                        }
+                    }
+                    .panelCard()
+
+                    ForEach(quality.metrics) { metric in
+                        HStack(spacing: 12) {
+                            Circle().fill(metric.level.color).frame(width: 9, height: 9)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(metric.label).fontWeight(.semibold)
+                                Text(metric.detail).font(.system(size: 11)).foregroundStyle(Color.secondaryText)
+                            }
+                            Spacer()
+                            Text("\(metric.score)").font(.system(size: 18, weight: .bold))
+                        }
+                        .panelCard()
+                    }
+
+                    if let issues = quality.gate?.issues.filter({ !$0.resolved }), !issues.isEmpty {
+                        Text(localization.text("å¼€æ”¾é—®é¢˜")).font(.system(size: 16, weight: .bold))
+                        ForEach(issues) { issue in
+                            VStack(alignment: .leading, spacing: 7) {
+                                HStack {
+                                    Text(issue.severity.rawValue.uppercased())
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundStyle(issue.severity == .blocker ? Color.red : Color.orange)
+                                    Text("EP " + issue.episodeNumbers.map(String.init).joined(separator: ", "))
+                                        .font(.system(size: 10, weight: .semibold))
+                                }
+                                Text(issue.evidence).font(.system(size: 12))
+                                Text("â†’ " + issue.repairInstruction)
+                                    .font(.system(size: 11)).foregroundStyle(Color.secondaryText)
+                            }
+                            .panelCard()
+                        }
+                    }
+                }
+                .padding(20)
+            }
+        } else {
+            EmptyState(icon: "checkmark.shield", title: localization.text("å°šæœªç”Ÿæˆå‰§æœ¬"))
+        }
+    }
+}
+
+private struct BookAnalysisView: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var localization: LocalizationStore
+    @State private var revisionInstruction = ""
+
+    var body: some View {
+        if model.project.document == nil {
+            EmptyHomeView()
+        } else {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(localization.text("æ‹†ä¹¦æŠ¥å‘Š"))
+                                .font(.system(size: 26, weight: .bold))
+                            Text(model.project.document?.title ?? "")
+                                .foregroundStyle(Color.secondaryText)
+                        }
+                        Spacer()
+                        if model.project.bookAnalysis != nil {
+                            Button(localization.text("å¯¼å‡ºæŠ¥å‘Š")) { model.exportBookAnalysis() }
+                                .buttonStyle(SecondaryButtonStyle())
+                        }
+                        Button {
+                            model.runBookAnalysis()
+                        } label: {
+                            Label(
+                                localization.text(model.project.bookAnalysis == nil ? "å¼€å§‹ä¸€é”®æ‹†ä¹¦" : "é‡æ–°ä¸€é”®æ‹†ä¹¦"),
+                                systemImage: "wand.and.stars"
+                            )
+                        }
+                        .buttonStyle(PrimaryButtonStyle())
+                        .disabled(model.isRunning)
+                    }
+
+                    if model.isRunning || model.bookProgress.fraction > 0 {
+                        VStack(alignment: .leading, spacing: 7) {
+                            HStack {
+                                Text(model.bookProgress.detail.isEmpty
+                                    ? localization.text("å‡†å¤‡å¼€å§‹ä¸€é”®æ‹†ä¹¦")
+                                    : model.bookProgress.detail)
+                                Spacer()
+                                Text("\(Int(model.bookProgress.fraction * 100))%")
+                            }
+                            .font(.system(size: 11, weight: .semibold))
+                            ProgressView(value: model.bookProgress.fraction).tint(Color.brand)
+                        }
+                        .panelCard()
+                    }
+
+                    if let report = model.project.bookAnalysis {
+                        HStack(spacing: 12) {
+                            metricCard(localization.text("è¯æ®è¦†ç›–"), "\(report.coveragePercent)%")
+                            metricCard("Mode", report.mode.rawValue.uppercased())
+                            metricCard("Versions", "\(model.project.bookAnalysisVersions.count)/8")
+                        }
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(report.logline).font(.system(size: 16, weight: .semibold))
+                            Text(report.summary).font(.system(size: 12)).foregroundStyle(Color.secondaryText)
+                            Text(report.genreTags.joined(separator: " Â· "))
+                                .font(.system(size: 10, weight: .semibold)).foregroundStyle(Color.brand)
+                        }
+                        .panelCard()
+                        ForEach(report.sections) { section in
+                            VStack(alignment: .leading, spacing: 9) {
+                                Text(section.title).font(.system(size: 17, weight: .bold))
+                                Text(section.markdown).font(.system(size: 12)).textSelection(.enabled)
+                                Text("Evidence: " + section.evidenceChapterIDs.joined(separator: " Â· "))
+                                    .font(.system(size: 9)).foregroundStyle(Color.secondaryText)
+                            }
+                            .panelCard()
+                        }
+                        VStack(alignment: .leading, spacing: 9) {
+                            Text(localization.text("ä¿®è®¢æŒ‡ä»¤")).fontWeight(.bold)
+                            TextEditor(text: $revisionInstruction)
+                                .frame(minHeight: 74)
+                                .padding(8)
+                                .background(Color.workspace)
+                                .clipShape(RoundedRectangle(cornerRadius: 7))
+                            Button(localization.text("æäº¤å¾®è°ƒ")) {
+                                model.reviseBookAnalysis(instruction: revisionInstruction)
+                                revisionInstruction = ""
+                            }
+                            .buttonStyle(SecondaryButtonStyle())
+                            .disabled(!model.modelReady || revisionInstruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        }
+                        .panelCard()
+                    } else {
+                        EmptyState(icon: "wand.and.stars", title: localization.text("å‡†å¤‡å¼€å§‹ä¸€é”®æ‹†ä¹¦"))
+                            .frame(height: 360)
+                    }
+                }
+                .padding(24)
+            }
+        }
+    }
+
+    private func metricCard(_ title: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(value).font(.system(size: 22, weight: .bold))
+            Text(title).font(.system(size: 10)).foregroundStyle(Color.secondaryText)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .panelCard()
+    }
+}
+
+private struct ProjectArchiveView: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var localization: LocalizationStore
+    @State private var selected = LibraryView.recent
+
+    private enum LibraryView: Equatable { case recent, archived }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(localization.text("é¡¹ç›®æ¡£æ¡ˆ")).font(.system(size: 27, weight: .bold))
+                        Text(localization.text("æœ€è¿‘æœ€å¤šä¿ç•™50ä¸ªï¼Œè¶…å‡ºåè‡ªåŠ¨å½’æ¡£ï¼›å½’æ¡£é¡¹ç›®ä¸ä¼šè‡ªåŠ¨åˆ é™¤ã€‚"))
+                            .foregroundStyle(Color.secondaryText)
+                    }
+                    Spacer()
+                    Button(localization.text("æ–°å»ºé¡¹ç›®")) { model.newProject() }
+                        .buttonStyle(PrimaryButtonStyle())
+                }
+
+                HStack(spacing: 12) {
+                    summaryButton("\(model.recentProjects.count)", "æœ€è¿‘é¡¹ç›®", selected == .recent) { selected = .recent }
+                    summaryButton("\(model.archivedProjects.count)", "å·²å½’æ¡£", selected == .archived) { selected = .archived }
+                    summaryStatic("\(model.projectLibrary.reduce(0) { $0 + $1.chapterCount })", "ç´¯è®¡ç« èŠ‚")
+                    summaryStatic("\(model.projectLibrary.reduce(0) { $0 + $1.generatedEpisodeCount })", "å·²ç”Ÿæˆé›†æ•°")
+                }
+
+                let visible = selected == .recent ? model.recentProjects : model.archivedProjects
+                if visible.isEmpty {
+                    EmptyState(icon: "archivebox", title: localization.text("æ²¡æœ‰é¡¹ç›®"))
+                        .frame(height: 340)
+                } else {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 270), spacing: 14)], spacing: 14) {
+                        ForEach(visible) { project in
+                            projectCard(project)
+                        }
+                    }
+                }
+            }
+            .padding(24)
+        }
+    }
+
+    private func summaryButton(_ value: String, _ title: String, _ active: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            summaryContent(value, title)
+                .background(active ? Color.brand.opacity(0.1) : Color.panel)
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(active ? Color.brand : Color.border))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func summaryStatic(_ value: String, _ title: String) -> some View {
+        summaryContent(value, title)
+            .background(Color.panel)
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.border))
+    }
+
+    private func summaryContent(_ value: String, _ title: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(value).font(.system(size: 24, weight: .bold))
+            Text(localization.text(title)).font(.system(size: 10)).foregroundStyle(Color.secondaryText)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func projectCard(_ project: StoredProject) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top) {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.brand.opacity(0.1))
+                    .overlay(Image(systemName: "doc.richtext.fill").foregroundStyle(Color.brand))
+                    .frame(width: 46, height: 58)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(project.name).font(.system(size: 14, weight: .bold)).lineLimit(2)
+                    Text(project.document?.title ?? localization.text("å°šæœªå¯¼å…¥"))
+                        .font(.system(size: 10)).foregroundStyle(Color.secondaryText)
+                }
+                Spacer()
+            }
+            HStack {
+                Label("\(project.chapterCount)", systemImage: "book.pages")
+                Label("\(project.generatedEpisodeCount)", systemImage: "play.rectangle")
+                Spacer()
+                Text(project.updatedAt.formatted(date: .abbreviated, time: .shortened))
+            }
+            .font(.system(size: 9)).foregroundStyle(Color.secondaryText)
+            Divider()
+            HStack(spacing: 8) {
+                Button(localization.text("æ‰“å¼€")) { model.openProject(project) }
+                    .buttonStyle(SecondaryButtonStyle())
+                Button(localization.text("åˆ›å»ºå‰¯æœ¬")) { model.duplicateProject(project) }
+                    .buttonStyle(SecondaryButtonStyle())
+                Spacer()
+                if project.archivedAt == nil {
+                    Button(localization.text("å½’æ¡£")) { model.archiveProject(project) }
+                        .buttonStyle(SecondaryButtonStyle())
+                } else {
+                    Button(localization.text("æ¢å¤")) { model.restoreProject(project) }
+                        .buttonStyle(SecondaryButtonStyle())
+                    Button(role: .destructive) { model.requestDelete(project) } label: {
+                        Image(systemName: "trash")
+                    }
+                    .buttonStyle(IconButtonStyle())
+                }
+            }
+        }
+        .panelCard()
+        .contentShape(Rectangle())
+        .onTapGesture { model.openProject(project) }
+    }
+}
+
+private struct PromptAssetsView: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var localization: LocalizationStore
+    @State private var selectedID: String? = PromptAssets.defaults.first?.id
+
+    var body: some View {
+        HStack(spacing: 0) {
+            List(model.promptAssets, selection: $selectedID) { asset in
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(asset.title).fontWeight(.semibold)
+                        Image(systemName: "info.circle")
+                            .font(.system(size: 10))
+                            .foregroundStyle(Color.secondaryText)
+                            .help(localization.text("å½±å“èŒƒå›´") + "ï¼š" + asset.influence)
+                    }
+                    Text(asset.scope).font(.system(size: 9)).foregroundStyle(Color.secondaryText)
+                }
+                .tag(asset.id)
+            }
+            .listStyle(.sidebar)
+            .frame(width: 270)
+            Divider()
+            if let asset = model.promptAssets.first(where: { selectedID == $0.id }) {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(asset.title).font(.system(size: 22, weight: .bold))
+                            Text(asset.scope).foregroundStyle(Color.secondaryText)
+                        }
+                        Spacer()
+                        Button(localization.text("æ¢å¤é»˜è®¤")) { model.resetPromptAsset(id: asset.id) }
+                            .buttonStyle(SecondaryButtonStyle())
+                    }
+                    Label(asset.influence, systemImage: "info.circle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.brand)
+                        .padding(10)
+                        .background(Color.brand.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    TextEditor(
+                        text: Binding(
+                            get: {
+                                model.promptAssets.first(where: { $0.id == asset.id })?.instruction ?? ""
+                            },
+                            set: { model.updatePromptAsset(id: asset.id, instruction: $0) }
+                        )
+                    )
+                    .font(.system(size: 13, design: .monospaced))
+                    .padding(12)
+                    .background(Color.editorPaper)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.border))
+                }
+                .padding(24)
+            }
+        }
+    }
+}
+
+private struct SettingsView: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var localization: LocalizationStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var settings: ModelSettings
+    @State private var apiKey = ""
+    @State private var consentGranted: Bool
+
+    init() {
+        _settings = State(initialValue: ModelSettings())
+        _consentGranted = State(initialValue: false)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Text(localization.text("æ¨¡å‹ä¸å®‰å…¨è®¾ç½®")).font(.system(size: 21, weight: .bold))
+                Spacer()
+                Button { dismiss() } label: { Image(systemName: "xmark") }
+                    .buttonStyle(IconButtonStyle())
+            }
+            Toggle(localization.text("å¯ç”¨åœ¨çº¿åŒæ¨¡å‹ç®¡çº¿"), isOn: $settings.useOnline)
+            settingField("API Base URL") { TextField("https://api.openai.com/v1", text: $settings.baseURL) }
+            settingField("åˆ›ä½œæ¨¡å‹ï¼ˆProï¼‰") { TextField("gpt-5.6-sol", text: $settings.primaryModel) }
+            settingField("é«˜é€Ÿæ¨¡å‹ï¼ˆFlashï¼‰") { TextField("gpt-5.6-terra", text: $settings.flashModel) }
+            settingField("æ¨ç†å¼ºåº¦") {
+                Picker("", selection: $settings.reasoningEffort) {
+                    ForEach(["none", "low", "medium", "high"], id: \.self) { Text($0).tag($0) }
+                }.labelsHidden()
+            }
+            settingField("API Key") {
+                SecureField(model.hasAPIKey ? "â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢ (saved)" : "sk-â€¦", text: $apiKey)
+            }
+            Toggle(localization.text("åŒæ„å‘é€åˆ°å½“å‰ç«¯ç‚¹"), isOn: $consentGranted)
+            Text(localization.text("åœ¨çº¿æ”¹ç¼–ä¼šæŠŠæ‰€é€‰å°è¯´ç‰‡æ®µå‘é€åˆ°ä¸Šæ–¹åŸŸåã€‚å¯†é’¥ä»…ä¿å­˜åœ¨ macOS Keychainã€‚"))
+                .font(.system(size: 11))
+                .foregroundStyle(Color.secondaryText)
+                .padding(10)
+                .background(Color.workspace)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            HStack {
+                Spacer()
+                Button(localization.text("å–æ¶ˆ")) { dismiss() }
+                    .buttonStyle(SecondaryButtonStyle())
+                Button(localization.text("ä¿å­˜è¿æ¥")) {
+                    model.saveSettings(settings, apiKey: apiKey, consentGranted: consentGranted)
+                }
+                .buttonStyle(PrimaryButtonStyle())
+                .disabled(settings.useOnline && !consentGranted)
+            }
+        }
+        .padding(24)
+        .frame(width: 560)
+        .onAppear {
+            settings = model.modelSettings
+            consentGranted = model.modelSettings.hasEndpointConsent
+        }
+    }
+
+    private func settingField<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        HStack {
+            Text(localization.text(title)).frame(width: 150, alignment: .leading)
+            content().textFieldStyle(.roundedBorder)
+        }
+    }
+}
+
+private struct EmptyState: View {
+    let icon: String
+    let title: String
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: icon).font(.system(size: 36)).foregroundStyle(Color.brand.opacity(0.7))
+            Text(title).font(.system(size: 14, weight: .semibold)).foregroundStyle(Color.secondaryText)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private extension View {
+    func panelCard() -> some View {
+        self
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.panel)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.border))
+    }
+}
+
+private struct PrimaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 14)
+            .frame(minHeight: 34)
+            .background(configuration.isPressed ? Color.brand.opacity(0.75) : Color.brand)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+private struct SecondaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundStyle(Color.primaryText)
+            .padding(.horizontal, 12)
+            .frame(minHeight: 32)
+            .background(configuration.isPressed ? Color.border : Color.panel)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.border))
+    }
+}
+
+private struct IconButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(Color.primaryText)
+            .frame(width: 32, height: 32)
+            .background(configuration.isPressed ? Color.border : Color.panel)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.border))
+    }
+}
+
+private extension QualityLevel {
+    var color: Color {
+        switch self {
+        case .good: .green
+        case .warning: .orange
+        case .bad: .red
+        }
+    }
+}
+
+private extension Color {
+    static let brand = Color(red: 0.78, green: 0.23, blue: 0.16)
+    static let brandLight = Color(red: 0.96, green: 0.54, blue: 0.42)
+    static let sidebar = Color(red: 0.10, green: 0.11, blue: 0.12)
+    static let workspace = Color(red: 0.95, green: 0.94, blue: 0.91)
+    static let panel = Color(red: 0.985, green: 0.98, blue: 0.965)
+    static let editorPaper = Color(red: 0.99, green: 0.985, blue: 0.97)
+    static let border = Color.black.opacity(0.09)
+    static let primaryText = Color(red: 0.13, green: 0.14, blue: 0.15)
+    static let secondaryText = Color(red: 0.39, green: 0.40, blue: 0.41)
+}

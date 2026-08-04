@@ -365,5 +365,459 @@ enum OnlinePipeline {
         let response: SemanticAuditResponse = try await client.structured(
             stage: .episodeSemanticAudit,
             instructions: systemBase + "\n\n" + PromptAssets.mergedInstruction(["quality-gate"], assets: prompts),
-            input:×İö¶‰Ëkºwµç}Õ¹ĞèÁ±…¸¹Á±…¹¹•‘M•¹•½Õ¹Ğ°(€€€€€€€€€€€½Á•¹¥¹!½½¬èÉ•¹…µ•¡Á±…¸¹½Á•¹¥¹!½½¬°¡…É…Ñ•ÉÌ¤°(€€€€€€€€€€€½‰©•Ñ¥Ù”èÉ•¹…µ•¡Á±…¸¹½‰©•Ñ¥Ù”°¡…É…Ñ•ÉÌ¤°(€€€€€€€€€€€É•Ù•ÉÍ…°èÉ•¹…µ•¡Á±…¸¹É•Ù•ÉÍ…°°¡…É…Ñ•ÉÌ¤°(€€€€€€€€€€€•¹‘!½½¬èÉ•¹…µ•¡Á±…¸¹•¹‘!½½¬°¡…É…Ñ•ÉÌ¤°(€€€€€€€€€€€½¹ÑÉ…ĞèÁ±…¸¹½¹ÑÉ…Ğ°(€€€€€€€€€€€ÉÕ¹Ñ¥µ”è¹¥°°(€€€€€€€€€€€Í•µ…¹Ñ¥Õ‘¥Ğè¹¥°°(€€€€€€€€€€€Í•¹•ÌèÍ•¹•Ì°(€€€€€€€€€€€½¹Ñ•¹Ğè€ˆˆ(€€€€€€€€¤(€€€€€€€•Á¥Í½‘”¹ÉÕ¹Ñ¥µ”€ôÁ¥Í½‘•	Õ‘•Ğ¹•ÍÑ¥µ…Ñ•IÕ¹Ñ¥µ”¡Í•¹•ÌèÍ•¹•Ì¤(€€€€€€€•Á¥Í½‘”¹½¹Ñ•¹Ğ€ô=™™±¥¹•A¥Á•±¥¹”¹É•¹‘•È¡•Á¥Í½‘”¤(€€€€€€€É•ÑÕÉ¸•Á¥Í½‘”(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™Õ¹Œ¹½Éµ…±¥é•A±…¹Ì (€€€€€€€|Í½ÕÉ”èmÁ¥Í½‘•A±…¹t°(€€€€€€€‘½Õµ•¹Ğè9½Ù•±½Õµ•¹Ğ°(€€€€€€€½ÁÑ¥½¹Ìè‘…ÁÑ…Ñ¥½¹=ÁÑ¥½¹Ì(€€€€¤€´ømÁ¥Í½‘•A±…¹tì(€€€€€€€±•ĞÉ…¹”€ôÁ¥Í½‘•	Õ‘•Ğ¹Í•¹•I…¹”¡‘ÕÉ…Ñ¥½¹M•½¹‘Ìè½ÁÑ¥½¹Ì¹‘ÕÉ…Ñ¥½¹M•½¹‘Ì¤(€€€€€€€É•ÑÕÉ¸€ À¸¸ñ½ÁÑ¥½¹Ì¹•Á¥Í½‘•½Õ¹Ğ¤¹µ…Àì¥¹‘•à¥¸(€€€€€€€€€€€¥˜Í½ÕÉ”¹¥¹‘¥•Ì¹½¹Ñ…¥¹Ì¡¥¹‘•à¤ì(€€€€€€€€€€€€€€€±•ĞÙ…±Õ”€ôÍ½ÕÉ•m¥¹‘•át(€€€€€€€€€€€€€€€±•Ğ%Ì€ôÙ…±Õ”¹Í½ÕÉ•¡…ÁÑ•É%Ì¹™¥±Ñ•Èì¥¥¸‘½Õµ•¹Ğ¹¡…ÁÑ•ÉÌ¹½¹Ñ…¥¹Ì¡İ¡•É”èì€À¹¥€ôô¥ô¤ô(€€€€€€€€€€€€€€€É•ÑÕÉ¸Á¥Í½‘•A±…¸ (€€€€€€€€€€€€€€€€€€€¹Õµ‰•Èè¥¹‘•à€¬€Ä°(€€€€€€€€€€€€€€€€€€€Ñ¥Ñ±”èÙ…±Õ”¹Ñ¥Ñ±”°(€€€€€€€€€€€€€€€€€€€Í½ÕÉ•¡…ÁÑ•É%Ìè%Ì¹¥ÍµÁÑä€üm‘½Õµ•¹Ğ¹¡…ÁÑ•ÉÍmµ¥¸¡¥¹‘•à°‘½Õµ•¹Ğ¹¡…ÁÑ•ÉÌ¹½Õ¹Ğ€´€Ä¥t¹¥‘t€è%Ì°(€€€€€€€€€€€€€€€€€€€Á±…¹¹•‘M•¹•½Õ¹Ğèµ¥¸¡É…¹”¹ÕÁÁ•É	½Õ¹°µ…à¡É…¹”¹±½İ•É	½Õ¹°Ù…±Õ”¹Á±…¹¹•‘M•¹•½Õ¹Ğ¤¤°(€€€€€€€€€€€€€€€€€€€½Á•¹¥¹!½½¬èÙ…±Õ”¹½Á•¹¥¹!½½¬°(€€€€€€€€€€€€€€€€€€€½‰©•Ñ¥Ù”èÙ…±Õ”¹½‰©•Ñ¥Ù”°(€€€€€€€€€€€€€€€€€€€É•Ù•ÉÍ…°èÙ…±Õ”¹É•Ù•ÉÍ…°°(€€€€€€€€€€€€€€€€€€€•¹‘!½½¬èÙ…±Õ”¹•¹‘!½½¬°(€€€€€€€€€€€€€€€€€€€½¹ÑÉ…ĞèÙ…±Õ”¹½¹ÑÉ…Ğ(€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€ô(€€€€€€€€€€€±•Ğ¡…ÁÑ•È€ô‘½Õµ•¹Ğ¹¡…ÁÑ•ÉÍmµ¥¸¡¥¹‘•à°‘½Õµ•¹Ğ¹¡…ÁÑ•ÉÌ¹½Õ¹Ğ€´€Ä¥t(€€€€€€€€€€€É•ÑÕÉ¸Á¥Í½‘•A±…¸ (€€€€€€€€€€€€€€€¹Õµ‰•Èè¥¹‘•à€¬€Ä°(€€€€€€€€€€€€€€€Ñ¥Ñ±”è¡…ÁÑ•È¹Ñ¥Ñ±”°(€€€€€€€€€€€€€€€Í½ÕÉ•¡…ÁÑ•É%Ìèm¡…ÁÑ•È¹¥‘t°(€€€€€€€€€€€€€€€Á±…¹¹•‘M•¹•½Õ¹Ğèµ¥¸ È°É…¹”¹ÕÁÁ•É	½Õ¹¤°(€€€€€€€€€€€€€€€½Á•¹¥¹!½½¬è€‹–6Çšrë–r£Rï¦v‹’â·nÓš:—–>GR|ˆ°(€€€€€€€€€€€€€€€½‰©•Ñ¥Ù”è€‹š:£¢şlp¡¡…ÁÑ•È¹Ñ¥Ñ±”¤ƒjš‚ã–ş–Ëªˆ°(€€€€€€€€€€€€€€€É•Ù•ÉÍ…°è€‹’êë&§–>G:Ã–:–#–"“šZ·–æÛ’â7–º3šVĞˆ°(€€€€€€€€€€€€€€€•¹‘!½½¬è€‹šZÃ¢¾š6»–ë:Ã¾ò3¢†3–*£¢Š¯¢ş¯’â·šZ´ˆ°(€€€€€€€€€€€€€€€½¹ÑÉ…ĞèÁ¥Í½‘•½¹ÑÉ…Ğ (€€€€€€€€€€€€€€€€€€€‘½µ¥¹…¹Ñ½¹™±¥Ğè¡…ÁÑ•È¹Ñ¥Ñ±”°(€€€€€€€€€€€€€€€€€€€¹•İ%¹™½Éµ…Ñ¥½¸èl‹®ƒ¢*’ê/–º{–úš"C¢ÿ–F#:À‰t°(€€€€€€€€€€€€€€€€€€€Ù¥ÍÕ…±!½½¬è€‹–>¿¢–Ëªˆ°(€€€€€€€€€€€€€€€€€€€ÑÉ…¹Í¥Ñ¥½¹É½µAÉ•Ù¥½ÕÌè¥¹‘•à€ôô€À€ü€‹¦š[¦nˆ€è€‹š&ÿš:—’â+’â¦n¦–ë*Ûšˆ°(€€€€€€€€€€€€€€€€€€€…Ñ¥Ù•AÉ½ÁQ¡É•…‘Ìèmt°(€€€€€€€€€€€€€€€€€€€•¹ÑÉåMÑ…Ñ”è€‹–Ëª–ò–,ˆ°(€€€€€€€€€€€€€€€€€€€•á¥ÑMÑ…Ñ”è€‹–Ëª–6êœˆ(€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€€¤(€€€€€€€ô(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™Õ¹ŒÍ½ÕÉ•Q•áĞ¡™½ÈÁ±…¸èÁ¥Í½‘•A±…¸°‘½Õµ•¹Ğè9½Ù•±½Õµ•¹Ğ¤€´øMÑÉ¥¹œì(€€€€€€€±•ĞÍ•±•Ñ•€ô‘½Õµ•¹Ğ¹¡…ÁÑ•ÉÌ¹™¥±Ñ•ÈìÁ±…¸¹Í½ÕÉ•¡…ÁÑ•É%Ì¹½¹Ñ…¥¹Ì À¹¥¤ô(€€€€€€€É•ÑÕÉ¸Í•±•Ñ•¹µ…Àì¡…ÁÑ•È¥¸(€€€€€€€€€€€±•Ğ½¹Ñ•¹Ğ€ô¡…ÁÑ•È¹½¹Ñ•¹Ğ¹½Õ¹Ğ€ø€Äá|ÀÀÀ(€€€€€€€€€€€€€€€€üMÑÉ¥¹œ¡¡…ÁÑ•È¹½¹Ñ•¹Ğ¹ÁÉ•™¥à Äá|ÀÀÀ¤¤€¬€‰q¹o¦Vÿ®ƒ–Û’ög––ºç–ŞË–r£šV’ê/–rî?¢¾š6»’â·šÆšítˆ(€€€€€€€€€€€€€€€€è¡…ÁÑ•È¹½¹Ñ•¹Ğ(€€€€€€€€€€€É•ÑÕÉ¸€‰mp¡¡…ÁÑ•È¹¥¥tp¡¡…ÁÑ•È¹Ñ¥Ñ±”¥q¹p¡½¹Ñ•¹Ğ¤ˆ(€€€€€€€ô¹©½¥¹•¡Í•Á…É…Ñ½Èè€‰q¹q¸ˆ¤(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™Õ¹ŒÍ…¹¥Ñ¥é”¡|Ù…±Õ”è¡Õ¹­¹…±åÍ¥Ì°…±±½İ•‘¡…ÁÑ•É%ÌèM•ĞñMÑÉ¥¹œø¤€´ø¡Õ¹­¹…±åÍ¥Ìì(€€€€€€€¡Õ¹­¹…±åÍ¥Ì (€€€€€€€€€€€ÍÕµµ…ÉäèÙ…±Õ”¹ÍÕµµ…Éä°(€€€€€€€€€€€™…ÑÌèÙ…±Õ”¹™…ÑÌ°(€€€€€€€€€€€­•åÙ•¹ÑÌèÙ…±Õ”¹­•åÙ•¹ÑÌ°(€€€€€€€€€€€•µ½Ñ¥½¹…±	•…ÑÌèÙ…±Õ”¹•µ½Ñ¥½¹…±	•…ÑÌ°(€€€€€€€€€€€ÁÉ½‘ÕÑ¥½¹9½Ñ•ÌèÙ…±Õ”¹ÁÉ½‘ÕÑ¥½¹9½Ñ•Ì°(€€€€€€€€€€€•Ù¥‘•¹•¡…ÁÑ•É%ÌèÙ…±Õ”¹•Ù¥‘•¹•¡…ÁÑ•É%Ì¹™¥±Ñ•È¡…±±½İ•‘¡…ÁÑ•É%Ì¹½¹Ñ…¥¹Ì¤(€€€€€€€€¤(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™Õ¹ŒÍ…¹¥Ñ¥é•	¥‰±” (€€€€€€€|‰¥‰±”èMÑ½Éå	¥‰±”°(€€€€€€€‘½Õµ•¹Ğè9½Ù•±½Õµ•¹Ğ°(€€€€€€€¡…É…Ñ•ÉÌèm¡…É…Ñ•ÉAÉ½™¥±•t(€€€€¤€´øMÑ½Éå	¥‰±”ì(€€€€€€€±•Ğ…±±½İ•€ôM•Ğ¡‘½Õµ•¹Ğ¹¡…ÁÑ•ÉÌ¹µ…À¡p¹¥¤¤(€€€€€€€±•Ğ­¹½İ¹9…µ•Ì€ôM•Ğ¡¡…É…Ñ•ÉÌ¹µ…À¡p¹Ñ…É•Ñ9…µ”¤¤(€€€€€€€É•ÑÕÉ¸MÑ½Éå	¥‰±” (€€€€€€€€€€€ÁÉ•µ¥Í”èÉ•¹…µ•¡‰¥‰±”¹ÁÉ•µ¥Í”°¡…É…Ñ•ÉÌ¤°(€€€€€€€€€€€…¹½¹¥…±¡…É…Ñ•ÉÌè‰¥‰±”¹…¹½¹¥…±¡…É…Ñ•ÉÌ¹µ…Àì(€€€€€€€€€€€€€€€…¹½¹¥…±¡…É…Ñ•È (€€€€€€€€€€€€€€€€€€€¥è€À¹¥°(€€€€€€€€€€€€€€€€€€€Í½ÕÉ•9…µ•Ìè€À¹Í½ÕÉ•9…µ•Ì°(€€€€€€€€€€€€€€€€€€€ÍÉ¥ÁÑ9…µ”è­¹½İ¹9…µ•Ì¹½¹Ñ…¥¹Ì À¹ÍÉ¥ÁÑ9…µ”¤€ü€À¹ÍÉ¥ÁÑ9…µ”€èÉ•¹…µ• À¹ÍÉ¥ÁÑ9…µ”°¡…É…Ñ•ÉÌ¤°(€€€€€€€€€€€€€€€€€€€É½±”è€À¹É½±”°(€€€€€€€€€€€€€€€€€€€É•±…Ñ¥½¹Í¡¥ÁÌè€À¹É•±…Ñ¥½¹Í¡¥ÁÌ¹µ…ÀìÉ•¹…µ• À°¡…É…Ñ•ÉÌ¤ô°(€€€€€€€€€€€€€€€€€€€•Ù¥‘•¹•¡…ÁÑ•É%Ìè€À¹•Ù¥‘•¹•¡…ÁÑ•É%Ì¹™¥±Ñ•È¡…±±½İ•¹½¹Ñ…¥¹Ì¤(€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€ô°(€€€€€€€€€€€İ½É±‘IÕ±•Ìè‰¥‰±”¹İ½É±‘IÕ±•Ì¹µ…Àì(€€€€€€€€€€€€€€€]½É±‘IÕ±” (€€€€€€€€€€€€€€€€€€€¥è€À¹¥°(€€€€€€€€€€€€€€€€€€€ÍÕ‰©•ĞèÉ•¹…µ• À¹ÍÕ‰©•Ğ°¡…É…Ñ•ÉÌ¤°(€€€€€€€€€€€€€€€€€€€™…ĞèÉ•¹…µ• À¹™…Ğ°¡…É…Ñ•ÉÌ¤°(€€€€€€€€€€€€€€€€€€€…ÕÍ”èÉ•¹…µ• À¹…ÕÍ”°¡…É…Ñ•ÉÌ¤°(€€€€€€€€€€€€€€€€€€€•Ù¥‘•¹•¡…ÁÑ•É%Ìè€À¹•Ù¥‘•¹•¡…ÁÑ•É%Ì¹™¥±Ñ•È¡…±±½İ•¹½¹Ñ…¥¹Ì¤(€€€€€€€€€€€€€€€€¤(€€€€€€€€€€€ô°(€€€€€€€€€€€ÁÉ½ÁQ¡É•…‘Ìè‰¥‰±”¹ÁÉ½ÁQ¡É•…‘Ì°(€€€€€€€€€€€Ñ¥µ•±¥¹”è‰¥‰±”¹Ñ¥µ•±¥¹”(€€€€€€€€¤(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™Õ¹Œµ…­•EÕ…±¥Ñå%ÍÍÕ”¡|Ù…±Õ”èM•É¥•Í%ÍÍÕ•Q<¤€´øEÕ…±¥Ñå…Ñ•%ÍÍÕ”ì(€€€€€€€EÕ…±¥Ñå…Ñ•%ÍÍÕ” (€€€€€€€€€€€¥èUU% ¤¹ÕÕ¥‘MÑÉ¥¹œ°(€€€€€€€€€€€Í•Ù•É¥ÑäèEÕ…±¥Ñå%ÍÍÕ•M•Ù•É¥Ñä¡É…İY…±Õ”èÙ…±Õ”¹Í•Ù•É¥Ñä¤€üü€¹µ…©½È°(€€€€€€€€€€€…Ñ•½ÉäèEÕ…±¥Ñå%ÍÍÕ•…Ñ•½Éä¡É…İY…±Õ”èÙ…±Õ”¹…Ñ•½Éä¤€üü€¹½¹Ñ¥¹Õ¥Ñä°(€€€€€€€€€€€•Á¥Í½‘•9Õµ‰•ÉÌèÙ…±Õ”¹•Á¥Í½‘•9Õµ‰•ÉÌ°(€€€€€€€€€€€•Ù¥‘•¹”èÙ…±Õ”¹•Ù¥‘•¹”°(€€€€€€€€€€€É•Á…¥É%¹ÍÑÉÕÑ¥½¸èÙ…±Õ”¹É•Á…¥É%¹ÍÑÉÕÑ¥½¸°(€€€€€€€€€€€É•Í½±Ù•è™…±Í”(€€€€€€€€¤(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™Õ¹ŒÉ•¹…µ•¡|Ù…±Õ”èMÑÉ¥¹œ°|¡…É…Ñ•ÉÌèm¡…É…Ñ•ÉAÉ½™¥±•t¤€´øMÑÉ¥¹œì(€€€€€€€¡…É…Ñ•ÉáÑÉ…Ñ½È¹…ÁÁ±åI•¹…µ•Ì¡Ù…±Õ”°¡…É…Ñ•ÉÌè¡…É…Ñ•ÉÌ¤(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™Õ¹Œ©Í½¸ñPè¹½‘…‰±”ø¡|Ù…±Õ”èP¤€´øMÑÉ¥¹œì(€€€€€€€Õ…É(€€€€€€€€€€€±•Ğ‘…Ñ„€ôÑÉäü)M=9¹½‘•È¹ÍÉ¥ÁÑ½É”¹•¹½‘”¡Ù…±Õ”¤°(€€€€€€€€€€€±•ĞÑ•áĞ€ôMÑÉ¥¹œ¡‘…Ñ„è‘…Ñ„°•¹½‘¥¹œè€¹ÕÑ˜à¤(€€€€€€€•±Í”ìÉ•ÑÕÉ¸€‰íôˆô(€€€€€€€É•ÑÕÉ¸Ñ•áĞ(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•ĞÍåÍÑ•µ	…Í”€ô€ˆˆˆ(€€€ƒ’öƒšb¿’â·–n÷®[–Æ?–ú»~·–&Ÿ–Ş—’âk–2[šRçò[Îïî’â·j’â’â«–>_¦fC¢*
-ç’â—š‚ó¢¾ï–>[’â+šâã¢Ö’êŸ¾ò3–>«¢úO–ë–öO–&4M¡•µ„ƒ¢ššÆjšVÃš6»¾òo’â7¢úO–ë–"šzC¢ş¢/¾ò3’â7¢fkšz–:šZ¢¾š6»¾ò3’â7šN¢«šRç–B7–òëšî«–ş¦†ï–â›šv—’êë&§¦'š.§–J3–B;šzs¾ò3¦ÿ–7šrëšŠÃú{¢úÇ¦7–’7¦–¦k–J3–>«šRû.ƒ¢¾w’â7¢†3–*£(€€€€ˆˆˆ((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•ĞÍÑÉ¥¹ÉÉ…äèmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°(€€€€€€€€‰¥Ñ•µÌˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€t((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•Ğ¹…µ¥¹M¡•µ„èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°(€€€€€€€€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€‰É•¹…µ•Ìˆèl(€€€€€€€€€€€€€€€€‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°(€€€€€€€€€€€€€€€€‰¥Ñ•µÌˆèl(€€€€€€€€€€€€€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°(€€€€€€€€€€€€€€€€€€€€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€€€€€€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€€€€€€€€€€€€€‰Í½ÕÉ•9…µ”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€€€€€€€€€€€€€‰Ñ…É•Ñ9…µ”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€€€€€€€€t°(€€€€€€€€€€€€€€€€€€€€‰É•ÅÕ¥É•ˆèl‰Í½ÕÉ•9…µ”ˆ°€‰Ñ…É•Ñ9…µ”‰t°(€€€€€€€€€€€€€€€t°(€€€€€€€€€€€t°(€€€€€€€t°(€€€€€€€€‰É•ÅÕ¥É•ˆèl‰É•¹…µ•Ì‰t°(€€€t((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•Ğ¡Õ¹­M¡•µ„èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°(€€€€€€€€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€‰ÍÕµµ…Éäˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰™…ÑÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€€€€€€‰­•åÙ•¹ÑÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€€€€€€‰•µ½Ñ¥½¹…±	•…ÑÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€€€€€€‰ÁÉ½‘ÕÑ¥½¹9½Ñ•ÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€€€€€€‰•Ù¥‘•¹•¡…ÁÑ•É%ÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€t°(€€€€€€€€‰É•ÅÕ¥É•ˆèl‰ÍÕµµ…Éäˆ°€‰™…ÑÌˆ°€‰­•åÙ•¹ÑÌˆ°€‰•µ½Ñ¥½¹…±	•…ÑÌˆ°€‰ÁÉ½‘ÕÑ¥½¹9½Ñ•Ìˆ°€‰•Ù¥‘•¹•¡…ÁÑ•É%Ì‰t°(€€€t((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•Ğ…¹½¹¥…±¡…É…Ñ•ÉM¡•µ„èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€‰¥ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰Í½ÕÉ•9…µ•ÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€€€€€€‰ÍÉ¥ÁÑ9…µ”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰É½±”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰É•±…Ñ¥½¹Í¡¥ÁÌˆèÍÑÉ¥¹ÉÉ…ä°€‰•Ù¥‘•¹•¡…ÁÑ•É%ÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€t°(€€€€€€€€‰É•ÅÕ¥É•ˆèl‰¥ˆ°€‰Í½ÕÉ•9…µ•Ìˆ°€‰ÍÉ¥ÁÑ9…µ”ˆ°€‰É½±”ˆ°€‰É•±…Ñ¥½¹Í¡¥ÁÌˆ°€‰•Ù¥‘•¹•¡…ÁÑ•É%Ì‰t°(€€€t((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•Ğİ½É±‘IÕ±•M¡•µ„èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€‰¥ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰ÍÕ‰©•Ğˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰™…Ğˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰…ÕÍ”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰•Ù¥‘•¹•¡…ÁÑ•É%ÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€t°(€€€€€€€€‰É•ÅÕ¥É•ˆèl‰¥ˆ°€‰ÍÕ‰©•Ğˆ°€‰™…Ğˆ°€‰…ÕÍ”ˆ°€‰•Ù¥‘•¹•¡…ÁÑ•É%Ì‰t°(€€€t((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•ĞÁÉ½ÁQ¡É•…‘M¡•µ„èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€‰¥ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰¹…µ”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰‘É…µ…Ñ¥Õ¹Ñ¥½¸ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰¥¹ÑÉ½‘Õ•‘Á¥Í½‘”ˆèl‰ÑåÁ”ˆè€‰¥¹Ñ••È‰t°(€€€€€€€€€€€€‰Á…å½™™Á¥Í½‘”ˆèl‰ÑåÁ”ˆè€‰¥¹Ñ••È‰t°€‰ÕÉÉ•¹ÑMÑ…Ñ”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰•Ù¥‘•¹•¡…ÁÑ•É%ÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€t°(€€€€€€€€‰É•ÅÕ¥É•ˆèl‰¥ˆ°€‰¹…µ”ˆ°€‰‘É…µ…Ñ¥Õ¹Ñ¥½¸ˆ°€‰¥¹ÑÉ½‘Õ•‘Á¥Í½‘”ˆ°€‰Á…å½™™Á¥Í½‘”ˆ°€‰ÕÉÉ•¹ÑMÑ…Ñ”ˆ°€‰•Ù¥‘•¹•¡…ÁÑ•É%Ì‰t°(€€€t((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•ĞÑ¥µ•±¥¹•M¡•µ„èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€‰¥ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰½É‘•Èˆèl‰ÑåÁ”ˆè€‰¥¹Ñ••È‰t°(€€€€€€€€€€€€‰±½…Ñ¥½¸ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰Ñ¥µ”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰Á…ÉÑ¥¥Á…¹ÑÌˆèÍÑÉ¥¹ÉÉ…ä°€‰…ÕÍ”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰•Ù•¹Ğˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰•™™•Ğˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰•Ù¥‘•¹•¡…ÁÑ•É%ÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€t°(€€€€€€€€‰É•ÅÕ¥É•ˆèl‰¥ˆ°€‰½É‘•Èˆ°€‰±½…Ñ¥½¸ˆ°€‰Ñ¥µ”ˆ°€‰Á…ÉÑ¥¥Á…¹ÑÌˆ°€‰…ÕÍ”ˆ°€‰•Ù•¹Ğˆ°€‰•™™•Ğˆ°€‰•Ù¥‘•¹•¡…ÁÑ•É%Ì‰t°(€€€t((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•ĞÍÑ½Éå	¥‰±•M¡•µ„èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€‰ÁÉ•µ¥Í”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰…¹½¹¥…±¡…É…Ñ•ÉÌˆèl‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°€‰¥Ñ•µÌˆè…¹½¹¥…±¡…É…Ñ•ÉM¡•µ…t°(€€€€€€€€€€€€‰İ½É±‘IÕ±•Ìˆèl‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°€‰¥Ñ•µÌˆèİ½É±‘IÕ±•M¡•µ…t°(€€€€€€€€€€€€‰ÁÉ½ÁQ¡É•…‘Ìˆèl‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°€‰¥Ñ•µÌˆèÁÉ½ÁQ¡É•…‘M¡•µ…t°(€€€€€€€€€€€€‰Ñ¥µ•±¥¹”ˆèl‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°€‰¥Ñ•µÌˆèÑ¥µ•±¥¹•M¡•µ…t°(€€€€€€€t°(€€€€€€€€‰É•ÅÕ¥É•ˆèl‰ÁÉ•µ¥Í”ˆ°€‰…¹½¹¥…±¡…É…Ñ•ÉÌˆ°€‰İ½É±‘IÕ±•Ìˆ°€‰ÁÉ½ÁQ¡É•…‘Ìˆ°€‰Ñ¥µ•±¥¹”‰t°(€€€t((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•Ğ•Á¥Í½‘•½¹ÑÉ…ÑM¡•µ„èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€‰‘½µ¥¹…¹Ñ½¹™±¥Ğˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰¹•İ%¹™½Éµ…Ñ¥½¸ˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€€€€€€‰Ù¥ÍÕ…±!½½¬ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰ÑÉ…¹Í¥Ñ¥½¹É½µAÉ•Ù¥½ÕÌˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰…Ñ¥Ù•AÉ½ÁQ¡É•…‘ÌˆèÍÑÉ¥¹ÉÉ…ä°€‰•¹ÑÉåMÑ…Ñ”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€‰•á¥ÑMÑ…Ñ”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€t°(€€€€€€€€‰É•ÅÕ¥É•ˆèl‰‘½µ¥¹…¹Ñ½¹™±¥Ğˆ°€‰¹•İ%¹™½Éµ…Ñ¥½¸ˆ°€‰Ù¥ÍÕ…±!½½¬ˆ°€‰ÑÉ…¹Í¥Ñ¥½¹É½µAÉ•Ù¥½ÕÌˆ°€‰…Ñ¥Ù•AÉ½ÁQ¡É•…‘Ìˆ°€‰•¹ÑÉåMÑ…Ñ”ˆ°€‰•á¥ÑMÑ…Ñ”‰t°(€€€t((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™Õ¹Œ½ÕÑ±¥¹•M¡•µ„¡•Á¥Í½‘•½Õ¹Ğè%¹Ğ°‘ÕÉ…Ñ¥½¹M•½¹‘Ìè%¹Ğ¤€´ømMÑÉ¥¹œè¹åtì(€€€€€€€±•ĞÉ…¹”€ôÁ¥Í½‘•	Õ‘•Ğ¹Í•¹•I…¹”¡‘ÕÉ…Ñ¥½¹M•½¹‘Ìè‘ÕÉ…Ñ¥½¹M•½¹‘Ì¤(€€€€€€€±•ĞÁ±…¸èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€€€€€‰¹Õµ‰•Èˆèl‰ÑåÁ”ˆè€‰¥¹Ñ••È‰t°€‰Ñ¥Ñ±”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€€€€€‰Í½ÕÉ•¡…ÁÑ•É%ÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€€€€€€€€€€‰Á±…¹¹•‘M•¹•½Õ¹Ğˆèl‰ÑåÁ”ˆè€‰¥¹Ñ••Èˆ°€‰µ¥¹¥µÕ´ˆèÉ…¹”¹±½İ•É	½Õ¹°€‰µ…á¥µÕ´ˆèÉ…¹”¹ÕÁÁ•É	½Õ¹‘t°(€€€€€€€€€€€€€€€€‰½Á•¹¥¹!½½¬ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰½‰©•Ñ¥Ù”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€€€€€‰É•Ù•ÉÍ…°ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰•¹‘!½½¬ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€€€€€‰½¹ÑÉ…Ğˆè•Á¥Í½‘•½¹ÑÉ…ÑM¡•µ„°(€€€€€€€€€€€t°(€€€€€€€€€€€€‰É•ÅÕ¥É•ˆèl‰¹Õµ‰•Èˆ°€‰Ñ¥Ñ±”ˆ°€‰Í½ÕÉ•¡…ÁÑ•É%Ìˆ°€‰Á±…¹¹•‘M•¹•½Õ¹Ğˆ°€‰½Á•¹¥¹!½½¬ˆ°€‰½‰©•Ñ¥Ù”ˆ°€‰É•Ù•ÉÍ…°ˆ°€‰•¹‘!½½¬ˆ°€‰½¹ÑÉ…Ğ‰t°(€€€€€€€t(€€€€€€€É•ÑÕÉ¸l(€€€€€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€€€€€‰±½±¥¹”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰•¹É”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€€€€€‰Ñ¡•µ•ÌˆèÍÑÉ¥¹ÉÉ…ä°€‰Í½ÕÉ•…ÑÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€€€€€€€€€€‰•Á¥Í½‘•Ìˆèl‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°€‰µ¥¹%Ñ•µÌˆè•Á¥Í½‘•½Õ¹Ğ°€‰µ…á%Ñ•µÌˆè•Á¥Í½‘•½Õ¹Ğ°€‰¥Ñ•µÌˆèÁ±…¹t°(€€€€€€€€€€€t°(€€€€€€€€€€€€‰É•ÅÕ¥É•ˆèl‰±½±¥¹”ˆ°€‰•¹É”ˆ°€‰Ñ¡•µ•Ìˆ°€‰Í½ÕÉ•…ÑÌˆ°€‰•Á¥Í½‘•Ì‰t°(€€€€€€€t(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ™Õ¹Œ•Á¥Í½‘•M¡•µ„¡‘ÕÉ…Ñ¥½¹M•½¹‘Ìè%¹Ğ¤€´ømMÑÉ¥¹œè¹åtì(€€€€€€€±•ĞÉ…¹”€ôÁ¥Í½‘•	Õ‘•Ğ¹Í•¹•I…¹”¡‘ÕÉ…Ñ¥½¹M•½¹‘Ìè‘ÕÉ…Ñ¥½¹M•½¹‘Ì¤(€€€€€€€±•Ğ‘¥…±½Õ”èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl‰ÍÁ•…­•Èˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰Ñ•áĞˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰ut°(€€€€€€€€€€€€‰É•ÅÕ¥É•ˆèl‰ÍÁ•…­•Èˆ°€‰Ñ•áĞ‰t°(€€€€€€€t(€€€€€€€±•ĞÍ•¹”èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€€€€€‰¡•…‘¥¹œˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰±½…Ñ¥½¸ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€€€€€‰…Ñ¥½¸ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€€€€€‰‘¥…±½Õ”ˆèl‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°€‰¥Ñ•µÌˆè‘¥…±½Õ•t°(€€€€€€€€€€€t°(€€€€€€€€€€€€‰É•ÅÕ¥É•ˆèl‰¡•…‘¥¹œˆ°€‰±½…Ñ¥½¸ˆ°€‰…Ñ¥½¸ˆ°€‰‘¥…±½Õ”‰t°(€€€€€€€t(€€€€€€€É•ÑÕÉ¸l(€€€€€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€€€€€‰Í•¹•Ìˆèl(€€€€€€€€€€€€€€€€€€€€‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°€‰µ¥¹%Ñ•µÌˆèÉ…¹”¹±½İ•É	½Õ¹°(€€€€€€€€€€€€€€€€€€€€‰µ…á%Ñ•µÌˆèÉ…¹”¹ÕÁÁ•É	½Õ¹°€‰¥Ñ•µÌˆèÍ•¹”°(€€€€€€€€€€€€€€€t°(€€€€€€€€€€€t°(€€€€€€€€€€€€‰É•ÅÕ¥É•ˆèl‰Í•¹•Ì‰t°(€€€€€€€t(€€€ô((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•ĞÍ•µ…¹Ñ¥Õ‘¥ÑM¡•µ„èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€‰Í½É”ˆèl‰ÑåÁ”ˆè€‰¥¹Ñ••Èˆ°€‰µ¥¹¥µÕ´ˆè€À°€‰µ…á¥µÕ´ˆè€ÄÀÁt°(€€€€€€€€€€€€‰Á…ÍÍ•ˆèl‰ÑåÁ”ˆè€‰‰½½±•…¸‰t°€‰¥ÍÍÕ•ÌˆèÍÑÉ¥¹ÉÉ…ä°(€€€€€€€t°(€€€€€€€€‰É•ÅÕ¥É•ˆèl‰Í½É”ˆ°€‰Á…ÍÍ•ˆ°€‰¥ÍÍÕ•Ì‰t°(€€€t((€€€ÁÉ¥Ù…Ñ”ÍÑ…Ñ¥Œ±•ĞÍ•É¥•ÍÕ‘¥ÑM¡•µ„èmMÑÉ¥¹œè¹åt€ôl(€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€‰¥ÍÍÕ•Ìˆèl(€€€€€€€€€€€€€€€€‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°(€€€€€€€€€€€€€€€€‰¥Ñ•µÌˆèl(€€€€€€€€€€€€€€€€€€€€‰ÑåÁ”ˆè€‰½‰©•Ğˆ°€‰…‘‘¥Ñ¥½¹…±AÉ½Á•ÉÑ¥•Ìˆè™…±Í”°(€€€€€€€€€€€€€€€€€€€€‰ÁÉ½Á•ÉÑ¥•Ìˆèl(€€€€€€€€€€€€€€€€€€€€€€€€‰Í•Ù•É¥Ñäˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œˆ°€‰•¹Õ´ˆèl‰‰±½­•Èˆ°€‰µ…©½Èˆ°€‰µ¥¹½È‰ut°(€€€€€€€€€€€€€€€€€€€€€€€€‰…Ñ•½Éäˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œˆ°€‰•¹Õ´ˆèl‰Í½ÕÉ•¥‘•±¥Ñäˆ°€‰½¹Ñ¥¹Õ¥Ñäˆ°€‰¡…É…Ñ•Èˆ°€‰Á…¥¹œˆ°€‰¡½½¬ˆ°€‰‘¥…±½Õ”ˆ°€‰ÁÉ½‘ÕÑ¥½¸ˆ°€‰½µÁ±¥…¹”‰ut°(€€€€€€€€€€€€€€€€€€€€€€€€‰•Á¥Í½‘•9Õµ‰•ÉÌˆèl‰ÑåÁ”ˆè€‰…ÉÉ…äˆ°€‰¥Ñ•µÌˆèl‰ÑåÁ”ˆè€‰¥¹Ñ••È‰ut°(€€€€€€€€€€€€€€€€€€€€€€€€‰•Ù¥‘•¹”ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°€‰É•Á…¥É%¹ÍÑÉÕÑ¥½¸ˆèl‰ÑåÁ”ˆè€‰ÍÑÉ¥¹œ‰t°(€€€€€€€€€€€€€€€€€€€t°(€€€€€€€€€€€€€€€€€€€€‰É•ÅÕ¥É•ˆèl‰Í•Ù•É¥Ñäˆ°€‰…Ñ•½Éäˆ°€‰•Á¥Í½‘•9Õµ‰•ÉÌˆ°€‰•Ù¥‘•¹”ˆ°€‰É•Á…¥É%¹ÍÑÉÕÑ¥½¸‰t°(€€€€€€€€€€€€€€€t°(€€€€€€€€€€€t°(€€€€€€€t°(€€€€€€€€‰É•ÅÕ¥É•ˆèl‰¥ÍÍÕ•Ì‰t°(€€€t)ô
+            input: """
+            ã€æ•…äº‹åœ£ç»ã€‘\(json(bible))
+            ã€æœ¬é›†å¥‘çº¦ã€‘\(json(plan))
+            ã€å€™é€‰æˆç¨¿ã€‘\(episode.content.isEmpty ? OfflinePipeline.render(episode) : episode.content)
+            åªæ£€æŸ¥æœ¬é›†æ˜¯å¦å¿ äºè¯æ®ã€äººç‰©åŠ¨æœºæ˜¯å¦æˆç«‹ã€å†²çªæ˜¯å¦çœŸæ­£æ¨è¿›ã€é’©å­æ˜¯å¦å¯è§å¯æ‹ã€‚
+            """,
+            name: "episode_semantic_audit_\(episode.number)",
+            schema: semanticAuditSchema
+        )
+        return EpisodeSemanticAudit(
+            score: min(100, max(0, response.score)),
+            passed: response.passed && response.score >= 78,
+            issues: response.issues
+        )
+    }
+
+    private static func repairEpisode(
+        episode: Episode,
+        issues: [String],
+        plan: EpisodePlan,
+        bible: StoryBible,
+        source: String,
+        options: AdaptationOptions,
+        characters: [CharacterProfile],
+        prompts: [PromptAsset],
+        client: LLMClient
+    ) async throws -> Episode {
+        let draft: EpisodeDraft = try await client.structured(
+            stage: .episodeRepair,
+            instructions: draftInstruction(
+                options: options,
+                characters: characters,
+                prompts: prompts,
+                plannedSceneCount: plan.plannedSceneCount
+            ) + "\n\nåªä¿®å¤åˆ—å‡ºçš„é‡å¤§é—®é¢˜ï¼Œä¿ç•™æ— é—®é¢˜çš„å†²çªã€äº‹å®å’Œæœ‰æ•ˆå°è¯ã€‚",
+            input: """
+            ã€æ•…äº‹åœ£ç»ã€‘\(json(bible))
+            ã€æœ¬é›†å¥‘çº¦ã€‘\(json(plan))
+            ã€åŸæ–‡è¯æ®ã€‘\(source)
+            ã€å½“å‰æˆç¨¿ã€‘\(episode.content.isEmpty ? OfflinePipeline.render(episode) : episode.content)
+            ã€å¿…é¡»ä¿®å¤ã€‘\(issues.joined(separator: "\n- "))
+            """,
+            name: "episode_repair_\(episode.number)",
+            schema: episodeSchema(durationSeconds: options.durationSeconds)
+        )
+        return makeEpisode(plan: plan, draft: draft, characters: characters)
+    }
+
+    private static func auditSeries(
+        episodes: [Episode],
+        bible: StoryBible,
+        prompts: [PromptAsset],
+        client: LLMClient
+    ) async throws -> SeriesAuditResponse {
+        var issues: [SeriesIssueDTO] = []
+        for window in seriesWindows(episodes) {
+            let response: SeriesAuditResponse = try await client.structured(
+                stage: .seriesQualityAudit,
+                instructions: systemBase + "\n\n" + PromptAssets.mergedInstruction(["quality-gate"], assets: prompts) + """
+
+                åªæŠ¥å‘Šå¯å®šä½çš„ blockerã€major æˆ– minorã€‚é‡ç‚¹æ£€æŸ¥è·¨é›†è½¬åœºåŸå› ã€äººç‰©å…³ç³»ä¸åå­—ã€èƒ½åŠ›è§„åˆ™ã€æ ¸å¿ƒå†²çªæ˜¯å¦é‡å¤ã€ä¼ç¬”æ˜¯å¦æ— æ•…æ¶ˆå¤±ã€‚
+                """,
+                input: "ã€æ•…äº‹åœ£ç»ã€‘\(json(bible))\nã€è¿ç»­åˆ†é›†ã€‘\n\(window.map(\.content).joined(separator: "\n\n"))",
+                name: "series_audit_\(window.first?.number ?? 1)",
+                schema: seriesAuditSchema
+            )
+            issues.append(contentsOf: response.issues)
+        }
+        var seen = Set<String>()
+        return SeriesAuditResponse(issues: issues.filter {
+            seen.insert("\($0.category)|\($0.episodeNumbers)|\($0.evidence)").inserted
+        })
+    }
+
+    private static func seriesWindows(_ episodes: [Episode]) -> [[Episode]] {
+        guard !episodes.isEmpty else { return [] }
+        var windows: [[Episode]] = []
+        var start = 0
+        while start < episodes.count {
+            windows.append(Array(episodes[start..<min(start + 4, episodes.count)]))
+            if start + 4 >= episodes.count { break }
+            start += 3
+        }
+        return windows
+    }
+
+    private static func draftInstruction(
+        options: AdaptationOptions,
+        characters: [CharacterProfile],
+        prompts: [PromptAsset],
+        plannedSceneCount: Int
+    ) -> String {
+        let budget = EpisodeBudget.budget(durationSeconds: options.durationSeconds)
+        return systemBase + "\n\n" + PromptAssets.mergedInstruction(["episode-drafting"], assets: prompts) + """
+
+        åªèƒ½ä½¿ç”¨ä»¥ä¸‹é”å®šäººç‰©æ–°åï¼š\(characters.map(\.targetName).joined(separator: "ã€"))ã€‚
+        æœ¬é›†çº¦ \(options.durationSeconds) ç§’ï¼Œåœºæ¬¡æ•°ç”±å‰§æƒ…å†³å®šï¼Œå…è®¸ \(budget.sceneRange.lowerBound)â€“\(budget.sceneRange.upperBound) åœºï¼›åˆ†é›†è§„åˆ’å»ºè®® \(plannedSceneCount) åœºï¼Œä½†ä¸è¦ä¸ºå‡‘æ•°æ‹†åœºã€‚
+        æ•´é›†ç›®æ ‡çº¦ \(budget.dialogueLines.lowerBound)â€“\(budget.dialogueLines.upperBound) å¥çŸ­å¯¹ç™½ã€\(budget.spokenCharacters.lowerBound)â€“\(budget.spokenCharacters.upperBound) ä¸ªå¯¹ç™½æœ‰æ•ˆå­—ã€‚é™åˆ¶æ˜¯æ•´é›†é¢„ç®—ï¼Œä¸æ˜¯æ¯åœºæœ€å°‘å¥æ•°ã€‚
+        æ¯ä¸ªåœºæ¬¡å¿…é¡»æœ‰åœºæ™¯æ—¶ç©ºã€åœ°ç‚¹ã€å¯æ‹åŠ¨ä½œå’Œå¯¹ç™½æ•°ç»„ã€‚ä¸å¾—è¾“å‡ºæ—§åã€‚
+        """
+    }
+
+    private static func makeEpisode(
+        plan: EpisodePlan,
+        draft: EpisodeDraft,
+        characters: [CharacterProfile]
+    ) -> Episode {
+        let scenes = draft.scenes.enumerated().map { index, scene in
+            ScriptScene(
+                id: "episode-\(plan.number)-scene-\(index + 1)",
+                heading: renamed(scene.heading, characters),
+                location: renamed(scene.location, characters),
+                action: renamed(scene.action, characters),
+                dialogue: scene.dialogue.map {
+                    DialogueLine(
+                        speaker: renamed($0.speaker, characters),
+                        text: renamed($0.text, characters)
+                    )
+                }
+            )
+        }
+        var episode = Episode(
+            id: "episode-\(plan.number)",
+            number: plan.number,
+            title: renamed(plan.title, characters),
+            sourceChapterIDs: plan.sourceChapterIDs,
+            plannedSceneCount: plan.plannedSceneCount,
+            openingHook: renamed(plan.openingHook, characters),
+            objective: renamed(plan.objective, characters),
+            reversal: renamed(plan.reversal, characters),
+            endHook: renamed(plan.endHook, characters),
+            contract: plan.contract,
+            runtime: nil,
+            semanticAudit: nil,
+            scenes: scenes,
+            content: ""
+        )
+        episode.runtime = EpisodeBudget.estimateRuntime(scenes: scenes)
+        episode.content = OfflinePipeline.render(episode)
+        return episode
+    }
+
+    private static func normalizePlans(
+        _ source: [EpisodePlan],
+        document: NovelDocument,
+        options: AdaptationOptions
+    ) -> [EpisodePlan] {
+        let range = EpisodeBudget.sceneRange(durationSeconds: options.durationSeconds)
+        return (0..<options.episodeCount).map { index in
+            if source.indices.contains(index) {
+                let value = source[index]
+                let IDs = value.sourceChapterIDs.filter { id in document.chapters.contains(where: { $0.id == id }) }
+                return EpisodePlan(
+                    number: index + 1,
+                    title: value.title,
+                    sourceChapterIDs: IDs.isEmpty ? [document.chapters[min(index, document.chapters.count - 1)].id] : IDs,
+                    plannedSceneCount: min(range.upperBound, max(range.lowerBound, value.plannedSceneCount)),
+                    openingHook: value.openingHook,
+                    objective: value.objective,
+                    reversal: value.reversal,
+                    endHook: value.endHook,
+                    contract: value.contract
+                )
+            }
+            let chapter = document.chapters[min(index, document.chapters.count - 1)]
+            return EpisodePlan(
+                number: index + 1,
+                title: chapter.title,
+                sourceChapterIDs: [chapter.id],
+                plannedSceneCount: min(2, range.upperBound),
+                openingHook: "å±æœºåœ¨ç”»é¢ä¸­ç›´æ¥å‘ç”Ÿ",
+                objective: "æ¨è¿› \(chapter.title) çš„æ ¸å¿ƒå†²çª",
+                reversal: "äººç‰©å‘ç°åŸå…ˆåˆ¤æ–­å¹¶ä¸å®Œæ•´",
+                endHook: "æ–°è¯æ®å‡ºç°ï¼Œè¡ŒåŠ¨è¢«è¿«ä¸­æ–­",
+                contract: EpisodeContract(
+                    dominantConflict: chapter.title,
+                    newInformation: ["ç« èŠ‚äº‹å®å¾…æˆç¨¿å‘ˆç°"],
+                    visualHook: "å¯è§å†²çª",
+                    transitionFromPrevious: index == 0 ? "é¦–é›†" : "æ‰¿æ¥ä¸Šä¸€é›†é€€å‡ºçŠ¶æ€",
+                    activePropThreads: [],
+                    entryState: "å†²çªå¼€å§‹",
+                    exitState: "å†²çªå‡çº§"
+                )
+            )
+        }
+    }
+
+    private static func sourceText(for plan: EpisodePlan, document: NovelDocument) -> String {
+        let selected = document.chapters.filter { plan.sourceChapterIDs.contains($0.id) }
+        return selected.map { chapter in
+            let content = chapter.content.count > 18_000
+                ? String(chapter.content.prefix(18_000)) + "\n[é•¿ç« å…¶ä½™å†…å®¹å·²åœ¨æ•…äº‹åœ£ç»è¯æ®ä¸­æ±‡æ€»]"
+                : chapter.content
+            return "[\(chapter.id)] \(chapter.title)\n\(content)"
+        }.joined(separator: "\n\n")
+    }
+
+    private static func sanitize(_ value: ChunkAnalysis, allowedChapterIDs: Set<String>) -> ChunkAnalysis {
+        ChunkAnalysis(
+            summary: value.summary,
+            facts: value.facts,
+            keyEvents: value.keyEvents,
+            emotionalBeats: value.emotionalBeats,
+            productionNotes: value.productionNotes,
+            evidenceChapterIDs: value.evidenceChapterIDs.filter(allowedChapterIDs.contains)
+        )
+    }
+
+    private static func sanitizeBible(
+        _ bible: StoryBible,
+        document: NovelDocument,
+        characters: [CharacterProfile]
+    ) -> StoryBible {
+        let allowed = Set(document.chapters.map(\.id))
+        let knownNames = Set(characters.map(\.targetName))
+        return StoryBible(
+            premise: renamed(bible.premise, characters),
+            canonicalCharacters: bible.canonicalCharacters.map {
+                CanonicalCharacter(
+                    id: $0.id,
+                    sourceNames: $0.sourceNames,
+                    scriptName: knownNames.contains($0.scriptName) ? $0.scriptName : renamed($0.scriptName, characters),
+                    role: $0.role,
+                    relationships: $0.relationships.map { renamed($0, characters) },
+                    evidenceChapterIDs: $0.evidenceChapterIDs.filter(allowed.contains)
+                )
+            },
+            worldRules: bible.worldRules.map {
+                WorldRule(
+                    id: $0.id,
+                    subject: renamed($0.subject, characters),
+                    fact: renamed($0.fact, characters),
+                    cause: renamed($0.cause, characters),
+                    evidenceChapterIDs: $0.evidenceChapterIDs.filter(allowed.contains)
+                )
+            },
+            propThreads: bible.propThreads,
+            timeline: bible.timeline
+        )
+    }
+
+    private static func makeQualityIssue(_ value: SeriesIssueDTO) -> QualityGateIssue {
+        QualityGateIssue(
+            id: UUID().uuidString,
+            severity: QualityIssueSeverity(rawValue: value.severity) ?? .major,
+            category: QualityIssueCategory(rawValue: value.category) ?? .continuity,
+            episodeNumbers: value.episodeNumbers,
+            evidence: value.evidence,
+            repairInstruction: value.repairInstruction,
+            resolved: false
+        )
+    }
+
+    private static func renamed(_ value: String, _ characters: [CharacterProfile]) -> String {
+        CharacterExtractor.applyRenames(value, characters: characters)
+    }
+
+    private static func json<T: Encodable>(_ value: T) -> String {
+        guard
+            let data = try? JSONEncoder.scriptForge.encode(value),
+            let text = String(data: data, encoding: .utf8)
+        else { return "{}" }
+        return text
+    }
+
+    private static let systemBase = """
+    ä½ æ˜¯ä¸­å›½ç«–å±å¾®çŸ­å‰§å·¥ä¸šåŒ–æ”¹ç¼–ç³»ç»Ÿä¸­çš„ä¸€ä¸ªå—é™èŠ‚ç‚¹ã€‚ä¸¥æ ¼è¯»å–ä¸Šæ¸¸èµ„äº§ï¼Œåªè¾“å‡ºå½“å‰ Schema è¦æ±‚çš„æ•°æ®ï¼›ä¸è¾“å‡ºåˆ†æè¿‡ç¨‹ï¼Œä¸è™šæ„åŸæ–‡è¯æ®ï¼Œä¸æ“…è‡ªæ”¹åã€‚å¼ºæƒ…ç»ªå¿…é¡»å¸¦æ¥äººç‰©é€‰æ‹©å’Œåæœï¼Œé¿å…æœºæ¢°ç¾è¾±ã€é‡å¤é€€å©šå’Œåªæ”¾ç‹ è¯ä¸è¡ŒåŠ¨ã€‚
+    """
+
+    private static let stringArray: [String: Any] = [
+        "type": "array",
+        "items": ["type": "string"],
+    ]
+
+    private static let namingSchema: [String: Any] = [
+        "type": "object",
+        "additionalProperties": false,
+        "properties": [
+            "renames": [
+                "type": "array",
+                "items": [
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": [
+                        "sourceName": ["type": "string"],
+                        "targetName": ["type": "string"],
+                    ],
+                    "required": ["sourceName", "targetName"],
+                ],
+            ],
+        ],
+        "required": ["renames"],
+    ]
+
+    private static let chunkSchema: [String: Any] = [
+        "type": "object",
+        "additionalProperties": false,
+        "properties": [
+            "summary": ["type": "string"],
+            "facts": stringArray,
+            "keyEvents": stringArray,
+            "emotionalBeats": stringArray,
+            "productionNotes": stringArray,
+            "evidenceChapterIDs": stringArray,
+        ],
+        "required": ["summary", "facts", "keyEvents", "emotionalBeats", "productionNotes", "evidenceChapterIDs"],
+    ]
+
+    private static let canonicalCharacterSchema: [String: Any] = [
+        "type": "object", "additionalProperties": false,
+        "properties": [
+            "id": ["type": "string"], "sourceNames": stringArray,
+            "scriptName": ["type": "string"], "role": ["type": "string"],
+            "relationships": stringArray, "evidenceChapterIDs": stringArray,
+        ],
+        "required": ["id", "sourceNames", "scriptName", "role", "relationships", "evidenceChapterIDs"],
+    ]
+
+    private static let worldRuleSchema: [String: Any] = [
+        "type": "object", "additionalProperties": false,
+        "properties": [
+            "id": ["type": "string"], "subject": ["type": "string"],
+            "fact": ["type": "string"], "cause": ["type": "string"],
+            "evidenceChapterIDs": stringArray,
+        ],
+        "required": ["id", "subject", "fact", "cause", "evidenceChapterIDs"],
+    ]
+
+    private static let propThreadSchema: [String: Any] = [
+        "type": "object", "additionalProperties": false,
+        "properties": [
+            "id": ["type": "string"], "name": ["type": "string"],
+            "dramaticFunction": ["type": "string"], "introducedEpisode": ["type": "integer"],
+            "payoffEpisode": ["type": "integer"], "currentState": ["type": "string"],
+            "evidenceChapterIDs": stringArray,
+        ],
+        "required": ["id", "name", "dramaticFunction", "introducedEpisode", "payoffEpisode", "currentState", "evidenceChapterIDs"],
+    ]
+
+    private static let timelineSchema: [String: Any] = [
+        "type": "object", "additionalProperties": false,
+        "properties": [
+            "id": ["type": "string"], "order": ["type": "integer"],
+            "location": ["type": "string"], "time": ["type": "string"],
+            "participants": stringArray, "cause": ["type": "string"],
+            "event": ["type": "string"], "effect": ["type": "string"],
+            "evidenceChapterIDs": stringArray,
+        ],
+        "required": ["id", "order", "location", "time", "participants", "cause", "event", "effect", "evidenceChapterIDs"],
+    ]
+
+    private static let storyBibleSchema: [String: Any] = [
+        "type": "object", "additionalProperties": false,
+        "properties": [
+            "premise": ["type": "string"],
+            "canonicalCharacters": ["type": "array", "items": canonicalCharacterSchema],
+            "worldRules": ["type": "array", "items": worldRuleSchema],
+            "propThreads": ["type": "array", "items": propThreadSchema],
+            "timeline": ["type": "array", "items": timelineSchema],
+        ],
+        "required": ["premise", "canonicalCharacters", "worldRules", "propThreads", "timeline"],
+    ]
+
+    private static let episodeContractSchema: [String: Any] = [
+        "type": "object", "additionalProperties": false,
+        "properties": [
+            "dominantConflict": ["type": "string"], "newInformation": stringArray,
+            "visualHook": ["type": "string"], "transitionFromPrevious": ["type": "string"],
+            "activePropThreads": stringArray, "entryState": ["type": "string"],
+            "exitState": ["type": "string"],
+        ],
+        "required": ["dominantConflict", "newInformation", "visualHook", "transitionFromPrevious", "activePropThreads", "entryState", "exitState"],
+    ]
+
+    private static func outlineSchema(episodeCount: Int, durationSeconds: Int) -> [String: Any] {
+        let range = EpisodeBudget.sceneRange(durationSeconds: durationSeconds)
+        let plan: [String: Any] = [
+            "type": "object", "additionalProperties": false,
+            "properties": [
+                "number": ["type": "integer"], "title": ["type": "string"],
+                "sourceChapterIDs": stringArray,
+                "plannedSceneCount": ["type": "integer", "minimum": range.lowerBound, "maximum": range.upperBound],
+                "openingHook": ["type": "string"], "objective": ["type": "string"],
+                "reversal": ["type": "string"], "endHook": ["type": "string"],
+                "contract": episodeContractSchema,
+            ],
+            "required": ["number", "title", "sourceChapterIDs", "plannedSceneCount", "openingHook", "objective", "reversal", "endHook", "contract"],
+        ]
+        return [
+            "type": "object", "additionalProperties": false,
+            "properties": [
+                "logline": ["type": "string"], "genre": ["type": "string"],
+                "themes": stringArray, "sourceFacts": stringArray,
+                "episodes": ["type": "array", "minItems": episodeCount, "maxItems": episodeCount, "items": plan],
+            ],
+            "required": ["logline", "genre", "themes", "sourceFacts", "episodes"],
+        ]
+    }
+
+    private static func episodeSchema(durationSeconds: Int) -> [String: Any] {
+        let range = EpisodeBudget.sceneRange(durationSeconds: durationSeconds)
+        let dialogue: [String: Any] = [
+            "type": "object", "additionalProperties": false,
+            "properties": ["speaker": ["type": "string"], "text": ["type": "string"]],
+            "required": ["speaker", "text"],
+        ]
+        let scene: [String: Any] = [
+            "type": "object", "additionalProperties": false,
+            "properties": [
+                "heading": ["type": "string"], "location": ["type": "string"],
+                "action": ["type": "string"],
+                "dialogue": ["type": "array", "items": dialogue],
+            ],
+            "required": ["heading", "location", "action", "dialogue"],
+        ]
+        return [
+            "type": "object", "additionalProperties": false,
+            "properties": [
+                "scenes": [
+                    "type": "array", "minItems": range.lowerBound,
+                    "maxItems": range.upperBound, "items": scene,
+                ],
+            ],
+            "required": ["scenes"],
+        ]
+    }
+
+    private static let semanticAuditSchema: [String: Any] = [
+        "type": "object", "additionalProperties": false,
+        "properties": [
+            "score": ["type": "integer", "minimum": 0, "maximum": 100],
+            "passed": ["type": "boolean"], "issues": stringArray,
+        ],
+        "required": ["score", "passed", "issues"],
+    ]
+
+    private static let seriesAuditSchema: [String: Any] = [
+        "type": "object", "additionalProperties": false,
+        "properties": [
+            "issues": [
+                "type": "array",
+                "items": [
+                    "type": "object", "additionalProperties": false,
+                    "properties": [
+                        "severity": ["type": "string", "enum": ["blocker", "major", "minor"]],
+                        "category": ["type": "string", "enum": ["sourceFidelity", "continuity", "character", "pacing", "hook", "dialogue", "production", "compliance"]],
+                        "episodeNumbers": ["type": "array", "items": ["type": "integer"]],
+                        "evidence": ["type": "string"], "repairInstruction": ["type": "string"],
+                    ],
+                    "required": ["severity", "category", "episodeNumbers", "evidence", "repairInstruction"],
+                ],
+            ],
+        ],
+        "required": ["issues"],
+    ]
+}
