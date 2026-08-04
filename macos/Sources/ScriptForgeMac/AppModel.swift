@@ -32,13 +32,14 @@ final class AppModel: ObservableObject {
     ) {
         projects = projectRepository
         prompts = promptRepository
-        projectLibrary = projectRepository.loadAll()
+        let loadedProjects = projectRepository.loadAll()
+        projectLibrary = loadedProjects
         promptAssets = promptRepository.load()
         modelSettings = Self.loadModelSettings()
         let savedID = UserDefaults.standard.string(forKey: "currentProjectID")
             .flatMap { UUID(uuidString: $0) }
-        project = projectLibrary.first(where: { $0.id == savedID && $0.archivedAt == nil })
-            ?? projectLibrary.first(where: { $0.archivedAt == nil })
+        project = loadedProjects.first(where: { $0.id == savedID && $0.archivedAt == nil })
+            ?? loadedProjects.first(where: { $0.archivedAt == nil })
             ?? StoredProject()
     }
 
