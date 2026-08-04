@@ -6,7 +6,7 @@
 
 - UTF-8 `txt/md/text` 导入、拖放、章节拆解和全文统计
 - 主要人物候选、统一改名、重名阻断与旧名残留检查
-- 改编规格：集数、单集时长、每集场数、创作策略
+- 改编规格：集数、单集时长和创作策略；场次数由模型按剧情与时长动态决定
 - 离线验收管线：无 API Key 也能跑通分集、场次、对白、编辑、导出
 - 在线精修管线：章节事实抽取 → 故事圣经/分集卡 → 带连续性的逐集成稿
 - Huobao Drama 架构对齐：职责分离的命名、事实、圣经、规划、编剧与连续性 Agent
@@ -26,7 +26,7 @@
 - 中文 / English 界面切换，语言偏好本地记忆
 - 项目档案支持自动归档、切换、新建和复制
 - 提示词资产支持编辑、恢复默认，并直接接入在线精修管线
-- 原生 SwiftUI macOS 版本（macOS 14+），含 Keychain 与 `.app` 构建脚本
+- 原生 SwiftUI macOS 版本（macOS 14+），含双模型可信管线、Keychain、项目归档、Xcode CI与发布脚本
 
 ## 运行
 
@@ -70,10 +70,13 @@ npm run acceptance -- <path-to-novel.txt>
 
 ## 原生 macOS 版
 
-SwiftUI 源码位于 [`macos/`](macos/)，可在 Mac 上用 Xcode 直接打开 `Package.swift`，也可执行：
+SwiftUI 源码位于 [`macos/`](macos/)。首次在 Mac 获取后执行：
 
 ```bash
 cd macos
-swift run ScriptForgeMac
-bash scripts/build-app.sh
+./scripts/bootstrap-macos.sh
+./scripts/ci-macos.sh
+open ScriptForge.xcodeproj
 ```
+
+发布、签名和私有附件验收见 [`macos/README.md`](macos/README.md)。

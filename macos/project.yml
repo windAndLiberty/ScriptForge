@@ -1,0 +1,61 @@
+name: ScriptForge
+options:
+  bundleIdPrefix: cn.scriptforge
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    ENABLE_HARDENED_RUNTIME: YES
+    SWIFT_STRICT_CONCURRENCY: minimal
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+targets:
+  ScriptForgeMac:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/ScriptForgeMac
+    resources:
+      - path: ../build/icon.png
+        buildPhase: resources
+    info:
+      path: AppResources/Info.plist
+    entitlements:
+      path: AppResources/ScriptForge.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: cn.scriptforge.mac
+        PRODUCT_NAME: ScriptForge
+        PRODUCT_MODULE_NAME: ScriptForgeMac
+        MARKETING_VERSION: 1.0.0
+        CURRENT_PROJECT_VERSION: 1
+        CODE_SIGN_STYLE: Automatic
+        ARCHS: $(ARCHS_STANDARD)
+        ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS: YES
+  ScriptForgeMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/ScriptForgeMacTests
+    dependencies:
+      - target: ScriptForgeMac
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: cn.scriptforge.mac.tests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/ScriptForge.app/Contents/MacOS/ScriptForge
+        BUNDLE_LOADER: $(TEST_HOST)
+schemes:
+  ScriptForge:
+    build:
+      targets:
+        ScriptForgeMac: all
+        ScriptForgeMacTests: [test]
+    test:
+      gatherCoverageData: true
+      targets:
+        - name: ScriptForgeMacTests
+    archive:
+      config: Release

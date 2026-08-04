@@ -15,10 +15,9 @@ enum KeychainStore {
         SecItemDelete(query as CFDictionary)
         var insert = query
         insert[kSecValueData as String] = data
+        insert[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         let status = SecItemAdd(insert as CFDictionary, nil)
-        guard status == errSecSuccess else {
-            throw KeychainError.unhandled(status)
-        }
+        guard status == errSecSuccess else { throw KeychainError.unhandled(status) }
     }
 
     static func load() -> String? {
@@ -31,10 +30,7 @@ enum KeychainStore {
         ]
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)
-        guard
-            status == errSecSuccess,
-            let data = result as? Data
-        else { return nil }
+        guard status == errSecSuccess, let data = result as? Data else { return nil }
         return String(data: data, encoding: .utf8)
     }
 
@@ -53,111 +49,345 @@ enum KeychainError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case let .unhandled(status):
-            "Keychain 错误：\(status)"
+        case let .unhandled(status): "Keychain 错误：\(status)"
         }
     }
 }
 
-struct OpenAIClient {
+enum ModelRoute: String, Codable, Hashable, Sendable {
+    case primary
+    case flash
+}
+
+enum ModelStage: String, CaseIterable, Sendable {
+    case characterNaming
+    case chapterAnalysis
+    case storyBible
+    case episodeOutline
+    case episodeDraft
+    case episodeSemanticAudit
+    case episodeRepair
+    case seriesQualityAudit
+    case seriesQualityRepair
+    case bookAnalysisExtract
+    case bookAnalysisDigest
+    case bookAnalysisStructure
+    case bookAnalysisCharacters
+    case bookAnalysisCommercial
+    case bookAnalysisRevision
+
+    var route: ModelRoute {
+        switch self {
+        case .characterNaming, .chapterAnalysis, .episodeSemanticAudit,
+             .seriesQualityAudit, .bookAnalysisExtract, .bookAnalysisDigest:
+            .flash
+        default:
+            .primary
+        }
+    }
+}
+
+enum ModelError: LocalizedError {
+    case invalidURL
+    case transport(String)
+    case server(Int, String)
+    case missingOutput
+    case invalidJSON(String)
+    case endpointConsentRequired(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            "模型 Base URL 无效"
+        case let .transport(message):
+            "模型网络请求失败：\(message)"
+        case let .server(status, message):
+            "模型请求失败（HTTP \(status)）：\(message)"
+        case .missingOutput:
+            "模型没有返回可读取的文本"
+        case let .invalidJSON(message):
+            "模型 JSON 结构不完整：\(message)"
+        case let .endpointConsentRequired(host):
+            "请先在模型设置中确认允许将所选小说内容发送到 \(host)"
+        }
+    }
+}
+
+struct LLMClient: Sendable {
     let settings: ModelSettings
     let apiKey: String
 
-    func structured<T: Decodable>(
+    func structured<T: Decodable & Sendable>(
+        stage: ModelStage,
         instructions: String,
         input: String,
         name: String,
         schema: [String: Any]
     ) async throws -> T {
-        let base = settings.baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        guard let url = URL(string: "\(base)/responses") else {
-            throw URLError(.badURL)
+        guard settings.hasEndpointConsent else {
+            throw ModelError.endpointConsentRequired(settings.endpointHost)
         }
-        let body: [String: Any] = [
-            "model": settings.model,
+        let model = stage.route == .flash ? settings.flashModel : settings.primaryModel
+        let payload = try makeResponsesPayload(
+            model: model,
+            instructions: instructions,
+            input: input,
+            name: name,
+            schema: schema,
+            strict: true
+        )
+        do {
+            let data = try await post(endpoint: "responses", payload: payload)
+            return try decodeOutput(data)
+        } catch let error as ModelError where shouldUseCompatibilityFallback(error) {
+            return try await compatibilityStructured(
+                model: model,
+                instructions: instructions,
+                input: input,
+                name: name,
+                schema: schema
+            )
+        }
+    }
+
+    private func compatibilityStructured<T: Decodable & Sendable>(
+        model: String,
+        instructions: String,
+        input: String,
+        name: String,
+        schema: [String: Any]
+    ) async throws -> T {
+        let schemaData = try JSONSerialization.data(withJSONObject: schema, options: [.sortedKeys])
+        let schemaText = String(data: schemaData, encoding: .utf8) ?? "{}"
+        let compatibilityInstruction = """
+        \(instructions)
+
+        只返回一个 JSON 对象，不要 Markdown 代码围栏，不要解释。对象必须符合以下 JSON Schema：
+        \(schemaText)
+        """
+
+        do {
+            let payload = try makeResponsesPayload(
+                model: model,
+                instructions: compatibilityInstruction,
+                input: input,
+                name: name,
+                schema: schema,
+                strict: false
+            )
+            let data = try await post(endpoint: "responses", payload: payload)
+            return try decodeOutput(data)
+        } catch let error as ModelError where shouldUseChatFallback(error) {
+            let chatPayload: [String: Any] = [
+                "model": model,
+                "messages": [
+                    ["role": "system", "content": compatibilityInstruction],
+                    ["role": "user", "content": input],
+                ],
+                "temperature": 0.2,
+            ]
+            let data = try await post(endpoint: "chat/completions", payload: chatPayload)
+            return try decodeOutput(data)
+        }
+    }
+
+    private func makeResponsesPayload(
+        model: String,
+        instructions: String,
+        input: String,
+        name: String,
+        schema: [String: Any],
+        strict: Bool
+    ) throws -> [String: Any] {
+        var payload: [String: Any] = [
+            "model": model,
             "instructions": instructions,
             "input": input,
             "store": false,
-            "reasoning": ["effort": settings.reasoningEffort],
-            "safety_identifier": safetyIdentifier(),
-            "text": [
+        ]
+        if strict {
+            payload["text"] = [
                 "format": [
                     "type": "json_schema",
                     "name": name,
                     "strict": true,
                     "schema": schema,
                 ],
-            ],
-        ]
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.timeoutInterval = 180
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-
-        let (data, response) = try await URLSession.shared.data(for: request)
-        guard let http = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
+            ]
         }
-        guard (200..<300).contains(http.statusCode) else {
-            let message = Self.apiErrorMessage(data)
-            throw ModelError.http(http.statusCode, message)
+        if !settings.reasoningEffort.isEmpty {
+            payload["reasoning"] = ["effort": settings.reasoningEffort]
         }
-        let text = try Self.outputText(from: data)
-        guard let payload = text.data(using: .utf8) else {
-            throw PipelineError.invalidResponse
-        }
-        return try JSONDecoder().decode(T.self, from: payload)
+        return payload
     }
 
-    private func safetyIdentifier() -> String {
-        let defaults = UserDefaults.standard
-        if let existing = defaults.string(forKey: "safetyIdentifier") {
-            return existing
+    private func post(endpoint: String, payload: [String: Any]) async throws -> Data {
+        let trimmed = settings.baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard let url = URL(string: "\(trimmed)/\(endpoint)") else { throw ModelError.invalidURL }
+        let body: Data
+        do {
+            body = try JSONSerialization.data(withJSONObject: payload)
+        } catch {
+            throw ModelError.invalidJSON(error.localizedDescription)
         }
-        let value = "desktop-\(UUID().uuidString.lowercased())"
-        defaults.set(value, forKey: "safetyIdentifier")
-        return value
-    }
 
-    private static func outputText(from data: Data) throws -> String {
-        guard
-            let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-        else { throw PipelineError.invalidResponse }
-        if let direct = object["output_text"] as? String, !direct.isEmpty {
-            return direct
-        }
-        if let output = object["output"] as? [[String: Any]] {
-            for item in output {
-                guard let content = item["content"] as? [[String: Any]] else { continue }
-                if let text = content.first(where: {
-                    ($0["type"] as? String) == "output_text"
-                })?["text"] as? String {
-                    return text
+        var lastError: Error?
+        for attempt in 0..<3 {
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.timeoutInterval = 240
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+            request.httpBody = body
+            do {
+                let (data, response) = try await URLSession.shared.data(for: request)
+                guard let http = response as? HTTPURLResponse else { throw ModelError.missingOutput }
+                if (200..<300).contains(http.statusCode) { return data }
+                let message = Self.serverMessage(data)
+                if (http.statusCode == 429 || http.statusCode >= 500), attempt < 2 {
+                    try await Task.sleep(for: .milliseconds(500 * (attempt + 1) * (attempt + 1)))
+                    continue
+                }
+                throw ModelError.server(http.statusCode, message)
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                lastError = error
+                if let modelError = error as? ModelError { throw modelError }
+                if attempt < 2 {
+                    try await Task.sleep(for: .milliseconds(500 * (attempt + 1) * (attempt + 1)))
                 }
             }
         }
-        throw PipelineError.invalidResponse
+        throw ModelError.transport(lastError?.localizedDescription ?? "未知错误")
     }
 
-    private static func apiErrorMessage(_ data: Data) -> String {
+    private func decodeOutput<T: Decodable & Sendable>(_ data: Data) throws -> T {
+        let object = try JSONSerialization.jsonObject(with: data)
+        let text = Self.outputText(from: object)
+        guard let text, !text.isEmpty else {
+            let direct = try? JSONDecoder.scriptForge.decode(T.self, from: data)
+            if let direct { return direct }
+            throw ModelError.missingOutput
+        }
+        let cleaned = Self.extractJSONObject(text)
+        guard let jsonData = cleaned.data(using: .utf8) else {
+            throw ModelError.invalidJSON("响应不是 UTF-8 JSON")
+        }
+        do {
+            return try JSONDecoder.scriptForge.decode(T.self, from: jsonData)
+        } catch {
+            throw ModelError.invalidJSON(Self.decodeMessage(error))
+        }
+    }
+
+    private func shouldUseCompatibilityFallback(_ error: ModelError) -> Bool {
+        switch error {
+        case let .server(status, message):
+            let lower = message.lowercased()
+            if [404, 405, 501].contains(status) { return true }
+            return [400, 415, 422].contains(status)
+                && (lower.contains("response_format")
+                    || lower.contains("json_schema")
+                    || lower.contains("text.format")
+                    || lower.contains("unavailable")
+                    || lower.contains("unsupported"))
+        default:
+            return false
+        }
+    }
+
+    private func shouldUseChatFallback(_ error: ModelError) -> Bool {
+        switch error {
+        case let .server(status, _): [404, 405, 501].contains(status)
+        default: false
+        }
+    }
+
+    private static func outputText(from object: Any) -> String? {
+        guard let root = object as? [String: Any] else { return nil }
+        if let value = root["output_text"] as? String { return value }
+        if let choices = root["choices"] as? [[String: Any]],
+           let message = choices.first?["message"] as? [String: Any] {
+            if let content = message["content"] as? String { return content }
+            if let content = message["content"] as? [[String: Any]] {
+                return content.compactMap { $0["text"] as? String }.joined()
+            }
+        }
+        guard let output = root["output"] as? [[String: Any]] else { return nil }
+        return output.compactMap { item in
+            (item["content"] as? [[String: Any]])?.compactMap { content in
+                content["text"] as? String
+                    ?? (content["value"] as? String)
+            }.joined()
+        }.joined()
+    }
+
+    private static func extractJSONObject(_ value: String) -> String {
+        var cleaned = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        if cleaned.hasPrefix("```") {
+            cleaned = cleaned.replacingOccurrences(
+                of: #"^```(?:json)?\s*|\s*```$"#,
+                with: "",
+                options: .regularExpression
+            )
+        }
+        guard let start = cleaned.firstIndex(of: "{") else { return cleaned }
+        var depth = 0
+        var inString = false
+        var escaped = false
+        var index = start
+        while index < cleaned.endIndex {
+            let character = cleaned[index]
+            if escaped {
+                escaped = false
+            } else if character == "\\" && inString {
+                escaped = true
+            } else if character == "\"" {
+                inString.toggle()
+            } else if !inString {
+                if character == "{" { depth += 1 }
+                if character == "}" {
+                    depth -= 1
+                    if depth == 0 { return String(cleaned[start...index]) }
+                }
+            }
+            index = cleaned.index(after: index)
+        }
+        return cleaned
+    }
+
+    private static func serverMessage(_ data: Data) -> String {
         guard
-            let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-            let error = object["error"] as? [String: Any],
-            let message = error["message"] as? String
-        else { return "Unknown API error" }
-        return message
+            let object = try? JSONSerialization.jsonObject(with: data),
+            let root = object as? [String: Any]
+        else { return String(data: data, encoding: .utf8) ?? "未知服务端错误" }
+        if let error = root["error"] as? [String: Any] {
+            return error["message"] as? String ?? String(describing: error)
+        }
+        return root["message"] as? String ?? String(data: data, encoding: .utf8) ?? "未知服务端错误"
     }
-}
 
-enum ModelError: LocalizedError {
-    case http(Int, String)
+    private static func decodeMessage(_ error: Error) -> String {
+        guard let decoding = error as? DecodingError else { return error.localizedDescription }
+        switch decoding {
+        case let .keyNotFound(key, context):
+            return "\(path(context.codingPath)).\(key.stringValue) 缺失"
+        case let .valueNotFound(_, context):
+            return "\(path(context.codingPath)) 缺少值"
+        case let .typeMismatch(_, context):
+            return "\(path(context.codingPath)) 类型错误：\(context.debugDescription)"
+        case let .dataCorrupted(context):
+            return "\(path(context.codingPath)) 数据损坏：\(context.debugDescription)"
+        @unknown default:
+            return error.localizedDescription
+        }
+    }
 
-    var errorDescription: String? {
-        switch self {
-        case let .http(code, message):
-            "模型请求失败（HTTP \(code)）：\(message)"
+    private static func path(_ codingPath: [CodingKey]) -> String {
+        codingPath.reduce("$") { partial, key in
+            if let index = key.intValue { return partial + "[\(index)]" }
+            return partial + "." + key.stringValue
         }
     }
 }

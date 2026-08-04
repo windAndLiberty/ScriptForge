@@ -100,6 +100,47 @@ enum NovelParser {
         )
     }
 
+    static func evidenceFragments(
+        chapters: [Chapter],
+        maxCharacters: Int = 12_000
+    ) -> [Chapter] {
+        chapters.flatMap { chapter in
+            guard chapter.content.count > maxCharacters else { return [chapter] }
+            var fragments: [String] = []
+            var buffer = ""
+            for paragraph in chapter.content.components(separatedBy: "\n") {
+                if paragraph.count > maxCharacters {
+                    if !buffer.isEmpty {
+                        fragments.append(buffer)
+                        buffer = ""
+                    }
+                    var start = paragraph.startIndex
+                    while start < paragraph.endIndex {
+                        let end = paragraph.index(start, offsetBy: maxCharacters, limitedBy: paragraph.endIndex)
+                            ?? paragraph.endIndex
+                        fragments.append(String(paragraph[start..<end]))
+                        start = end
+                    }
+                } else if buffer.count + paragraph.count + 1 > maxCharacters {
+                    fragments.append(buffer)
+                    buffer = paragraph
+                } else {
+                    buffer += buffer.isEmpty ? paragraph : "\n" + paragraph
+                }
+            }
+            if !buffer.isEmpty { fragments.append(buffer) }
+            return fragments.enumerated().map { offset, content in
+                Chapter(
+                    id: chapter.id,
+                    index: chapter.index,
+                    title: "\(chapter.title)（片段\(offset + 1)）",
+                    content: content,
+                    characterCount: compactCount(content)
+                )
+            }
+        }
+    }
+
     private static func compactCount(_ text: String) -> Int {
         text.filter { !$0.isWhitespace }.count
     }

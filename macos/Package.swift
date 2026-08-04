@@ -15,6 +15,11 @@ let package = Package(
         .executableTarget(
             name: "ScriptForgeMac",
             path: "Sources/ScriptForgeMac"
-        )
+        ),
+        .testTarget(
+            name: "ScriptForgeMacTests",
+            dependencies: ["ScriptForgeMac"],
+            path: "Tests/ScriptForgeMacTests"
+        ),
     ]
 )

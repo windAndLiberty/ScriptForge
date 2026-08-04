@@ -6,3 +6,9 @@
 *.gif binary
 *.ico binary
 *.icns binary
+
+*.swift text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.pbxproj text eol=lf
