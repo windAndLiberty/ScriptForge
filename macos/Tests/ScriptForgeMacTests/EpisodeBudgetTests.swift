@@ -24,4 +24,63 @@ final class EpisodeBudgetTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(result.runtime.dialogueLines, 12)
         XCTAssertFalse(result.issues.contains { $0.contains("每场至少") })
     }
+
+    func testEnglishBudgetCountsWordsInsteadOfLetters() {
+        let budget = EpisodeBudget.budget(durationSeconds: 60, language: .english)
+        XCTAssertEqual(budget.spokenCharacters, 105...165)
+
+        let line = "We cannot leave until the archive opens and everyone sees the ledger."
+        let dialogue = (1...12).map {
+            DialogueLine(speaker: $0.isMultiple(of: 2) ? "Mara" : "Elias", text: line)
+        }
+        let scene = ScriptScene(
+            id: "english-scene",
+            heading: "INT. ARCHIVE - NIGHT",
+            location: "The sealed archive",
+            action: "Mara breaks the wax seal while Elias blocks the only exit and the alarm begins to ring.",
+            dialogue: dialogue
+        )
+        let result = EpisodeBudget.assess(
+            scenes: [scene],
+            durationSeconds: 60,
+            language: .english
+        )
+
+        XCTAssertGreaterThanOrEqual(result.runtime.spokenCharacters, 105)
+        XCTAssertTrue(result.passed)
+    }
+
+    func testEnglishRendererDoesNotInjectChineseLabels() {
+        let episode = Episode(
+            id: "episode-1",
+            number: 1,
+            title: "The Ledger",
+            sourceChapterIDs: ["chapter-1"],
+            plannedSceneCount: 1,
+            openingHook: "The archive alarm rings.",
+            objective: "Recover the ledger.",
+            reversal: "The ledger is a forgery.",
+            endHook: "The real author steps inside.",
+            contract: EpisodeContract(
+                dominantConflict: "Recover the ledger",
+                newInformation: [],
+                visualHook: "A broken seal",
+                transitionFromPrevious: "Opening",
+                activePropThreads: [],
+                entryState: "Locked out",
+                exitState: "Trapped inside"
+            ),
+            runtime: nil,
+            semanticAudit: nil,
+            scenes: [],
+            content: ""
+        )
+
+        let rendered = OfflinePipeline.render(episode, language: .english)
+        XCTAssertTrue(rendered.contains("EPISODE 1"))
+        XCTAssertNil(rendered.range(
+            of: #"[\u3400-\u4DBF\u4E00-\u9FFF]"#,
+            options: .regularExpression
+        ))
+    }
 }

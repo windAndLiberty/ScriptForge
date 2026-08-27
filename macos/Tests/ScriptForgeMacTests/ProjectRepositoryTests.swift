@@ -33,6 +33,29 @@ final class ProjectRepositoryTests: XCTestCase {
         XCTAssertFalse(remaining.contains { $0.id == project.id })
     }
 
+    func testDuplicateCopiesLocalMediaAssets() throws {
+        let root = FileManager.default.temporaryDirectory
+            .appendingPathComponent("ScriptForgeTests-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let repository = ProjectRepository(baseURL: root)
+        var project = StoredProject(name: "含媒体项目")
+        project.document = fixtureDocument(index: 2)
+        _ = try repository.save(project)
+        let relativePath = try repository.writeMedia(
+            Data([1, 2, 3]),
+            fileExtension: "png",
+            projectID: project.id,
+            episodeNumber: 1,
+            shotID: "ep1-shot-1",
+            kind: "keyframe"
+        )
+
+        let (copy, _) = try repository.duplicate(project)
+
+        let copiedURL = try XCTUnwrap(repository.mediaURL(relativePath: relativePath, projectID: copy.id))
+        XCTAssertEqual(try Data(contentsOf: copiedURL), Data([1, 2, 3]))
+    }
+
     private func fixtureDocument(index: Int) -> NovelDocument {
         NovelDocument(
             fileName: "\(index).txt",

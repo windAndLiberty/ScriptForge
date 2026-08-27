@@ -85,13 +85,20 @@ enum OnlinePipeline {
     ) async throws -> [CharacterProfile] {
         guard !characters.isEmpty else { return [] }
         let client = LLMClient(settings: settings, apiKey: apiKey)
+        let outputLanguage = AppLanguage.detect(in: document.rawText)
+        let namingRule = outputLanguage == .english
+            ? "Generate natural, distinct English-language screenplay names. Do not transliterate them into Chinese."
+            : "Generate natural, distinct Simplified-Chinese screenplay names."
         let response: NamingResponse = try await client.structured(
             stage: .characterNaming,
-            instructions: systemBase + "\n\n" + PromptAssets.mergedInstruction(["character-naming"], assets: prompts),
+            instructions: instruction(
+                prompts: PromptAssets.mergedInstruction(["character-naming"], assets: prompts),
+                outputLanguage: outputLanguage
+            ) + "\n\n" + namingRule,
             input: """
-            为以下人物一次性生成剧本新名。保留 sourceName 原样：
-            \(characters.map { "- \($0.sourceName)：\($0.role)，出现 \($0.occurrences) 次，特征 \($0.traits.joined(separator: "、"))" }.joined(separator: "\n"))
-            小说类型提示：\(document.title)；\(document.intro.prefix(500))
+            Generate screenplay names for all of the following characters in one pass. Preserve every sourceName exactly:
+            \(characters.map { "- \($0.sourceName): role=\($0.role); occurrences=\($0.occurrences); traits=\($0.traits.joined(separator: ", "))" }.joined(separator: "\n"))
+            Story context: \(document.title); \(document.intro.prefix(500))
             """,
             name: "character_renames",
             schema: namingSchema
@@ -106,13 +113,18 @@ enum OnlinePipeline {
         prompts: [PromptAsset],
         settings: ModelSettings,
         apiKey: String,
+        interfaceLanguage: AppLanguage = .chinese,
         progress: @escaping (PipelinePhase, String, Double) -> Void
     ) async throws -> AdaptationResult {
         guard CharacterExtractor.validate(characters) else { throw PipelineError.invalidNames }
         let client = LLMClient(settings: settings, apiKey: apiKey)
-        let evidenceInstruction = systemBase + "\n\n" + PromptAssets.mergedInstruction(
+        let outputLanguage = options.outputLanguage(for: document)
+        let evidenceInstruction = instruction(
+            prompts: PromptAssets.mergedInstruction(
             ["story-evidence"],
             assets: prompts
+            ),
+            outputLanguage: outputLanguage
         )
         let evidenceFragments = NovelParser.evidenceFragments(chapters: document.chapters)
         let chapterGroups = stride(from: 0, to: evidenceFragments.count, by: 2).map {
@@ -123,7 +135,9 @@ enum OnlinePipeline {
             try Task.checkCancellation()
             progress(
                 .analysis,
-                "正在抽取章节证据 \(index + 1) / \(chapterGroups.count)",
+                interfaceLanguage == .english
+                    ? "Extracting chapter evidence \(index + 1) / \(chapterGroups.count)"
+                    : "正在抽取章节证据 \(index + 1) / \(chapterGroups.count)",
                 0.08 + Double(index) / Double(max(1, chapterGroups.count)) * 0.2
             )
             let input = group.map { "[\($0.id)] \($0.title)\n\($0.content)" }.joined(separator: "\n\n")
@@ -137,18 +151,28 @@ enum OnlinePipeline {
             analyses.append(sanitize(analysis, allowedChapterIDs: Set(group.map(\.id))))
         }
 
-        progress(.bible, "正在建立人物、世界规则与时间线", 0.31)
+        progress(
+            .bible,
+            interfaceLanguage == .english
+                ? "Building characters, world rules, and timeline"
+                : "正在建立人物、世界规则与时间线",
+            0.31
+        )
         let bibleResponse: StoryBibleResponse = try await client.structured(
             stage: .storyBible,
-            instructions: systemBase + "\n\n" + PromptAssets.mergedInstruction(
-                ["story-bible"],
-                assets: prompts
-            ) + "\n\n剧本只能使用锁定新名：\(characters.map(\.targetName).joined(separator: "、"))。",
+            instructions: instruction(
+                prompts: PromptAssets.mergedInstruction(["story-bible"], assets: prompts),
+                outputLanguage: outputLanguage
+            ) + "\n\nThe screenplay may use only these locked character names: \(characters.map(\.targetName).joined(separator: ", ")).",
             input: """
-            【人物映射】
-            \(characters.map { "\($0.sourceName) → \($0.targetName)（\($0.role)）" }.joined(separator: "\n"))
+            [Character Mapping]
+            \(characters.map {
+                outputLanguage == .english
+                    ? "\($0.sourceName) -> \($0.targetName) (\($0.resolvedRole(for: .english)))"
+                    : "\($0.sourceName) → \($0.targetName)（\($0.role)）"
+            }.joined(separator: "\n"))
 
-            【章节证据】
+            [Chapter Evidence]
             \(json(analyses))
             """,
             name: "story_bible",
@@ -166,23 +190,29 @@ enum OnlinePipeline {
             characters: characters
         )
 
-        progress(.outline, "正在规划全剧分集契约与动态场次", 0.4)
+        progress(
+            .outline,
+            interfaceLanguage == .english
+                ? "Planning episode contracts and dynamic scenes"
+                : "正在规划全剧分集契约与动态场次",
+            0.4
+        )
         let outline: OutlineResponse = try await client.structured(
             stage: .episodeOutline,
-            instructions: systemBase + "\n\n" + PromptAssets.mergedInstruction(
-                ["episode-planning"],
-                assets: prompts
+            instructions: instruction(
+                prompts: PromptAssets.mergedInstruction(["episode-planning"], assets: prompts),
+                outputLanguage: outputLanguage
             ) + """
 
-            必须规划恰好 \(options.episodeCount) 集；每集时长 \(options.durationSeconds) 秒。
-            场次数由剧情决定，允许范围 \(EpisodeBudget.sceneRange(durationSeconds: options.durationSeconds).lowerBound)–\(EpisodeBudget.sceneRange(durationSeconds: options.durationSeconds).upperBound) 场。
+            Plan exactly \(options.episodeCount) episodes, each lasting \(options.durationSeconds) seconds.
+            Let the story determine scene count within \(EpisodeBudget.sceneRange(durationSeconds: options.durationSeconds).lowerBound)–\(EpisodeBudget.sceneRange(durationSeconds: options.durationSeconds).upperBound) scenes per episode.
             """,
             input: """
-            【故事圣经】\(json(bible))
-            【章节证据】\(json(analyses))
-            【类型】\(options.genre)
-            【基调】\(options.tone)
-            【趋势策略】\(options.trendPreset.rawValue)
+            [Story Bible]\n\(json(bible))
+            [Chapter Evidence]\n\(json(analyses))
+            [Genre]\n\(options.resolvedGenre(for: outputLanguage))
+            [Tone]\n\(options.resolvedTone(for: outputLanguage))
+            [Trend Strategy]\n\(options.trendPreset.resolvedValue(for: outputLanguage))
             """,
             name: "episode_outline",
             schema: outlineSchema(episodeCount: options.episodeCount, durationSeconds: options.durationSeconds)
@@ -196,38 +226,51 @@ enum OnlinePipeline {
             try Task.checkCancellation()
             progress(
                 .drafting,
-                "正在生成第 \(index + 1) / \(plans.count) 集",
+                interfaceLanguage == .english
+                    ? "Drafting episode \(index + 1) / \(plans.count)"
+                    : "正在生成第 \(index + 1) / \(plans.count) 集",
                 0.48 + Double(index) / Double(max(1, plans.count)) * 0.31
             )
             let source = sourceText(for: plan, document: document)
             let previous = episodes.last.map {
-                "上一集退出状态：\($0.contract.exitState)\n上一集卡点：\($0.endHook)"
-            } ?? "首集：前5秒直接建立视觉冲突"
+                "Previous episode exit state: \($0.contract.exitState)\nPrevious episode cliffhanger: \($0.endHook)"
+            } ?? "Opening episode: establish a visible conflict within the first five seconds."
             let draft: EpisodeDraft = try await client.structured(
                 stage: .episodeDraft,
                 instructions: draftInstruction(
                     options: options,
                     characters: characters,
                     prompts: prompts,
-                    plannedSceneCount: plan.plannedSceneCount
+                    plannedSceneCount: plan.plannedSceneCount,
+                    outputLanguage: outputLanguage
                 ),
                 input: """
-                【故事圣经】\(json(bible))
-                【本集契约】\(json(plan))
-                【连续性】\(previous)
-                【对应原文】\(source)
+                [Story Bible]\n\(json(bible))
+                [Episode Contract]\n\(json(plan))
+                [Continuity]\n\(previous)
+                [Source Evidence]\n\(source)
                 """,
                 name: "episode_\(plan.number)",
                 schema: episodeSchema(durationSeconds: options.durationSeconds)
             )
-            var episode = makeEpisode(plan: plan, draft: draft, characters: characters)
-            let completeness = EpisodeBudget.assess(scenes: episode.scenes, durationSeconds: options.durationSeconds)
+            var episode = makeEpisode(
+                plan: plan,
+                draft: draft,
+                characters: characters,
+                outputLanguage: outputLanguage
+            )
+            let completeness = EpisodeBudget.assess(
+                scenes: episode.scenes,
+                durationSeconds: options.durationSeconds,
+                language: outputLanguage
+            )
             let semantic = try await semanticAudit(
                 episode: episode,
                 bible: bible,
                 plan: plan,
                 prompts: prompts,
-                client: client
+                client: client,
+                outputLanguage: outputLanguage
             )
             episode.runtime = completeness.runtime
             episode.semanticAudit = semantic
@@ -243,38 +286,48 @@ enum OnlinePipeline {
                     options: options,
                     characters: characters,
                     prompts: prompts,
-                    client: client
+                    client: client,
+                    outputLanguage: outputLanguage
                 )
                 let repairedCompleteness = EpisodeBudget.assess(
                     scenes: repaired.scenes,
-                    durationSeconds: options.durationSeconds
+                    durationSeconds: options.durationSeconds,
+                    language: outputLanguage
                 )
                 let repairedSemantic = try await semanticAudit(
                     episode: repaired,
                     bible: bible,
                     plan: plan,
                     prompts: prompts,
-                    client: client
+                    client: client,
+                    outputLanguage: outputLanguage
                 )
-                if repairedCompleteness.score >= completeness.score && repairedSemantic.passed {
+                if repairedCompleteness.passed && repairedSemantic.passed {
                     var accepted = repaired
                     accepted.runtime = repairedCompleteness.runtime
                     accepted.semanticAudit = repairedSemantic
-                    accepted.content = OfflinePipeline.render(accepted)
+                    accepted.content = OfflinePipeline.render(accepted, language: outputLanguage)
                     episode = accepted
                     acceptedRepairs += 1
                 }
             }
-            episode.content = OfflinePipeline.render(episode)
+            episode.content = OfflinePipeline.render(episode, language: outputLanguage)
             episodes.append(episode)
         }
 
-        progress(.quality, "正在执行跨集重叠窗口终审", 0.82)
+        progress(
+            .quality,
+            interfaceLanguage == .english
+                ? "Running overlapping cross-episode review"
+                : "正在执行跨集重叠窗口终审",
+            0.82
+        )
         let initialAudit = try await auditSeries(
             episodes: episodes,
             bible: bible,
             prompts: prompts,
-            client: client
+            client: client,
+            outputLanguage: outputLanguage
         )
         let targets = Array(Set(initialAudit.issues
             .filter { $0.severity == "blocker" || $0.severity == "major" }
@@ -296,40 +349,51 @@ enum OnlinePipeline {
                     options: options,
                     characters: characters,
                     prompts: prompts,
-                    client: client
+                    client: client,
+                    outputLanguage: outputLanguage
                 )
                 let oldScore = EpisodeBudget.assess(
                     scenes: episodes[index].scenes,
-                    durationSeconds: options.durationSeconds
+                    durationSeconds: options.durationSeconds,
+                    language: outputLanguage
                 ).score
                 let newAssessment = EpisodeBudget.assess(
                     scenes: repaired.scenes,
-                    durationSeconds: options.durationSeconds
+                    durationSeconds: options.durationSeconds,
+                    language: outputLanguage
                 )
                 let verification = try await semanticAudit(
                     episode: repaired,
                     bible: bible,
                     plan: plan,
                     prompts: prompts,
-                    client: client
+                    client: client,
+                    outputLanguage: outputLanguage
                 )
-                if newAssessment.score >= oldScore && verification.passed {
+                if newAssessment.passed && newAssessment.score >= oldScore && verification.passed {
                     var accepted = repaired
                     accepted.runtime = newAssessment.runtime
                     accepted.semanticAudit = verification
-                    accepted.content = OfflinePipeline.render(accepted)
+                    accepted.content = OfflinePipeline.render(accepted, language: outputLanguage)
                     episodes[index] = accepted
                     acceptedRepairs += 1
                 }
             }
         }
 
-        progress(.quality, "正在复验修订后的全剧连续性", 0.93)
+        progress(
+            .quality,
+            interfaceLanguage == .english
+                ? "Rechecking continuity after repairs"
+                : "正在复验修订后的全剧连续性",
+            0.93
+        )
         let finalAudit = try await auditSeries(
             episodes: episodes,
             bible: bible,
             prompts: prompts,
-            client: client
+            client: client,
+            outputLanguage: outputLanguage
         )
         let qualityIssues = finalAudit.issues.map(makeQualityIssue)
         let auditedWindows = seriesWindows(episodes).count
@@ -340,7 +404,8 @@ enum OnlinePipeline {
             semanticIssues: qualityIssues,
             repairAttempts: repairAttempts,
             acceptedRepairs: acceptedRepairs,
-            auditedWindows: auditedWindows
+            auditedWindows: auditedWindows,
+            outputLanguage: outputLanguage
         )
         return AdaptationResult(
             logline: renamed(outline.logline, characters),
@@ -360,16 +425,20 @@ enum OnlinePipeline {
         bible: StoryBible,
         plan: EpisodePlan,
         prompts: [PromptAsset],
-        client: LLMClient
+        client: LLMClient,
+        outputLanguage: AppLanguage
     ) async throws -> EpisodeSemanticAudit {
         let response: SemanticAuditResponse = try await client.structured(
             stage: .episodeSemanticAudit,
-            instructions: systemBase + "\n\n" + PromptAssets.mergedInstruction(["quality-gate"], assets: prompts),
+            instructions: instruction(
+                prompts: PromptAssets.mergedInstruction(["quality-gate"], assets: prompts),
+                outputLanguage: outputLanguage
+            ),
             input: """
-            【故事圣经】\(json(bible))
-            【本集契约】\(json(plan))
-            【候选成稿】\(episode.content.isEmpty ? OfflinePipeline.render(episode) : episode.content)
-            只检查本集是否忠于证据、人物动机是否成立、冲突是否真正推进、钩子是否可见可拍。
+            [Story Bible]\n\(json(bible))
+            [Episode Contract]\n\(json(plan))
+            [Candidate Draft]\n\(episode.content.isEmpty ? OfflinePipeline.render(episode, language: outputLanguage) : episode.content)
+            Check only whether this episode is faithful to the evidence, character motivations are credible, the conflict genuinely advances, and the hooks are visible and shootable.
             """,
             name: "episode_semantic_audit_\(episode.number)",
             schema: semanticAuditSchema
@@ -390,7 +459,8 @@ enum OnlinePipeline {
         options: AdaptationOptions,
         characters: [CharacterProfile],
         prompts: [PromptAsset],
-        client: LLMClient
+        client: LLMClient,
+        outputLanguage: AppLanguage
     ) async throws -> Episode {
         let draft: EpisodeDraft = try await client.structured(
             stage: .episodeRepair,
@@ -398,36 +468,46 @@ enum OnlinePipeline {
                 options: options,
                 characters: characters,
                 prompts: prompts,
-                plannedSceneCount: plan.plannedSceneCount
-            ) + "\n\n只修复列出的重大问题，保留无问题的冲突、事实和有效台词。",
+                plannedSceneCount: plan.plannedSceneCount,
+                outputLanguage: outputLanguage
+            ) + "\n\nRepair only the listed major issues. Preserve valid conflicts, facts, and effective dialogue.",
             input: """
-            【故事圣经】\(json(bible))
-            【本集契约】\(json(plan))
-            【原文证据】\(source)
-            【当前成稿】\(episode.content.isEmpty ? OfflinePipeline.render(episode) : episode.content)
-            【必须修复】\(issues.joined(separator: "\n- "))
+            [Story Bible]\n\(json(bible))
+            [Episode Contract]\n\(json(plan))
+            [Source Evidence]\n\(source)
+            [Current Draft]\n\(episode.content.isEmpty ? OfflinePipeline.render(episode, language: outputLanguage) : episode.content)
+            [Required Repairs]\n- \(issues.joined(separator: "\n- "))
             """,
             name: "episode_repair_\(episode.number)",
             schema: episodeSchema(durationSeconds: options.durationSeconds)
         )
-        return makeEpisode(plan: plan, draft: draft, characters: characters)
+        return makeEpisode(
+            plan: plan,
+            draft: draft,
+            characters: characters,
+            outputLanguage: outputLanguage
+        )
     }
 
     private static func auditSeries(
         episodes: [Episode],
         bible: StoryBible,
         prompts: [PromptAsset],
-        client: LLMClient
+        client: LLMClient,
+        outputLanguage: AppLanguage
     ) async throws -> SeriesAuditResponse {
         var issues: [SeriesIssueDTO] = []
         for window in seriesWindows(episodes) {
             let response: SeriesAuditResponse = try await client.structured(
                 stage: .seriesQualityAudit,
-                instructions: systemBase + "\n\n" + PromptAssets.mergedInstruction(["quality-gate"], assets: prompts) + """
+                instructions: instruction(
+                    prompts: PromptAssets.mergedInstruction(["quality-gate"], assets: prompts),
+                    outputLanguage: outputLanguage
+                ) + """
 
-                只报告可定位的 blocker、major 或 minor。重点检查跨集转场原因、人物关系与名字、能力规则、核心冲突是否重复、伏笔是否无故消失。
+                Report only locatable blocker, major, or minor issues. Focus on the reasons for transitions between episodes, character relationships and names, ability rules, repeated central conflicts, and foreshadowing that disappears without explanation.
                 """,
-                input: "【故事圣经】\(json(bible))\n【连续分集】\n\(window.map(\.content).joined(separator: "\n\n"))",
+                input: "[Story Bible]\n\(json(bible))\n[Consecutive Episodes]\n\(window.map(\.content).joined(separator: "\n\n"))",
                 name: "series_audit_\(window.first?.number ?? 1)",
                 schema: seriesAuditSchema
             )
@@ -451,26 +531,35 @@ enum OnlinePipeline {
         return windows
     }
 
-    private static func draftInstruction(
+    static func draftInstruction(
         options: AdaptationOptions,
         characters: [CharacterProfile],
         prompts: [PromptAsset],
-        plannedSceneCount: Int
+        plannedSceneCount: Int,
+        outputLanguage: AppLanguage = .chinese
     ) -> String {
-        let budget = EpisodeBudget.budget(durationSeconds: options.durationSeconds)
-        return systemBase + "\n\n" + PromptAssets.mergedInstruction(["episode-drafting"], assets: prompts) + """
+        let budget = EpisodeBudget.budget(
+            durationSeconds: options.durationSeconds,
+            language: outputLanguage
+        )
+        let unitName = outputLanguage == .english ? "English dialogue words" : "effective spoken Chinese characters"
+        return instruction(
+            prompts: PromptAssets.mergedInstruction(["episode-drafting"], assets: prompts),
+            outputLanguage: outputLanguage
+        ) + """
 
-        只能使用以下锁定人物新名：\(characters.map(\.targetName).joined(separator: "、"))。
-        本集约 \(options.durationSeconds) 秒，场次数由剧情决定，允许 \(budget.sceneRange.lowerBound)–\(budget.sceneRange.upperBound) 场；分集规划建议 \(plannedSceneCount) 场，但不要为凑数拆场。
-        整集目标约 \(budget.dialogueLines.lowerBound)–\(budget.dialogueLines.upperBound) 句短对白、\(budget.spokenCharacters.lowerBound)–\(budget.spokenCharacters.upperBound) 个对白有效字。限制是整集预算，不是每场最少句数。
-        每个场次必须有场景时空、地点、可拍动作和对白数组。不得输出旧名。
+        Use only these locked character names: \(characters.map(\.targetName).joined(separator: ", ")).
+        Target approximately \(options.durationSeconds) seconds. Let the story determine scene count within \(budget.sceneRange.lowerBound)–\(budget.sceneRange.upperBound) scenes. The episode plan recommends \(plannedSceneCount) scenes, but never split scenes merely to meet a count.
+        HARD COMPLETENESS BUDGET: produce \(budget.dialogueLines.lowerBound)–\(budget.dialogueLines.upperBound) short dialogue lines and \(budget.spokenCharacters.lowerBound)–\(budget.spokenCharacters.upperBound) \(unitName) across the entire episode. Count before returning. A draft below either lower bound is incomplete. These are episode-wide budgets, not minimums for each scene.
+        Every scene must define its time and setting, location, shootable action, and dialogue array. Never output a source character name that has been replaced.
         """
     }
 
     private static func makeEpisode(
         plan: EpisodePlan,
         draft: EpisodeDraft,
-        characters: [CharacterProfile]
+        characters: [CharacterProfile],
+        outputLanguage: AppLanguage
     ) -> Episode {
         let scenes = draft.scenes.enumerated().map { index, scene in
             ScriptScene(
@@ -502,8 +591,8 @@ enum OnlinePipeline {
             scenes: scenes,
             content: ""
         )
-        episode.runtime = EpisodeBudget.estimateRuntime(scenes: scenes)
-        episode.content = OfflinePipeline.render(episode)
+        episode.runtime = EpisodeBudget.estimateRuntime(scenes: scenes, language: outputLanguage)
+        episode.content = OfflinePipeline.render(episode, language: outputLanguage)
         return episode
     }
 
@@ -513,6 +602,7 @@ enum OnlinePipeline {
         options: AdaptationOptions
     ) -> [EpisodePlan] {
         let range = EpisodeBudget.sceneRange(durationSeconds: options.durationSeconds)
+        let language = options.outputLanguage(for: document)
         return (0..<options.episodeCount).map { index in
             if source.indices.contains(index) {
                 let value = source[index]
@@ -535,18 +625,20 @@ enum OnlinePipeline {
                 title: chapter.title,
                 sourceChapterIDs: [chapter.id],
                 plannedSceneCount: min(2, range.upperBound),
-                openingHook: "危机在画面中直接发生",
-                objective: "推进 \(chapter.title) 的核心冲突",
-                reversal: "人物发现原先判断并不完整",
-                endHook: "新证据出现，行动被迫中断",
+                openingHook: language == .english ? "The crisis begins visibly on screen" : "危机在画面中直接发生",
+                objective: language == .english ? "Advance the central conflict of \(chapter.title)" : "推进 \(chapter.title) 的核心冲突",
+                reversal: language == .english ? "A character discovers that the original judgment was incomplete" : "人物发现原先判断并不完整",
+                endHook: language == .english ? "New evidence interrupts the action" : "新证据出现，行动被迫中断",
                 contract: EpisodeContract(
                     dominantConflict: chapter.title,
-                    newInformation: ["章节事实待成稿呈现"],
-                    visualHook: "可见冲突",
-                    transitionFromPrevious: index == 0 ? "首集" : "承接上一集退出状态",
+                    newInformation: [language == .english ? "Source facts must be dramatized in the draft" : "章节事实待成稿呈现"],
+                    visualHook: language == .english ? "Visible conflict" : "可见冲突",
+                    transitionFromPrevious: language == .english
+                        ? (index == 0 ? "Opening episode" : "Continue from the previous exit state")
+                        : (index == 0 ? "首集" : "承接上一集退出状态"),
                     activePropThreads: [],
-                    entryState: "冲突开始",
-                    exitState: "冲突升级"
+                    entryState: language == .english ? "Conflict begins" : "冲突开始",
+                    exitState: language == .english ? "Conflict escalates" : "冲突升级"
                 )
             )
         }
@@ -556,7 +648,7 @@ enum OnlinePipeline {
         let selected = document.chapters.filter { plan.sourceChapterIDs.contains($0.id) }
         return selected.map { chapter in
             let content = chapter.content.count > 18_000
-                ? String(chapter.content.prefix(18_000)) + "\n[长章其余内容已在故事圣经证据中汇总]"
+                ? String(chapter.content.prefix(18_000)) + "\n[The remainder of this long chapter is summarized in the story-bible evidence.]"
                 : chapter.content
             return "[\(chapter.id)] \(chapter.title)\n\(content)"
         }.joined(separator: "\n\n")
@@ -630,9 +722,17 @@ enum OnlinePipeline {
         return text
     }
 
-    private static let systemBase = """
-    你是中国竖屏微短剧工业化改编系统中的一个受限节点。严格读取上游资产，只输出当前 Schema 要求的数据；不输出分析过程，不虚构原文证据，不擅自改名。强情绪必须带来人物选择和后果，避免机械羞辱、重复退婚和只放狠话不行动。
+    static let systemBase = """
+    You are a constrained node in an industrial vertical micro-drama adaptation workflow. Read upstream assets strictly and output only data required by the current JSON Schema. Do not reveal hidden reasoning, fabricate source evidence, or rename characters without authorization. Strong emotion must cause a character choice and a consequence; avoid mechanical humiliation, repetitive engagement-cancellation plots, and threats without action.
     """
+
+    static func instruction(prompts: String, outputLanguage: AppLanguage) -> String {
+        systemBase + "\n\n" + prompts + """
+
+
+        OUTPUT LANGUAGE CONTRACT: Write every natural-language output value exclusively in \(outputLanguage.promptName). Preserve proper names, verbatim source excerpts, and evidence IDs in their original form. Do not translate evidence IDs or mix languages in labels, summaries, plans, dialogue, actions, audits, or repair instructions. This final contract overrides language preferences in editable prompt assets, while leaving privacy, source fidelity, and JSON structure constraints unchanged.
+        """
+    }
 
     private static let stringArray: [String: Any] = [
         "type": "array",

@@ -1,86 +1,110 @@
 import Foundation
+import CryptoKit
 
 enum PromptAssets {
-    static let version = "mac-prompts-v2"
+    static let version = "mac-prompts-v4-en"
 
     static let defaults: [PromptAsset] = [
         PromptAsset(
             id: "story-evidence",
-            title: "故事事实抽取",
-            scope: "章节分析、一键拆书证据层",
-            influence: "决定模型从原文保留哪些人物、事件、因果和伏笔；不会直接决定剧本文风。",
+            title: "Story Evidence Extraction",
+            scope: "Chapter analysis and the evidence layer for Book Analysis",
+            influence: "Controls which characters, events, causal links, and foreshadowing elements are retained from the source; it does not directly set screenplay style.",
             instruction: """
-            只抽取原文明确支持的事实。每条事实必须保留章节证据 ID；区分已发生事件、人物动机、世界规则和未兑现伏笔，不补写原文没有的信息。
+            Extract only facts explicitly supported by the source. Every fact must retain its chapter evidence ID. Distinguish completed events, character motivations, world rules, and unresolved foreshadowing. Do not add information absent from the source.
             """,
             isDefault: true,
             updatedAt: Date(timeIntervalSince1970: 0)
         ),
         PromptAsset(
             id: "character-naming",
-            title: "人物轻量改名",
-            scope: "导入后的 Flash 命名调用",
-            influence: "影响剧本角色的新名字；用户手动修改的名字优先级最高，后续模型不得擅自更改。",
+            title: "Lightweight Character Renaming",
+            scope: "Flash-model naming call after import",
+            influence: "Controls new screenplay character names. Manually edited names have the highest priority and must not be changed by later model calls.",
             instruction: """
-            为人物生成符合中国短剧类型和人物气质的自然中文姓名。姓名必须是二至四个汉字，彼此不重复，不得使用“角色8”“男主1”等占位名，不得与原名相同。
+            Generate natural Chinese names that fit each character's personality and the conventions of Chinese short-form drama. Each name must contain two to four Chinese characters, be unique, differ from the source name, and never use placeholders such as "Character 8" or "Male Lead 1."
             """,
             isDefault: true,
             updatedAt: Date(timeIntervalSince1970: 0)
         ),
         PromptAsset(
             id: "story-bible",
-            title: "故事圣经与连续性",
-            scope: "全剧事实圣经、人物关系、时间线和道具线",
-            influence: "约束所有分集的人物身份、关系、能力规则、场景转移和伏笔兑现，是连续性判断的唯一事实源。",
+            title: "Story Bible and Continuity",
+            scope: "Series facts, relationships, timeline, and prop continuity",
+            influence: "Constrains character identity, relationships, ability rules, location changes, and foreshadowing payoffs across all episodes; it is the canonical source for continuity decisions.",
             instruction: """
-            将章节证据整理成可执行故事圣经。统一人物身份与别名，明确世界规则的原因和限制，建立按因果排序的时间线；无法由证据支持的内容不得写成确定事实。
+            Organize chapter evidence into an actionable story bible. Reconcile character identities and aliases, state the causes and limits of world rules, and build a causally ordered timeline. Never present unsupported material as established fact.
             """,
             isDefault: true,
             updatedAt: Date(timeIntervalSince1970: 0)
         ),
         PromptAsset(
             id: "episode-planning",
-            title: "中国竖屏短剧分集",
-            scope: "全局分集契约与单集场次建议",
-            influence: "决定每集推进的新事件、开场钩子、反转、结尾卡点和动态场次数，不直接撰写完整对白。",
+            title: "Chinese Vertical-Drama Episode Planning",
+            scope: "Series-wide episode contracts and per-episode scene recommendations",
+            influence: "Controls each episode's new event, opening hook, reversal, closing cliffhanger, and dynamic scene count; it does not draft complete dialogue.",
             instruction: """
-            每集只推进一个核心冲突，但必须增加新信息或造成新后果。前 5 秒出现可见冲突，最后 5–8 秒留下未完成动作或信息差。前三集必须快速完成处境、羞辱或危机、能力或真相反转，禁止连续多集重复同一冲突。场次数由剧情决定，60 秒通常 1–3 场。
+            Advance one central conflict per episode while adding new information or causing a new consequence. Show a visible conflict within the first five seconds and end the final five to eight seconds on an unfinished action or information gap. Within the first three episodes, establish the situation, a humiliation or crisis, and an ability or truth reversal. Never repeat the same conflict across consecutive episodes. Let the story determine scene count; a 60-second episode normally uses one to three scenes.
             """,
             isDefault: true,
             updatedAt: Date(timeIntervalSince1970: 0)
         ),
         PromptAsset(
             id: "episode-drafting",
-            title: "单集可拍成稿",
-            scope: "逐集场景动作和对白",
-            influence: "直接影响最终剧本的节奏、动作、对白密度和结尾卡点。",
+            title: "Shootable Episode Draft",
+            scope: "Per-episode scene action and dialogue",
+            influence: "Directly controls pacing, visible action, dialogue density, and the closing cliffhanger in the final screenplay.",
             instruction: """
-            输出中国市场竖屏微短剧成稿。动作必须可见、可拍、能给演员反应抓手；台词短、带攻守关系，不复述观众刚看到的动作。60 秒整集通常 12–18 句对白，单句尽量不超过 18 个汉字。场次不能为凑数拆分，结尾必须停在行动、发现或选择发生的瞬间。
+            Draft a production-ready vertical micro-drama episode for the Chinese market. Every action must be visible, shootable, and give performers a playable reaction. Keep dialogue short and adversarial; never restate an action the audience has just seen. A 60-second episode normally contains 12–18 dialogue lines, preferably no more than 18 Chinese characters per line. Do not split scenes merely to increase the count. End at the exact moment an action, discovery, or choice occurs.
             """,
             isDefault: true,
             updatedAt: Date(timeIntervalSince1970: 0)
         ),
         PromptAsset(
             id: "quality-gate",
-            title: "可信终审与修复",
-            scope: "单集初审、跨集审片、问题台账和定向修复",
-            influence: "只决定成稿能否通过以及需要修复的位置；不得为了提高分数重写无问题内容。",
+            title: "Evidence-Grounded Quality Gate",
+            scope: "Episode review, series audit, issue ledger, and targeted repair",
+            influence: "Determines whether a draft passes and identifies repair locations; it must not rewrite valid content merely to increase a score.",
             instruction: """
-            以证据为基础检查原著忠实度、人物连续性、动机、时间地点转场、冲突推进、开尾钩子和可拍性。只报告可定位的问题；修复时只处理 blocker 和 major，保留已经有效的场景和台词。
+            Use evidence to check source fidelity, character continuity, motivation, time and location transitions, conflict progression, opening and closing hooks, and shootability. Report only issues with a precise location. During repair, address only blocker and major issues while preserving scenes and dialogue that already work.
+            """,
+            isDefault: true,
+            updatedAt: Date(timeIntervalSince1970: 0)
+        ),
+        PromptAsset(
+            id: "storyboard-production",
+            title: "Storyboard and Multimedia Production Package",
+            scope: "Approved screenplay to shots, keyframes, sound, and continuity notes",
+            influence: "Controls shot breakdown, composition, camera movement, sound design, and image prompts without changing the approved story.",
+            instruction: """
+            Break the approved screenplay into executable shots. Every shot must specify shot size, camera movement, vertical composition, visible action, dialogue or narration, sound, continuity, and production notes. Total shot duration must match the episode target. Each keyframe prompt must repeat stable character visual anchors and specify 9:16. Do not add characters, events, locations, prop abilities, or outcomes absent from the screenplay.
             """,
             isDefault: true,
             updatedAt: Date(timeIntervalSince1970: 0)
         ),
         PromptAsset(
             id: "book-analysis",
-            title: "一键拆书六模块",
-            scope: "结构、人物、爽点、文风、技法和仿写建议",
-            influence: "决定拆书报告的深度与证据标准，不会直接修改短剧成稿。",
+            title: "Six-Section Book Analysis",
+            scope: "Structure, characters, commercial payoffs, style, techniques, and adaptation guidance",
+            influence: "Controls the depth and evidence standard of the analysis report; it does not directly modify the screenplay draft.",
             instruction: """
-            拆书报告必须覆盖内容概览、结构节奏、人物系统、商业爽点、语言文风、可复用技法六个模块。判断必须引用章节证据 ID；明确区分原文事实、分析推论和仿写建议。
+            The book analysis must cover six sections: content overview, structure and pacing, character system, commercial highlights, language and style, and reusable techniques. Every judgment must cite chapter evidence IDs. Clearly distinguish source facts, analytical inferences, and adaptation recommendations.
             """,
             isDefault: true,
             updatedAt: Date(timeIntervalSince1970: 0)
         ),
+    ]
+
+    // Hashes allow old built-in defaults to migrate without shipping their obsolete prompt text.
+    private static let legacyDefaultHashes: [String: String] = [
+        "story-evidence": "f5b356263bab21ae72baad20086e8b0a21fc95a1658b2339c62f7bc2e5996b1e",
+        "character-naming": "4eefac4b6513b21e62ebd235eb18e08d8929c86369ed06973b8e681a065bee39",
+        "story-bible": "10b34c08e82fadd8d5ad6d0592ea19fa48e3f2da2fab3f7f2e519aecc7a65b49",
+        "episode-planning": "d1009c1a1d53d3f53941b2311b51ece1226e34ec8465deebb2b26678ee03d82b",
+        "episode-drafting": "fbfe098b3cab1fa8f6bbb4a7fccae2fe337fbdb7872e3f7b474a5d3618b276f9",
+        "quality-gate": "833a0f4add1b081c4a02130f156e0444b2fdb87382d22a6e2793e8702762d3b6",
+        "storyboard-production": "f2821351fc758be5c217554c325850d6fc8f05114f74912e4388312f7848e323",
+        "book-analysis": "e99298dbfcc41ce056a976b0c816e7869109c77270d2e81487bccd0df689cf7f",
     ]
 
     static func mergedInstruction(_ ids: [String], assets: [PromptAsset]) -> String {
@@ -90,6 +114,13 @@ enum PromptAssets {
 
     static func reset(asset: PromptAsset) -> PromptAsset {
         defaults.first(where: { $0.id == asset.id }) ?? asset
+    }
+
+    static func isLegacyDefault(_ asset: PromptAsset) -> Bool {
+        guard let expected = legacyDefaultHashes[asset.id] else { return false }
+        let normalized = asset.instruction.trimmingCharacters(in: .whitespacesAndNewlines)
+        let digest = SHA256.hash(data: Data(normalized.utf8)).map { String(format: "%02x", $0) }.joined()
+        return digest == expected
     }
 }
 
@@ -113,9 +144,25 @@ final class PromptAssetRepository {
             let data = try? Data(contentsOf: fileURL),
             let saved = try? decoder.decode([PromptAsset].self, from: data)
         else { return PromptAssets.defaults }
-        return PromptAssets.defaults.map { defaultAsset in
-            saved.first(where: { $0.id == defaultAsset.id }) ?? defaultAsset
+        let merged = PromptAssets.defaults.map { defaultAsset in
+            guard let savedAsset = saved.first(where: { $0.id == defaultAsset.id }) else {
+                return defaultAsset
+            }
+            guard !savedAsset.isDefault, !PromptAssets.isLegacyDefault(savedAsset) else {
+                return defaultAsset
+            }
+            return PromptAsset(
+                id: defaultAsset.id,
+                title: defaultAsset.title,
+                scope: defaultAsset.scope,
+                influence: defaultAsset.influence,
+                instruction: savedAsset.instruction,
+                isDefault: false,
+                updatedAt: savedAsset.updatedAt
+            )
         }
+        if merged != saved { try? save(merged) }
+        return merged
     }
 
     func save(_ assets: [PromptAsset]) throws {

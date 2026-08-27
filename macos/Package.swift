@@ -11,14 +11,29 @@ let package = Package(
     products: [
         .executable(name: "ScriptForgeMac", targets: ["ScriptForgeMac"])
     ],
+    dependencies: [
+        .package(
+            url: "https://github.com/weichsel/ZIPFoundation.git",
+            exact: "0.9.20"
+        ),
+    ],
     targets: [
         .executableTarget(
             name: "ScriptForgeMac",
-            path: "Sources/ScriptForgeMac"
+            dependencies: [
+                .product(name: "ZIPFoundation", package: "ZIPFoundation"),
+            ],
+            path: "Sources/ScriptForgeMac",
+            resources: [
+                .copy("Resources/ScriptForgeAura.png"),
+            ]
         ),
         .testTarget(
             name: "ScriptForgeMacTests",
-            dependencies: ["ScriptForgeMac"],
+            dependencies: [
+                "ScriptForgeMac",
+                .product(name: "ZIPFoundation", package: "ZIPFoundation"),
+            ],
             path: "Tests/ScriptForgeMacTests"
         ),
     ]

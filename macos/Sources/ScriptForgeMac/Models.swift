@@ -15,6 +15,7 @@ enum PipelinePhase: String, Codable, CaseIterable, Hashable, Sendable {
 
 enum PrimaryView: String, CaseIterable, Identifiable, Hashable, Sendable {
     case bookAnalysis
+    case creation
     case studio
     case projects
     case prompts
@@ -30,6 +31,32 @@ struct Chapter: Identifiable, Codable, Hashable, Sendable {
     let characterCount: Int
 }
 
+enum SourceContentKind: String, Codable, CaseIterable, Hashable, Sendable {
+    case prose
+    case screenplay
+
+    var chineseLabel: String {
+        return switch self {
+        case .prose: "小说 / 故事"
+        case .screenplay: "已有剧本"
+        }
+    }
+}
+
+enum SourceDiagnosticSeverity: String, Codable, Hashable, Sendable {
+    case info
+    case warning
+    case error
+}
+
+struct SourceDiagnostic: Identifiable, Codable, Hashable, Sendable {
+    let id: String
+    let severity: SourceDiagnosticSeverity
+    let code: String
+    let message: String
+    let unitNumbers: [Int]
+}
+
 struct NovelDocument: Codable, Hashable, Sendable {
     let fileName: String
     let title: String
@@ -38,6 +65,33 @@ struct NovelDocument: Codable, Hashable, Sendable {
     let rawText: String
     let characterCount: Int
     let chapters: [Chapter]
+    let sourceKind: SourceContentKind?
+    let diagnostics: [SourceDiagnostic]?
+
+    init(
+        fileName: String,
+        title: String,
+        author: String,
+        intro: String,
+        rawText: String,
+        characterCount: Int,
+        chapters: [Chapter],
+        sourceKind: SourceContentKind = .prose,
+        diagnostics: [SourceDiagnostic] = []
+    ) {
+        self.fileName = fileName
+        self.title = title
+        self.author = author
+        self.intro = intro
+        self.rawText = rawText
+        self.characterCount = characterCount
+        self.chapters = chapters
+        self.sourceKind = sourceKind
+        self.diagnostics = diagnostics
+    }
+
+    var resolvedSourceKind: SourceContentKind { sourceKind ?? .prose }
+    var sourceDiagnostics: [SourceDiagnostic] { diagnostics ?? [] }
 }
 
 enum CharacterNameSource: String, Codable, Hashable, Sendable {
@@ -55,6 +109,16 @@ struct CharacterProfile: Identifiable, Codable, Hashable, Sendable {
     let occurrences: Int
     var locked: Bool
     var nameSource: CharacterNameSource
+
+    func resolvedRole(for language: AppLanguage) -> String {
+        guard language == .english else { return role }
+        switch role {
+        case "核心主角": return "Core Protagonist"
+        case "主要角色": return "Main Character"
+        case "关键配角": return "Key Supporting Character"
+        default: return role
+        }
+    }
 }
 
 enum TrendPreset: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
@@ -63,14 +127,64 @@ enum TrendPreset: String, Codable, CaseIterable, Identifiable, Hashable, Sendabl
     case comedy = "轻喜反转"
 
     var id: String { rawValue }
+
+    func resolvedValue(for language: AppLanguage) -> String {
+        guard language == .english else { return rawValue }
+        return switch self {
+        case .premium: "Premium Hook Drama"
+        case .grounded: "Grounded Resonance"
+        case .comedy: "Light Comedy"
+        }
+    }
 }
 
 struct AdaptationOptions: Codable, Hashable, Sendable {
+    static let defaultGenreChinese = "玄幻逆袭"
+    static let defaultGenreEnglish = "Fantasy Comeback"
+    static let defaultToneChinese = "高燃、克制、强反转"
+    static let defaultToneEnglish = "High-energy, restrained, with strong reversals"
+
     var episodeCount = 8
     var durationSeconds = 60
-    var genre = "玄幻逆袭"
-    var tone = "高燃、克制、强反转"
+    var genre = Self.defaultGenreChinese
+    var tone = Self.defaultToneChinese
     var trendPreset = TrendPreset.premium
+    var preserveSourceLanguage = true
+    var targetLanguage = AppLanguage.chinese
+
+    private enum CodingKeys: String, CodingKey {
+        case episodeCount, durationSeconds, genre, tone, trendPreset
+        case preserveSourceLanguage, targetLanguage
+    }
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        episodeCount = try values.decodeIfPresent(Int.self, forKey: .episodeCount) ?? 8
+        durationSeconds = try values.decodeIfPresent(Int.self, forKey: .durationSeconds) ?? 60
+        genre = try values.decodeIfPresent(String.self, forKey: .genre) ?? Self.defaultGenreChinese
+        tone = try values.decodeIfPresent(String.self, forKey: .tone) ?? Self.defaultToneChinese
+        trendPreset = try values.decodeIfPresent(TrendPreset.self, forKey: .trendPreset) ?? .premium
+        preserveSourceLanguage = try values.decodeIfPresent(Bool.self, forKey: .preserveSourceLanguage) ?? true
+        targetLanguage = try values.decodeIfPresent(AppLanguage.self, forKey: .targetLanguage) ?? .chinese
+    }
+
+    func outputLanguage(for document: NovelDocument) -> AppLanguage {
+        preserveSourceLanguage ? AppLanguage.detect(in: document.rawText) : targetLanguage
+    }
+
+    func resolvedGenre(for language: AppLanguage) -> String {
+        if language == .english, genre == Self.defaultGenreChinese { return Self.defaultGenreEnglish }
+        if language == .chinese, genre == Self.defaultGenreEnglish { return Self.defaultGenreChinese }
+        return genre
+    }
+
+    func resolvedTone(for language: AppLanguage) -> String {
+        if language == .english, tone == Self.defaultToneChinese { return Self.defaultToneEnglish }
+        if language == .chinese, tone == Self.defaultToneEnglish { return Self.defaultToneChinese }
+        return tone
+    }
 }
 
 struct DialogueLine: Identifiable, Codable, Hashable, Sendable {
@@ -265,6 +379,52 @@ struct AdaptationResult: Codable, Hashable, Sendable {
     let mode: GenerationMode
 }
 
+struct StoryboardShot: Identifiable, Codable, Hashable, Sendable {
+    let id: String
+    let number: Int
+    let sceneID: String
+    let title: String
+    let durationSeconds: Double
+    let shotSize: String
+    let cameraMovement: String
+    let composition: String
+    let visualAction: String
+    let dialogue: String
+    let narration: String
+    let soundEffects: String
+    let imagePrompt: String
+    let negativePrompt: String
+    let continuityNotes: String
+    let productionNotes: String
+    var keyframePath: String?
+    var narrationPath: String?
+}
+
+struct EpisodeStoryboard: Identifiable, Codable, Hashable, Sendable {
+    var id: Int { episodeNumber }
+    let episodeNumber: Int
+    let title: String
+    let aspectRatio: String
+    let visualStyle: String
+    let characterVisualAnchors: [String]
+    var shots: [StoryboardShot]
+
+    var totalDurationSeconds: Double {
+        shots.reduce(0) { $0 + $1.durationSeconds }
+    }
+}
+
+struct ProductionPackage: Codable, Hashable, Sendable {
+    static let currentVersion = "storyboard-v1"
+
+    let version: String
+    let createdAt: Date
+    let mode: GenerationMode
+    var episodes: [EpisodeStoryboard]
+
+    var shotCount: Int { episodes.reduce(0) { $0 + $1.shots.count } }
+}
+
 struct BookAnalysisSection: Identifiable, Codable, Hashable, Sendable {
     let id: String
     let title: String
@@ -274,6 +434,7 @@ struct BookAnalysisSection: Identifiable, Codable, Hashable, Sendable {
 
 struct BookAnalysisReport: Codable, Hashable, Sendable {
     let title: String
+    let outputLanguage: AppLanguage?
     let logline: String
     let summary: String
     let genreTags: [String]
@@ -310,7 +471,7 @@ struct PipelineCheckpoint: Identifiable, Codable, Hashable, Sendable {
 }
 
 struct StoredProject: Identifiable, Codable, Hashable, Sendable {
-    static let currentSchemaVersion = 2
+    static let currentSchemaVersion = 5
 
     var id: UUID
     var schemaVersion: Int
@@ -319,8 +480,10 @@ struct StoredProject: Identifiable, Codable, Hashable, Sendable {
     var characters: [CharacterProfile]
     var options: AdaptationOptions
     var result: AdaptationResult?
+    var productionPackage: ProductionPackage?
     var bookAnalysis: BookAnalysisReport?
     var bookAnalysisVersions: [BookAnalysisVersion]
+    var creativeWorkspace: CreativeWorkspace?
     var checkpoints: [PipelineCheckpoint]
     var phase: PipelinePhase
     var archivedAt: Date?
@@ -335,8 +498,10 @@ struct StoredProject: Identifiable, Codable, Hashable, Sendable {
         characters = []
         options = AdaptationOptions()
         result = nil
+        productionPackage = nil
         bookAnalysis = nil
         bookAnalysisVersions = []
+        creativeWorkspace = nil
         checkpoints = []
         phase = .idle
         archivedAt = nil
@@ -345,11 +510,13 @@ struct StoredProject: Identifiable, Codable, Hashable, Sendable {
     }
 
     var hasContent: Bool {
-        document != nil || result != nil || bookAnalysis != nil
+        document != nil || result != nil || productionPackage != nil || bookAnalysis != nil
+            || creativeWorkspace != nil
     }
 
     var generatedEpisodeCount: Int { result?.episodes.count ?? 0 }
     var chapterCount: Int { document?.chapters.count ?? 0 }
+    var sourceKind: SourceContentKind { document?.resolvedSourceKind ?? .prose }
 }
 
 struct ModelSettings: Codable, Hashable, Sendable {
@@ -357,8 +524,31 @@ struct ModelSettings: Codable, Hashable, Sendable {
     var primaryModel = "gpt-5.6-sol"
     var flashModel = "gpt-5.6-terra"
     var reasoningEffort = "low"
+    var imageModel = ""
+    var speechModel = ""
+    var speechVoice = "alloy"
     var useOnline = false
     var consentedEndpointHost = ""
+
+    private enum CodingKeys: String, CodingKey {
+        case baseURL, primaryModel, flashModel, reasoningEffort
+        case imageModel, speechModel, speechVoice, useOnline, consentedEndpointHost
+    }
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        baseURL = try values.decodeIfPresent(String.self, forKey: .baseURL) ?? "https://api.openai.com/v1"
+        primaryModel = try values.decodeIfPresent(String.self, forKey: .primaryModel) ?? "gpt-5.6-sol"
+        flashModel = try values.decodeIfPresent(String.self, forKey: .flashModel) ?? "gpt-5.6-terra"
+        reasoningEffort = try values.decodeIfPresent(String.self, forKey: .reasoningEffort) ?? "low"
+        imageModel = try values.decodeIfPresent(String.self, forKey: .imageModel) ?? ""
+        speechModel = try values.decodeIfPresent(String.self, forKey: .speechModel) ?? ""
+        speechVoice = try values.decodeIfPresent(String.self, forKey: .speechVoice) ?? "alloy"
+        useOnline = try values.decodeIfPresent(Bool.self, forKey: .useOnline) ?? false
+        consentedEndpointHost = try values.decodeIfPresent(String.self, forKey: .consentedEndpointHost) ?? ""
+    }
 
     var endpointHost: String {
         URL(string: baseURL)?.host?.lowercased() ?? ""

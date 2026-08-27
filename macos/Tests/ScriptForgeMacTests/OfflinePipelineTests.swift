@@ -21,4 +21,32 @@ final class OfflinePipelineTests: XCTestCase {
             XCTAssertFalse(CharacterExtractor.isGenericName(character.targetName))
         }
     }
+
+    func testEnglishSourceStaysEnglishAndMeetsEpisodeWordBudget() throws {
+        let text = Array(repeating: "Mara finds a sealed ledger in the harbor archive while Elias blocks Victor from taking it.", count: 30)
+            .joined(separator: "\n")
+        let document = try NovelParser.parse(text: text, fileName: "harbor.txt")
+        var options = AdaptationOptions()
+        options.episodeCount = 2
+        options.durationSeconds = 60
+
+        let result = try OfflinePipeline.run(document: document, characters: [], options: options)
+        let rendered = result.episodes.map(\.content).joined(separator: "\n")
+        let qualityText = result.quality.metrics.map { $0.label + $0.detail }.joined()
+            + result.quality.warnings.joined()
+
+        XCTAssertEqual(options.outputLanguage(for: document), .english)
+        XCTAssertEqual(result.genre, "Fantasy Comeback")
+        XCTAssertTrue(result.episodes.allSatisfy {
+            EpisodeBudget.assess(
+                scenes: $0.scenes,
+                durationSeconds: 60,
+                language: .english
+            ).runtime.spokenCharacters >= 105
+        })
+        XCTAssertNil((rendered + qualityText).range(
+            of: #"[\u3400-\u4DBF\u4E00-\u9FFF]"#,
+            options: .regularExpression
+        ))
+    }
 }

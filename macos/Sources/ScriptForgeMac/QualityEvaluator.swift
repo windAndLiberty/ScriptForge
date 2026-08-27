@@ -8,7 +8,8 @@ enum QualityEvaluator {
         semanticIssues: [QualityGateIssue] = [],
         repairAttempts: Int = 0,
         acceptedRepairs: Int = 0,
-        auditedWindows: Int = 0
+        auditedWindows: Int = 0,
+        outputLanguage: AppLanguage = .chinese
     ) -> QualityReport {
         let allContent = episodes.map(\.content).joined(separator: "\n")
         let leakedNames = characters.filter {
@@ -16,7 +17,11 @@ enum QualityEvaluator {
         }
         let genericNames = characters.filter { CharacterExtractor.isGenericName($0.targetName) }
         let episodeAssessments = episodes.map {
-            EpisodeBudget.assess(scenes: $0.scenes, durationSeconds: options.durationSeconds)
+            EpisodeBudget.assess(
+                scenes: $0.scenes,
+                durationSeconds: options.durationSeconds,
+                language: outputLanguage
+            )
         }
         let incompleteEpisodes = zip(episodes, episodeAssessments).filter { !$0.1.passed }
         let missingHooks = episodes.filter {
@@ -33,8 +38,12 @@ enum QualityEvaluator {
                 severity: .blocker,
                 category: .character,
                 episodes: episodes.map(\.number),
-                evidence: "成稿残留原名：\(leakedNames.map(\.sourceName).joined(separator: "、"))",
-                repair: "按锁定人物映射替换所有旧名，并复查称谓和对白说话人。"
+                evidence: localized(
+                    "成稿残留原名：\(leakedNames.map(\.sourceName).joined(separator: "、"))",
+                    "The draft still contains source names: \(leakedNames.map(\.sourceName).joined(separator: ", "))",
+                    outputLanguage
+                ),
+                repair: "Replace every source name according to the locked character mapping, then verify forms of address and dialogue speakers."
             ))
         }
         if !genericNames.isEmpty {
@@ -42,8 +51,14 @@ enum QualityEvaluator {
                 severity: .blocker,
                 category: .character,
                 episodes: episodes.map(\.number),
-                evidence: "发现占位人物名：\(genericNames.map(\.targetName).joined(separator: "、"))",
-                repair: "为人物生成自然且唯一的中文姓名。"
+                evidence: localized(
+                    "发现占位人物名：\(genericNames.map(\.targetName).joined(separator: "、"))",
+                    "Placeholder character names were found: \(genericNames.map(\.targetName).joined(separator: ", "))",
+                    outputLanguage
+                ),
+                repair: outputLanguage == .english
+                    ? "Generate a natural, unique English-language name for every character."
+                    : "Generate a natural, unique Chinese name for every character."
             ))
         }
         for (episode, assessment) in incompleteEpisodes {
@@ -51,8 +66,8 @@ enum QualityEvaluator {
                 severity: assessment.score < 55 ? .blocker : .major,
                 category: .pacing,
                 episodes: [episode.number],
-                evidence: assessment.issues.joined(separator: "；"),
-                repair: "保持本集核心冲突，按 \(options.durationSeconds) 秒表演预算补足或压缩动作与对白。"
+                evidence: assessment.issues.joined(separator: outputLanguage == .english ? "; " : "；"),
+                repair: "Preserve the episode's central conflict while expanding or compressing action and dialogue to fit a \(options.durationSeconds)-second performance budget."
             ))
         }
         for episode in missingHooks {
@@ -60,8 +75,8 @@ enum QualityEvaluator {
                 severity: .major,
                 category: .hook,
                 episodes: [episode.number],
-                evidence: "本集缺少可执行开场钩子或结尾卡点。",
-                repair: "在前5秒增加可见冲突，并把结尾停在未完成动作、发现或选择上。"
+                evidence: localized("本集缺少可执行开场钩子或结尾卡点。", "The episode lacks a playable opening hook or cliffhanger.", outputLanguage),
+                repair: "Add a visible conflict within the first five seconds and end on an unfinished action, discovery, or choice."
             ))
         }
         for pair in duplicateConflicts {
@@ -69,8 +84,8 @@ enum QualityEvaluator {
                 severity: .major,
                 category: .continuity,
                 episodes: pair,
-                evidence: "相邻分集的核心冲突高度重复，剧情没有形成新后果。",
-                repair: "合并重复表达，让后一集新增事实、选择或不可逆后果。"
+                evidence: localized("相邻分集的核心冲突高度重复，剧情没有形成新后果。", "Adjacent episodes repeat the same central conflict without creating a new consequence.", outputLanguage),
+                repair: "Merge repeated material so the later episode adds a new fact, choice, or irreversible consequence."
             ))
         }
         if !riskyPatterns.isEmpty {
@@ -78,8 +93,8 @@ enum QualityEvaluator {
                 severity: .major,
                 category: .compliance,
                 episodes: episodes.map(\.number),
-                evidence: "命中高风险表达：\(riskyPatterns.joined(separator: "、"))",
-                repair: "交由人工合规复核，并删除不必要的可执行危险细节。"
+                evidence: localized("命中高风险表达：\(riskyPatterns.joined(separator: "、"))", "Potentially high-risk expressions were detected.", outputLanguage),
+                repair: "Send the material for human compliance review and remove unnecessary actionable details that could enable harm."
             ))
         }
 
@@ -93,35 +108,41 @@ enum QualityEvaluator {
         let metrics = [
             metric(
                 id: "rename",
-                label: "人物改名一致性",
+                label: localized("人物改名一致性", "Character Naming Consistency", outputLanguage),
                 score: leakedNames.isEmpty && genericNames.isEmpty ? 100 : 20,
                 detail: leakedNames.isEmpty && genericNames.isEmpty
-                    ? "已检查 \(characters.count) 组人物映射，未发现旧名或占位名"
-                    : "人物命名存在阻断问题"
+                    ? localized("已检查 \(characters.count) 组人物映射，未发现旧名或占位名", "Checked \(characters.count) character mappings; no source or placeholder names remain", outputLanguage)
+                    : localized("人物命名存在阻断问题", "Character naming has a blocking issue", outputLanguage)
             ),
             metric(
                 id: "runtime",
-                label: "60秒表演时长",
+                label: localized("单集表演时长", "Episode Runtime", outputLanguage),
                 score: deterministicScore,
-                detail: "\(episodes.count - incompleteEpisodes.count)/\(episodes.count) 集达到完整成稿线"
+                detail: localized("\(episodes.count - incompleteEpisodes.count)/\(episodes.count) 集达到完整成稿线", "\(episodes.count - incompleteEpisodes.count)/\(episodes.count) episodes meet the completeness threshold", outputLanguage)
             ),
             metric(
                 id: "continuity",
-                label: "跨集连续性",
+                label: localized("跨集连续性", "Cross-Episode Continuity", outputLanguage),
                 score: max(0, 100 - duplicateConflicts.count * 24),
-                detail: duplicateConflicts.isEmpty ? "未发现相邻集重复冲突" : "发现 \(duplicateConflicts.count) 组重复推进"
+                detail: duplicateConflicts.isEmpty
+                    ? localized("未发现相邻集重复冲突", "No repeated conflict was found in adjacent episodes", outputLanguage)
+                    : localized("发现 \(duplicateConflicts.count) 组重复推进", "Found \(duplicateConflicts.count) repeated progression pattern(s)", outputLanguage)
             ),
             metric(
                 id: "hooks",
-                label: "开场与结尾钩子",
+                label: localized("开场与结尾钩子", "Opening and Closing Hooks", outputLanguage),
                 score: max(0, 100 - missingHooks.count * 20),
-                detail: missingHooks.isEmpty ? "每集均有开场钩子和结尾卡点" : "\(missingHooks.count) 集钩子不完整"
+                detail: missingHooks.isEmpty
+                    ? localized("每集均有开场钩子和结尾卡点", "Every episode has an opening hook and cliffhanger", outputLanguage)
+                    : localized("\(missingHooks.count) 集钩子不完整", "\(missingHooks.count) episode(s) have incomplete hooks", outputLanguage)
             ),
             metric(
                 id: "semantic",
-                label: "独立语义终审",
+                label: localized("独立语义终审", "Independent Semantic Review", outputLanguage),
                 score: max(0, 100 - semanticIssues.filter { !$0.resolved }.count * 14),
-                detail: auditedWindows > 0 ? "已审片 \(auditedWindows) 个重叠窗口" : "离线模式仅执行程序门禁"
+                detail: auditedWindows > 0
+                    ? localized("已审片 \(auditedWindows) 个重叠窗口", "Reviewed \(auditedWindows) overlapping episode window(s)", outputLanguage)
+                    : localized("离线模式仅执行程序门禁", "Offline mode runs deterministic checks only", outputLanguage)
             ),
         ]
         let score = metrics.map(\.score).reduce(0, +) / max(1, metrics.count)
@@ -139,21 +160,27 @@ enum QualityEvaluator {
                     stage: "deterministic_precheck",
                     status: deterministicIssues.isEmpty ? "passed" : "failed",
                     episodeNumbers: episodes.map(\.number),
-                    detail: "程序复算发现 \(deterministicIssues.count) 条问题"
+                    detail: localized("程序复算发现 \(deterministicIssues.count) 条问题", "Deterministic checks found \(deterministicIssues.count) issue(s)", outputLanguage)
                 ),
                 QualityGateTrace(
                     id: UUID().uuidString,
                     stage: "delivery_gate",
                     status: openMajor.isEmpty ? "passed" : "failed",
                     episodeNumbers: episodes.map(\.number),
-                    detail: openMajor.isEmpty ? "不存在开放的重大问题" : "仍有 \(openMajor.count) 条重大问题"
+                    detail: openMajor.isEmpty
+                        ? localized("不存在开放的重大问题", "No open major issues remain", outputLanguage)
+                        : localized("仍有 \(openMajor.count) 条重大问题", "\(openMajor.count) major issue(s) remain open", outputLanguage)
                 ),
             ]
         )
         return QualityReport(
             score: score,
             metrics: metrics,
-            warnings: ["AI辅助内容须由编剧、制片和合规人员复核后再拍摄或发布。"],
+            warnings: [localized(
+                "AI辅助内容须由编剧、制片和合规人员复核后再拍摄或发布。",
+                "AI-assisted content must be reviewed by writing, production, and compliance professionals before filming or release.",
+                outputLanguage
+            )],
             passed: score >= 80 && openMajor.isEmpty,
             gate: gate
         )
@@ -210,5 +237,13 @@ enum QualityEvaluator {
             detail: detail,
             level: bounded >= 85 ? .good : bounded >= 65 ? .warning : .bad
         )
+    }
+
+    private static func localized(
+        _ chinese: String,
+        _ english: String,
+        _ language: AppLanguage
+    ) -> String {
+        language == .english ? english : chinese
     }
 }
