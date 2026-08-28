@@ -5,6 +5,7 @@ const path = require("node:path");
 app.commandLine.appendSwitch("disable-gpu");
 
 const fixtureProject = {
+  schemaVersion: 5,
   id: "visual-smoke",
   qualityProfileVersion: 2,
   name: "开局地摊卖大力·短剧改编",
@@ -62,6 +63,10 @@ const fixtureProject = {
     trendPreset: "精品爽剧",
   },
   result: null,
+  creativeWorkspace: {
+    projectInstruction: "",
+    briefs: [], storyBibles: [], outlines: [], chapters: [], characterStates: [], timeline: [], foreshadowing: [], continuityIssues: [], runs: [], artifacts: [], promptOverrides: [], handoffs: [],
+  },
   phase: "characters",
   updatedAt: new Date().toISOString(),
 };
@@ -101,6 +106,35 @@ app.whenReady().then(async () => {
   );
   await window.reload();
   await capture(window, "ui-workbench-en.png");
+  const authorOpened = await window.webContents.executeJavaScript(`(async () => {
+    const item = [...document.querySelectorAll(".nav-item")].find((button) =>
+      button.textContent.includes("Author Studio")
+    );
+    item?.click();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    return Boolean(item && document.querySelector(".author-studio"));
+  })()`);
+  if (!authorOpened) throw new Error("Author Studio navigation smoke check failed");
+  await capture(window, "ui-author-studio-en.png");
+  const lightThemeApplied = await window.webContents.executeJavaScript(`(async () => {
+    const toggle = document.querySelector('.accessibility-controls button[title="Switch theme"]');
+    toggle?.click();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    return Boolean(toggle && document.documentElement.dataset.theme === "light");
+  })()`);
+  if (!lightThemeApplied) throw new Error("Light theme smoke check failed");
+  await capture(window, "ui-author-studio-light-en.png");
+  await window.webContents.executeJavaScript(`document.querySelector('.accessibility-controls button[title="Switch theme"]')?.click()`);
+  const bookOpened = await window.webContents.executeJavaScript(`(async () => {
+    const item = [...document.querySelectorAll(".nav-item")].find((button) =>
+      button.textContent.includes("One-click Book Analysis")
+    );
+    item?.click();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    return Boolean(item && document.querySelector(".book-analysis-workspace"));
+  })()`);
+  if (!bookOpened) throw new Error("Book Analysis navigation smoke check failed");
+  await capture(window, "ui-book-analysis-en.png");
   const projectsOpened = await window.webContents.executeJavaScript(`(async () => {
     const item = [...document.querySelectorAll(".nav-item")].find((button) =>
       button.textContent.includes("Projects")

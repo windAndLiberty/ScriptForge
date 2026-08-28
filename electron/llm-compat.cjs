@@ -1,5 +1,5 @@
 function apiErrorMessage(data, status) {
-  return data?.error?.message || data?.message || `模型请求失败（HTTP ${status}）`;
+  return data?.error?.message || data?.message || `Model request failed (HTTP ${status})`;
 }
 
 function isFormatUnavailable(message) {
@@ -20,14 +20,14 @@ function isResponsesEndpointUnavailable(message, status) {
 function schemaInstructions(payload) {
   return `${payload.instructions}
 
-你必须只返回一个可被 JSON.parse 直接解析的 JSON 值，不要输出 Markdown 代码块、解释或前后缀。
-输出必须严格匹配以下 JSON Schema：
+Return only one JSON value that JSON.parse can parse directly. Do not include Markdown fences, explanations, prefixes, or suffixes.
+The output must match this JSON Schema exactly:
 ${JSON.stringify(payload.schema)}`;
 }
 
 function parseStructuredText(value) {
   if (typeof value !== "string" || !value.trim()) {
-    throw new Error("模型没有返回可解析的结构化内容");
+    throw new Error("The model returned no readable structured content.");
   }
   const stripped = value
     .trim()
@@ -51,7 +51,7 @@ function parseStructuredText(value) {
         // Fall through to the stable user-facing error below.
       }
     }
-    throw new Error("模型响应不是有效 JSON；已尝试兼容纯文本结构化输出");
+    throw new Error("The model response is not valid JSON. Plain-text compatibility parsing also failed.");
   }
 }
 
@@ -60,10 +60,10 @@ function schemaValidationErrors(value, schema, path = "$") {
   if (!schema || typeof schema !== "object") return errors;
   if (schema.type === "object") {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
-      return [`${path} 应为对象`];
+      return [`${path} must be an object`];
     }
     for (const key of schema.required || []) {
-      if (!(key in value)) errors.push(`${path}.${key} 缺失`);
+      if (!(key in value)) errors.push(`${path}.${key} is missing`);
     }
     for (const [key, childSchema] of Object.entries(schema.properties || {})) {
       if (key in value) {
@@ -73,12 +73,12 @@ function schemaValidationErrors(value, schema, path = "$") {
       }
     }
   } else if (schema.type === "array") {
-    if (!Array.isArray(value)) return [`${path} 应为数组`];
+    if (!Array.isArray(value)) return [`${path} must be an array`];
     if (Number.isFinite(schema.minItems) && value.length < schema.minItems) {
-      errors.push(`${path} 至少需要 ${schema.minItems} 项，实际 ${value.length} 项`);
+      errors.push(`${path} requires at least ${schema.minItems} items; received ${value.length}`);
     }
     if (Number.isFinite(schema.maxItems) && value.length > schema.maxItems) {
-      errors.push(`${path} 最多允许 ${schema.maxItems} 项，实际 ${value.length} 项`);
+      errors.push(`${path} allows at most ${schema.maxItems} items; received ${value.length}`);
     }
     value.forEach((item, index) => {
       errors.push(
@@ -86,33 +86,33 @@ function schemaValidationErrors(value, schema, path = "$") {
       );
     });
   } else if (schema.type === "string") {
-    if (typeof value !== "string") return [`${path} 应为字符串`];
+    if (typeof value !== "string") return [`${path} must be a string`];
     if (Number.isFinite(schema.minLength) && value.length < schema.minLength) {
-      errors.push(`${path} 至少需要 ${schema.minLength} 个字符`);
+      errors.push(`${path} requires at least ${schema.minLength} characters`);
     }
     if (Number.isFinite(schema.maxLength) && value.length > schema.maxLength) {
-      errors.push(`${path} 最多允许 ${schema.maxLength} 个字符`);
+      errors.push(`${path} allows at most ${schema.maxLength} characters`);
     }
   } else if (schema.type === "integer") {
     if (!Number.isInteger(value)) {
-      errors.push(`${path} 应为整数`);
+      errors.push(`${path} must be an integer`);
     } else {
       if (Number.isFinite(schema.minimum) && value < schema.minimum) {
-        errors.push(`${path} 不得小于 ${schema.minimum}`);
+        errors.push(`${path} must be at least ${schema.minimum}`);
       }
       if (Number.isFinite(schema.maximum) && value > schema.maximum) {
-        errors.push(`${path} 不得大于 ${schema.maximum}`);
+        errors.push(`${path} must be at most ${schema.maximum}`);
       }
     }
   } else if (schema.type === "number") {
     if (typeof value !== "number" || !Number.isFinite(value)) {
-      errors.push(`${path} 应为数字`);
+      errors.push(`${path} must be a number`);
     } else {
       if (Number.isFinite(schema.minimum) && value < schema.minimum) {
-        errors.push(`${path} 不得小于 ${schema.minimum}`);
+        errors.push(`${path} must be at least ${schema.minimum}`);
       }
       if (Number.isFinite(schema.maximum) && value > schema.maximum) {
-        errors.push(`${path} 不得大于 ${schema.maximum}`);
+        errors.push(`${path} must be at most ${schema.maximum}`);
       }
     }
   }
@@ -123,7 +123,7 @@ function parseAndValidateStructuredText(value, schema) {
   const parsed = parseStructuredText(value);
   const errors = schemaValidationErrors(parsed, schema);
   if (errors.length) {
-    throw new Error(`模型 JSON 结构不完整：${errors.slice(0, 4).join("；")}`);
+    throw new Error(`Model JSON is incomplete: ${errors.slice(0, 4).join("; ")}`);
   }
   return parsed;
 }
@@ -157,66 +157,25 @@ async function requestChatStructured({
   model,
   payload,
 }) {
-  const messages = [
-    { role: "system", content: payload.instructions },
-    { role: "user", content: payload.input },
-  ];
   const schemaMessages = [
     { role: "system", content: schemaInstructions(payload) },
     { role: "user", content: payload.input },
   ];
-  const attempts = [
-    {
+  const response = await fetchImpl(endpoint, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
       model,
-      messages,
+      messages: schemaMessages,
       response_format: {
         type: "json_schema",
-        json_schema: {
-          name: payload.name,
-          strict: true,
-          schema: payload.schema,
-        },
+        json_schema: { name: payload.name, strict: true, schema: payload.schema },
       },
-    },
-    {
-      model,
-      messages: schemaMessages,
-      response_format: { type: "json_object" },
-    },
-    {
-      model,
-      messages: schemaMessages,
-    },
-  ];
-
-  let lastMessage = "";
-  for (let index = 0; index < attempts.length; index += 1) {
-    const response = await fetchImpl(endpoint, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(attempts[index]),
-    });
-    const data = await response.json().catch(() => ({}));
-    if (response.ok) {
-      try {
-        return parseAndValidateStructuredText(
-          chatOutputText(data),
-          payload.schema,
-        );
-      } catch (error) {
-        lastMessage =
-          error instanceof Error ? error.message : "模型 JSON 结构不完整";
-        if (index < attempts.length - 1) continue;
-        throw error;
-      }
-    }
-    lastMessage = apiErrorMessage(data, response.status);
-    const canFallback =
-      index < attempts.length - 1 &&
-      (isFormatUnavailable(lastMessage) || [400, 404, 422].includes(response.status));
-    if (!canFallback) throw new Error(lastMessage);
-  }
-  throw new Error(lastMessage || "模型结构化输出调用失败");
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(apiErrorMessage(data, response.status));
+  return parseAndValidateStructuredText(chatOutputText(data), payload.schema);
 }
 
 module.exports = {

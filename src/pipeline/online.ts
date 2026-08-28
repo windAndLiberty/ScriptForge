@@ -405,8 +405,8 @@ export async function generateModelCharacterNames(params: {
     "character_naming",
     {
     instructions: `${promptContent(promptAssets, "base")}
-你现在只执行一次轻量角色改名，不分析章节、不写剧情。
-为每个原著角色生成适合中国短剧、自然且有辨识度的中文姓名。姓名使用2–4个汉字，彼此不得重复，不得沿用旧名，也不得与用户已经保留的姓名重复；禁止“角色8、人物3、男主、女配、甲乙丙丁”等占位称呼，不要使用数字或身份标签。`,
+Perform one lightweight character-renaming pass only. Do not analyze chapters or draft plot.
+Give every source character a natural, distinctive name suitable for the target drama. Names must be unique, must not reuse source names, and must not conflict with names retained by the user. Never use numbered roles, generic labels such as Male Lead or Supporting Woman, letters, digits, or identity tags as names.`,
     input: `【作品】${document.title}
 【题材】${options.genre}
 【语气】${options.tone}
@@ -514,11 +514,11 @@ export async function runOnlinePipeline(params: {
     {
     instructions: `${baseInstructions}
 ${promptContent(promptAssets, "bible")}
-你是“故事圣经架构师”，只建立全剧唯一事实源，不写分集、不写剧本。
-必须以人物改名表为准建立 canonicalCharacters：sourceNames 保存原著姓名和能够被证据确认的别名，scriptName 只能使用新名。
-同一个人不得因为称呼变化被拆成两人；不同人物不得因为身份相似被误合并。
-worldRules 必须把“当前状态、直接原因、证据章节”写清楚。例如修为耗尽、灵脉损毁、被人暗算不能混为同一事实。
-timeline 每个事件必须包含发生地点、原因和结果；propThreads 只收录会推动剧情或形成视觉记忆点的道具，并规划引入与兑现集。`,
+You are the story-bible architect. Build the production's sole factual source; do not plan episodes or draft screenplay.
+Build canonicalCharacters from the rename map: sourceNames keeps source names and evidence-supported aliases, while scriptName uses only the approved new name.
+Never split one person because their form of address changes, and never merge different people because their roles look similar.
+Every worldRule must state current condition, direct cause, and evidence chapters. Distinct conditions cannot be conflated.
+Every timeline event must include location, cause, and result. propThreads includes only props that advance plot or create a visual memory point, with planned introduction and payoff episodes.`,
     input: `【作品】${document.title}
 【人物改名表】
 ${renameMap}
@@ -538,7 +538,7 @@ ${JSON.stringify(analyses)}
       {
       instructions: `${baseInstructions}
 ${promptContent(promptAssets, "bible")}
-你是连续性编辑。请只修复给出的故事圣经问题，保留有章节证据的事实；不得添加无法回溯的新关系、新设定或新事件。`,
+You are a continuity editor. Repair only the listed story-bible defects, preserve chapter-supported facts, and never add relationships, rules, or events that cannot be traced to evidence.`,
       input: `【人物改名表】
 ${renameMap}
 【章节事实分析】
@@ -563,11 +563,11 @@ ${bibleCheck.issues.join("；")}
     {
     instructions: `${baseInstructions}
 ${promptContent(promptAssets, "outline")}
-必须严格使用人物改名表中的新名，输出中不得出现任何旧名。
-生成恰好 ${options.episodeCount} 集；单集目标 ${options.durationSeconds} 秒；题材策略为“${options.trendPreset}”。
-每一集的 sceneCount 必须由你根据本集动作节点、地点切换必要性和情绪节拍单独决定，可在 ${dynamicSceneRange.min}–${dynamicSceneRange.max} 场之间动态变化。不要机械地让所有分集场次数相同；能在一个场景完成的冲突不要硬拆，发生地点、时间或核心攻守状态改变时才切场。
-允许把同一章拆成多集，但不得为凑集数编造原文没有的核心关系。每集只选择3–5个具体事实，必须发生一次可视化行动、一次阻碍升级和一次关系或信息反转。
-集名必须来自本集独特动作、道具或选择，禁用“归来、真相、危机、反击”等无辨识度单词作为单独集名。`,
+Use only approved new names from the rename map; no source name may appear in output.
+Generate exactly ${options.episodeCount} episodes targeting ${options.durationSeconds} seconds each, using the strategy "${options.trendPreset}".
+Determine each episode's sceneCount independently from action beats, necessary location changes, and emotional rhythm, within ${dynamicSceneRange.min}–${dynamicSceneRange.max}. Do not mechanically use the same count. Keep a conflict in one scene when possible; cut only when location, time, or the core attack/defense state changes.
+One chapter may span several episodes, but never invent a core relationship to fill the count. Select only 3–5 concrete facts per episode and include a visible action, an escalated obstacle, and a relationship or information reversal.
+Derive each title from a distinctive action, prop, or choice in that episode; avoid generic standalone titles such as Return, Truth, Crisis, or Counterattack.`,
     input: `【作品】${document.title}
 【人物改名表】
 ${renameMap}
@@ -592,7 +592,7 @@ ${JSON.stringify(compactStoryBible(storyBible))}
       {
       instructions: `${baseInstructions}
 ${promptContent(promptAssets, "outline")}
-你是短剧总编剧与连续性编辑。保持有证据的核心事实，只修复相邻集重复、转场断裂、前三集无升级、道具不兑现等规划问题。`,
+You are the head writer and continuity editor. Preserve evidence-supported core facts and repair only planning defects such as adjacent repetition, broken transitions, no escalation across the first three episodes, or missing prop payoffs.`,
       input: `【故事圣经】
 ${JSON.stringify(compactStoryBible(storyBible))}
 【待修复分集规划】
@@ -622,20 +622,19 @@ ${contractCheck.issues.join("；")}
     const contract = contractFromOutline(item);
     const episodeInstructions = `${baseInstructions}
 ${promptContent(promptAssets, "episode")}
-只使用以下人物新名：${resolvedCharacters.map((character) => character.targetName).join("、")}。
+Use only these approved character names: ${resolvedCharacters.map((character) => character.targetName).join(", ")}.
 
-本集硬性可拍预算：
-1. 分集规划模型已根据本集剧情决定使用 ${item.sceneCount} 场；保持这个动态规划结果；
-2. 全集使用 ${budget.minDialogueLines}–${budget.maxDialogueLines} 句有效对白、${budget.spokenCharacters.min}–${budget.spokenCharacters.max} 个汉字，目标约 ${budget.spokenCharacters.target} 字；
-   单句平均不超过15字，任何一句不得超过24字；长信息必须拆成“短台词—反应动作—短台词”，每场动作行至少 ${budget.minActionCharactersPerScene} 个字符；
-3. 发言角色不超过 ${budget.maxSpeakingCharacters} 人；不要让所有关系人物排队报到；
-4. 0–5秒直接发生钩子，随后依次完成“阻碍加码 → 主动选择 → 信息/关系反转 → 未完成行动卡点”；
-5. 每场必须发生状态变化，角色要有动作、阻力和代价。禁止用回忆问答、自报家门或集体安慰代替戏剧冲突；
-6. 开场钩子必须直接成为第一场动作或对白，结尾卡点必须直接成为最后一个可拍动作或台词，不得在场景外另写【冷开场】【反转】【卡点】说明；
-7. 只选择本集最关键的 3–5 个原文事实完成戏剧化，其余事实留给后续集，不要把整章压缩成剧情梗概。
-8. 本集只能推进分集契约中的 dominantConflict；newInformation 必须真正出现在画面或对白中，entryState 到 exitState 必须发生可见变化。
+Hard production budget for this episode:
+1. Keep the dynamically planned ${item.sceneCount} scenes.
+2. Use ${budget.minDialogueLines}–${budget.maxDialogueLines} effective dialogue lines and ${budget.spokenCharacters.min}–${budget.spokenCharacters.max} spoken characters, targeting about ${budget.spokenCharacters.target}. Keep individual lines concise. Break long information into short dialogue, reaction action, and short dialogue. Each scene needs at least ${budget.minActionCharactersPerScene} action characters.
+3. Use no more than ${budget.maxSpeakingCharacters} speaking characters; do not make every relationship character report in sequence.
+4. Put the hook directly in seconds 0–5, then move through obstacle escalation, active choice, information or relationship reversal, and an unfinished-action cliffhanger.
+5. Every scene must visibly change state through action, resistance, and cost. Never replace conflict with memory Q&A, self-introduction, or group reassurance.
+6. The opening hook must be the first shootable action or line, and the ending hook must be the final shootable action or line. Do not add out-of-scene labels for cold open, reversal, or cliffhanger.
+7. Dramatize only the 3–5 most important source facts and leave the rest for later episodes; never compress an entire chapter into a plot summary.
+8. Advance only the contract's dominantConflict. newInformation must appear on screen or in dialogue, and entryState must visibly change into exitState.
 
-动作行不用小说腔，不得出现旧名。`;
+Use production-facing action rather than novelistic prose. No source character names may appear.`;
     const sourceChapters = document.chapters.filter((chapter) =>
       item.sourceChapterIds.includes(chapter.id),
     );
@@ -675,14 +674,14 @@ ${promptContent(promptAssets, "episode")}
         callStructured,
         "episode_semantic_audit",
         {
-          instructions: `你是短剧成稿审片员，只做低成本语义初审，不改写剧本。
-以故事圣经和分集执行契约为唯一标准，检查：
-1. 人物身份、关系、世界规则、地点与上一集状态是否连续；
-2. 本集是否只推进一个核心冲突，且新增信息、反转和结尾卡点真正进入可拍场景；
-3. 台词是否口语化、有攻守变化，是否重复解释、机械放狠话或排队发言；
-4. 重要道具是否按状态使用，不能突然出现、失效或改变能力。
-只有存在会影响理解、留存或拍摄的实质问题时才判定不通过；不要对文风做无关紧要的挑剔。
-repairBrief 必须是可直接交给编剧执行的短指令。`,
+          instructions: `You are a screenplay semantic reviewer performing a low-cost first pass; do not rewrite the screenplay.
+Use only the story bible and episode contract to check:
+1. continuity of identity, relationships, world rules, location, and prior-episode state;
+2. whether the episode advances one core conflict and puts new information, reversal, and the ending hook into shootable scenes;
+3. whether dialogue is conversational and adversarial rather than repetitive exposition, mechanical threats, or a queue of speakers;
+4. whether important props follow their tracked state instead of appearing, failing, or changing ability without cause.
+Fail only for material problems affecting comprehension, retention, or production. Do not nitpick inconsequential style.
+Every repairBrief must be a short, directly executable instruction for the writer.`,
           input: `【故事圣经】${JSON.stringify(compactStoryBible(storyBible))}
 【本集执行契约】${JSON.stringify(contract)}
 【上一集连续性】${JSON.stringify(previousContinuity)}
@@ -708,8 +707,8 @@ repairBrief 必须是可直接交给编剧执行的短指令。`,
         "episode_repair",
         {
         instructions: `${episodeInstructions}
-这是第 ${revisionRound} 轮质量修订。必须逐条修复检查问题，重写完整场景，不要解释修改过程。
-对白和动作都要有新的有效信息，不得靠重复台词、语气词或空泛动作凑字数；发言角色超限时合并功能重复的配角。`,
+This is quality revision round ${revisionRound}. Repair every listed issue and return complete rewritten scenes without explaining the revision process.
+Dialogue and action must add meaningful information. Never pad length with repeated lines, filler sounds, or empty action. When the speaking-character limit is exceeded, consolidate supporting roles with duplicate functions.`,
         input: `【全局故事】${outline.logline}
 【唯一事实源：故事圣经】${JSON.stringify(compactStoryBible(storyBible))}
 【本集分集卡】${JSON.stringify(item)}

@@ -184,11 +184,14 @@ describe("一键拆书管线", () => {
 
   it("系统固定使用 Flash 抽取、Pro 完成三个专项判断", async () => {
     const routes: Array<{ name: string; route?: "primary" | "flash" }> = [];
+    const instructions: string[] = [];
     const callStructured: StructuredCaller = async <T,>(payload: {
       name: string;
       route?: "primary" | "flash";
+      instructions: string;
     }) => {
       routes.push({ name: payload.name, route: payload.route });
+      instructions.push(payload.instructions);
       if (payload.name === "book_analysis_extract") {
         return {
           chapterIds: ["chapter-1", "chapter-2", "chapter-3"],
@@ -220,10 +223,13 @@ describe("一键拆书管线", () => {
     const result = await runOnlineBookAnalysis({
       document: documentFixture(),
       characters: [],
+      outputLanguage: "English",
       callStructured,
     });
     expect(result.mode).toBe("online");
     expect(result.report.structure.classification).toContain("复仇");
+    expect(result.outputLanguage).toBe("English");
+    expect(instructions.every((value) => value.includes("English"))).toBe(true);
     expect(
       routes.find((item) => item.name === "book_analysis_extract")?.route,
     ).toBe("flash");

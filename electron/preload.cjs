@@ -1,11 +1,26 @@
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer, webUtils } = require("electron");
 
 contextBridge.exposeInMainWorld("desktopAPI", {
   isDesktop: true,
-  openTextFile: () => ipcRenderer.invoke("file:open-text"),
+  openTextFile: () => ipcRenderer.invoke("file:open-document"),
+  openDocument: () => ipcRenderer.invoke("file:open-document"),
+  readDroppedDocument: (file) => ipcRenderer.invoke("file:read-document", webUtils.getPathForFile(file)),
   saveTextFile: (payload) => ipcRenderer.invoke("file:save-text", payload),
+  saveExport: (payload) => ipcRenderer.invoke("file:save-export", payload),
+  saveProject: (project) => ipcRenderer.invoke("project:save", project),
+  loadProject: (projectId) => ipcRenderer.invoke("project:load", projectId),
+  listProjects: () => ipcRenderer.invoke("project:list"),
+  duplicateProject: (payload) => ipcRenderer.invoke("project:duplicate", payload),
+  deleteProject: (projectId) => ipcRenderer.invoke("project:delete", projectId),
+  writeProjectJson: (payload) => ipcRenderer.invoke("project:write-json", payload),
+  readProjectJson: (payload) => ipcRenderer.invoke("project:read-json", payload),
+  writeProjectText: (payload) => ipcRenderer.invoke("project:write-text", payload),
+  readProjectText: (payload) => ipcRenderer.invoke("project:read-text", payload),
   getSettings: () => ipcRenderer.invoke("settings:get"),
   updateSettings: (payload) => ipcRenderer.invoke("settings:update", payload),
   callStructured: (payload) => ipcRenderer.invoke("llm:structured", payload),
+  generateImage: (payload) => ipcRenderer.invoke("media:image", payload),
+  synthesizeSpeech: (payload) => ipcRenderer.invoke("media:speech", payload),
+  readProjectMedia: (payload) => ipcRenderer.invoke("media:read", payload),
   getVersion: () => ipcRenderer.invoke("app:version"),
 });

@@ -9,15 +9,21 @@
     "dev": "concurrently -k \"vite --host 127.0.0.1 --port 5417 --strictPort\" \"wait-on http://127.0.0.1:5417 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5417 electron .\"",
     "build": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && vite build",
     "dist": "npm run build && electron-builder --win nsis",
+    "dist:windows": "npm run build && electron-builder --win nsis",
+    "dist:windows:store": "npm run build && electron-builder --win appx",
     "test": "vitest run",
     "acceptance": "tsx scripts/acceptance.ts",
     "smoke:desktop": "electron electron/smoke.cjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
+    "iconv-lite": "^0.7.3",
+    "jszip": "^3.10.1",
     "lucide-react": "^1.27.0",
+    "pdfjs-dist": "^6.2.108",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "word-extractor": "^1.0.4"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

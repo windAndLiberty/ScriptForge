@@ -74,7 +74,7 @@ describe("LLM structured-output compatibility", () => {
           },
         },
       ),
-    ).toThrow("$.scenes[0].dialogue 缺失");
+    ).toThrow("$.scenes[0].dialogue is missing");
   });
 
   it("rejects a model-planned scene count outside the runtime range", () => {
@@ -90,7 +90,7 @@ describe("LLM structured-output compatibility", () => {
           },
         },
       }),
-    ).toThrow("$.sceneCount 不得大于 4");
+    ).toThrow("$.sceneCount must be at most 4");
   });
 
   it("allows thin scene dialogue through transport validation for automatic repair", () => {
@@ -112,23 +112,15 @@ describe("LLM structured-output compatibility", () => {
     ).toEqual(payload);
   });
 
-  it("falls back when json_schema and json_object are unavailable", async () => {
+  it("does not issue automatic paid retries when json_schema is unavailable", async () => {
     const bodies: Array<Record<string, unknown>> = [];
     const fetchImpl = (async (_url: string, init?: RequestInit) => {
       bodies.push(JSON.parse(String(init?.body)));
-      if (bodies.length < 3) {
-        return new Response(
-          JSON.stringify({
-            error: { message: "This response_format type is unavailable now" },
-          }),
-          { status: 400, headers: { "Content-Type": "application/json" } },
-        );
-      }
       return new Response(
         JSON.stringify({
-          choices: [{ message: { content: '```json\n{"title":"ok"}\n```' } }],
+          error: { message: "This response_format type is unavailable now" },
         }),
-        { status: 200, headers: { "Content-Type": "application/json" } },
+        { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }) as typeof fetch;
 
@@ -145,10 +137,8 @@ describe("LLM structured-output compatibility", () => {
           schema: { type: "object", required: ["title"] },
         },
       }),
-    ).resolves.toEqual({ title: "ok" });
-    expect(bodies).toHaveLength(3);
+    ).rejects.toThrow("response_format type is unavailable");
+    expect(bodies).toHaveLength(1);
     expect(bodies[0]).toHaveProperty("response_format.type", "json_schema");
-    expect(bodies[1]).toHaveProperty("response_format.type", "json_object");
-    expect(bodies[2]).not.toHaveProperty("response_format");
   });
 });
