@@ -142,6 +142,7 @@ app.whenReady().then(async () => {
     // window visible so every acceptance screenshot reflects the asserted page.
     show: true,
     backgroundColor: "#efede7",
+    icon: path.join(__dirname, "../build/icon-aura.png"),
     webPreferences: {
       backgroundThrottling: false,
       contextIsolation: true,

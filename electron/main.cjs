@@ -41,6 +41,7 @@ function createWindow() {
     minWidth: 1180,
     minHeight: 720,
     backgroundColor: "#f5f2eb",
+    icon: path.join(__dirname, "../build/icon-aura.png"),
     title: "剧擎 ScriptForge",
     autoHideMenuBar: true,
     webPreferences: {

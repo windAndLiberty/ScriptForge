@@ -10,7 +10,8 @@
     "build": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && vite build",
     "dist": "npm run build && electron-builder --win nsis",
     "dist:windows": "npm run build && electron-builder --win nsis --publish never",
-    "dist:windows:store": "npm run build && electron-builder --win appx --x64 --publish never",
+    "assets:windows:store": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-windows-appx-assets.ps1",
+    "dist:windows:store": "npm run assets:windows:store && npm run build && electron-builder --win appx --x64 --publish never",
     "test": "vitest run",
     "acceptance": "tsx scripts/acceptance.ts",
     "smoke:desktop": "electron electron/smoke.cjs",
@@ -49,11 +50,12 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
+      "build/icon-aura.png",
       "package.json"
     ],
     "win": {
       "target": "nsis",
-      "icon": "build/icon.png",
+      "icon": "build/icon-aura.png",
       "artifactName": "ScriptForge-${version}-${arch}.${ext}"
     },
     "appx": {
