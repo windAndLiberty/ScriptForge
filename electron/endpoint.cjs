@@ -11,9 +11,17 @@ function normalizeApiRoot(value) {
     throw new Error("Enter the OpenAI-compatible API root URL, not a request endpoint, dashboard, or model page URL.");
   }
   url.pathname = path || "/v1";
-  url.search = "";
   url.hash = "";
   return url.toString().replace(/\/+$/, "");
 }
 
-module.exports = { normalizeApiRoot };
+function appendApiPath(baseUrl, suffix) {
+  const url = new URL(baseUrl);
+  const basePath = url.pathname.replace(/\/+$/, "");
+  const childPath = String(suffix || "").replace(/^\/+/, "");
+  url.pathname = `${basePath}/${childPath}`;
+  url.hash = "";
+  return url.toString();
+}
+
+module.exports = { appendApiPath, normalizeApiRoot };

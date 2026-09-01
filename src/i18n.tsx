@@ -465,6 +465,16 @@ const english: Record<string, string> = {
   "{{count}} 字符 · 自动保存": "{{count}} characters · Autosaved",
   "原文章节": "Source Chapters",
   "结构化 JSON": "Structured JSON",
+  "认证方式": "Authentication",
+  "无认证（本地服务）": "No authentication (local service)",
+  "结构化输出": "Structured Output",
+  "严格 JSON Schema": "Strict JSON Schema",
+  "纯提示词 JSON": "Prompt-only JSON",
+  "向主模型发送 reasoning.effort 参数":
+    "Send reasoning.effort to the primary model",
+  "无认证模式不需要密钥": "No key is required in no-auth mode",
+  "系统会自动调度两个模型；兼容模式由你显式选择，格式失败时不会自动发起第二次付费请求。":
+    "The system routes both models automatically. You choose the compatibility mode explicitly, and a format failure never triggers a second paid request.",
   "确定性质检": "Deterministic QA",
   "叙事语义初审": "Narrative Semantic Review",
   "一键拆书": "One-click Book Analysis",

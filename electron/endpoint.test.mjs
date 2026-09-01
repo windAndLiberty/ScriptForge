@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const { normalizeApiRoot } = require("./endpoint.cjs");
+const { appendApiPath, normalizeApiRoot } = require("./endpoint.cjs");
 
 describe("OpenAI-compatible API roots", () => {
   it("normalizes a valid root", () => {
@@ -18,5 +18,17 @@ describe("OpenAI-compatible API roots", () => {
   it("guides OpenRouter website URLs to the API host", () => {
     expect(() => normalizeApiRoot("https://openrouter.com/chat/completions")).toThrow("https://openrouter.ai/api/v1");
     expect(normalizeApiRoot("https://openrouter.ai/api/v1")).toBe("https://openrouter.ai/api/v1");
+  });
+
+  it("preserves gateway query parameters while appending request paths", () => {
+    const root = normalizeApiRoot(
+      "https://example.test/openai/deployments/writer/?api-version=2026-01-01",
+    );
+    expect(root).toBe(
+      "https://example.test/openai/deployments/writer?api-version=2026-01-01",
+    );
+    expect(appendApiPath(root, "chat/completions")).toBe(
+      "https://example.test/openai/deployments/writer/chat/completions?api-version=2026-01-01",
+    );
   });
 });

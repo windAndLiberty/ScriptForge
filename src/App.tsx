@@ -114,6 +114,14 @@ const DEFAULT_OPTIONS: AdaptationOptions = {
   tone: "高燃、机敏、轻喜",
   trendPreset: "精品爽剧",
 };
+
+function hasModelConnection(settings: ModelSettings | null | undefined) {
+  return Boolean(
+    settings &&
+      (settings.authMode === "none" || settings.hasApiKey) &&
+      settings.hasFlashModel,
+  );
+}
 const PHASES: Array<{ id: PipelinePhase; label: string }> = [
   { id: "ingest", label: "文本拆解" },
   { id: "analysis", label: "故事事实" },
@@ -361,7 +369,7 @@ export default function App() {
   useEffect(() => {
     window.desktopAPI?.getSettings().then((value) => {
       setSettings(value);
-      setUseOnline(value.hasApiKey && value.hasFlashModel);
+      setUseOnline(hasModelConnection(value));
     });
   }, []);
 
@@ -389,8 +397,7 @@ export default function App() {
   ) => {
     if (
       !window.desktopAPI ||
-      !connection?.hasApiKey ||
-      !connection.hasFlashModel ||
+      !hasModelConnection(connection) ||
       !characters.some(
         (character) =>
           !["model", "manual"].includes(character.nameSource || "") ||
@@ -618,8 +625,7 @@ export default function App() {
       if (useOnline) {
         if (
           !window.desktopAPI ||
-          !settings?.hasApiKey ||
-          !settings.hasFlashModel
+          !hasModelConnection(settings)
         ) {
           throw new Error(t("请先完成双模型配置"));
         }
@@ -751,7 +757,7 @@ export default function App() {
         message: t("正在准备全书证据"),
       });
       const onlineReady = Boolean(
-        window.desktopAPI && settings?.hasApiKey && settings.hasFlashModel,
+        window.desktopAPI && hasModelConnection(settings),
       );
       const result = onlineReady
         ? await runOnlineBookAnalysis({
@@ -794,8 +800,7 @@ export default function App() {
     if (!project.document || !project.bookAnalysis) return;
     if (
       !window.desktopAPI ||
-      !settings?.hasApiKey ||
-      !settings.hasFlashModel
+      !hasModelConnection(settings)
     ) {
       setError(t("报告微调需要先完成双模型配置"));
       return;
@@ -1128,7 +1133,7 @@ export default function App() {
             {t("模型与偏好")}
             <span
               className={`status-dot ${
-                settings?.hasApiKey && settings.hasFlashModel ? "online" : ""
+                hasModelConnection(settings) ? "online" : ""
               }`}
             />
           </button>
@@ -1459,7 +1464,7 @@ export default function App() {
           onClose={() => setSettingsOpen(false)}
           onSaved={(value) => {
             setSettings(value);
-            setUseOnline(value.hasApiKey && value.hasFlashModel);
+            setUseOnline(hasModelConnection(value));
             setSettingsOpen(false);
             setToast(t("模型设置已安全保存"));
             if (project.document) {
@@ -1564,7 +1569,7 @@ function BookAnalysisWorkspace({
   const document = project.document;
   const result = project.bookAnalysis;
   const report = result?.report;
-  const modelReady = Boolean(settings?.hasApiKey && settings.hasFlashModel);
+  const modelReady = hasModelConnection(settings);
   const submitRevision = async () => {
     const instruction = revision.trim();
     if (!instruction || revising) return;
@@ -2809,7 +2814,7 @@ function OutlineWorkspace({
             <strong>{t(useOnline ? "结构化大模型管线" : "离线验收管线")}</strong>
             <span>
               {useOnline
-                ? settings?.hasApiKey && settings.hasFlashModel
+                ? hasModelConnection(settings)
                   ? t("双模型协同已就绪")
                   : t("需要完成双模型配置")
                 : t("无需密钥，适合流程验收与界面演示")}
@@ -2825,7 +2830,7 @@ function OutlineWorkspace({
           </button>
         </div>
         {useOnline &&
-          (!settings?.hasApiKey || !settings.hasFlashModel) && (
+          !hasModelConnection(settings) && (
           <button className="text-button" onClick={onOpenSettings}>
             <KeyRound size={14} />
             {t("配置模型")}
@@ -3328,6 +3333,9 @@ function SettingsDialog({
   const { t } = useI18n();
   const [form, setForm] = useState({
     protocol: settings?.protocol || ("responses" as const),
+    authMode: settings?.authMode || ("bearer" as const),
+    structuredOutput:
+      settings?.structuredOutput || ("json_schema" as const),
     baseUrl: settings?.baseUrl || "https://api.openai.com/v1",
     model: settings?.model || "gpt-5.6-terra",
     flashModel: settings?.flashModel || "",
@@ -3335,6 +3343,7 @@ function SettingsDialog({
     speechModel: settings?.speechModel || "",
     speechVoice: settings?.speechVoice || "alloy",
     confirmEndpoint: false,
+    sendReasoning: settings?.sendReasoning ?? true,
     reasoningEffort: settings?.reasoningEffort || ("low" as const),
     apiKey: "",
   });
@@ -3379,7 +3388,7 @@ function SettingsDialog({
         <div className="settings-grid">
           <div className="settings-model-note full">
             <Sparkles size={15} />
-            <span>{t("系统会自动调度两个模型，无需手动分配阶段；两者共享当前 API 连接和加密密钥。")}</span>
+            <span>{t("系统会自动调度两个模型；兼容模式由你显式选择，格式失败时不会自动发起第二次付费请求。")}</span>
           </div>
           <label>
             <span>{t("接口协议")}</span>
@@ -3391,6 +3400,41 @@ function SettingsDialog({
             >
               <option value="responses">{t("OpenAI Responses API（推荐）")}</option>
               <option value="chat">{t("兼容 Chat Completions")}</option>
+            </select>
+          </label>
+          <label>
+            <span>{t("认证方式")}</span>
+            <select
+              value={form.authMode}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  authMode: event.target.value as ModelSettings["authMode"],
+                })
+              }
+            >
+              <option value="bearer">Authorization: Bearer</option>
+              <option value="api-key">api-key</option>
+              <option value="x-api-key">x-api-key</option>
+              <option value="x-goog-api-key">x-goog-api-key</option>
+              <option value="none">{t("无认证（本地服务）")}</option>
+            </select>
+          </label>
+          <label>
+            <span>{t("结构化输出")}</span>
+            <select
+              value={form.structuredOutput}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  structuredOutput: event.target
+                    .value as ModelSettings["structuredOutput"],
+                })
+              }
+            >
+              <option value="json_schema">{t("严格 JSON Schema")}</option>
+              <option value="json_object">JSON Object</option>
+              <option value="prompt_only">{t("纯提示词 JSON")}</option>
             </select>
           </label>
           <label>
@@ -3435,6 +3479,7 @@ function SettingsDialog({
             <span>{t("推理强度")}</span>
             <select
               value={form.reasoningEffort}
+              disabled={!form.sendReasoning}
               onChange={(event) =>
                 setForm({
                   ...form,
@@ -3448,6 +3493,16 @@ function SettingsDialog({
               <option value="high">{t("high · 高成本")}</option>
             </select>
           </label>
+          <label className="full endpoint-consent">
+            <input
+              type="checkbox"
+              checked={form.sendReasoning}
+              onChange={(event) =>
+                setForm({ ...form, sendReasoning: event.target.checked })
+              }
+            />
+            <span>{t("向主模型发送 reasoning.effort 参数")}</span>
+          </label>
           <label className="full">
             <span>
               API Key{" "}
@@ -3459,7 +3514,14 @@ function SettingsDialog({
               type="password"
               value={form.apiKey}
               onChange={(event) => setForm({ ...form, apiKey: event.target.value })}
-              placeholder={settings?.hasApiKey ? t("留空则保持现有密钥") : "sk-…"}
+              placeholder={
+                form.authMode === "none"
+                  ? t("无认证模式不需要密钥")
+                  : settings?.hasApiKey
+                    ? t("留空则保持现有密钥")
+                    : "sk-…"
+              }
+              disabled={form.authMode === "none"}
               autoComplete="off"
             />
           </label>

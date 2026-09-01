@@ -127,7 +127,11 @@ export function AuthorStudio({
   const selectedChapter = workspace.chapters.find((chapter) => chapter.id === selectedChapterId);
   const showChapterEditor = Boolean(selectedChapter && ["chapterProduction", "chapterPolish"].includes(run?.workflowId || workflowId));
   const context = useMemo(() => buildCreativeContext(workspace), [workspace]);
-  const hasModel = Boolean(settings?.hasApiKey && settings.hasFlashModel);
+  const hasModel = Boolean(
+    settings &&
+      (settings.authMode === "none" || settings.hasApiKey) &&
+      settings.hasFlashModel,
+  );
 
   useEffect(() => {
     const override = workspace.promptOverrides.find((item) => item.workflowId === workflowId);

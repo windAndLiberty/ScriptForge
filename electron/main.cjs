@@ -3,15 +3,21 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { readDocument, SUPPORTED_EXTENSIONS } = require("./document-import.cjs");
 const { ProjectStore } = require("./project-store.cjs");
-const { normalizeApiRoot } = require("./endpoint.cjs");
+const { appendApiPath, normalizeApiRoot } = require("./endpoint.cjs");
 const { makeDocx } = require("./docx-export.cjs");
 const {
   apiErrorMessage,
+  authHeaders,
   isFormatUnavailable,
   isResponsesEndpointUnavailable,
+  normalizeAuthMode,
+  normalizeStructuredOutputMode,
   parseAndValidateStructuredText,
+  readResponseData,
   requestChatStructured,
   responsesOutputText,
+  responsesTextFormat,
+  schemaInstructions,
 } = require("./llm-compat.cjs");
 
 let mainWindow;
@@ -59,6 +65,8 @@ function settingsPath() {
 const defaultSettings = {
   provider: "openai",
   protocol: "responses",
+  authMode: "bearer",
+  structuredOutput: "json_schema",
   baseUrl: "https://api.openai.com/v1",
   model: "gpt-5.6-terra",
   flashModel: "",
@@ -66,6 +74,7 @@ const defaultSettings = {
   speechModel: "",
   speechVoice: "alloy",
   consentedEndpointHost: "",
+  sendReasoning: true,
   reasoningEffort: "low",
   apiKeyEncrypted: "",
 };
@@ -119,41 +128,40 @@ function modelForPayload(settings, payload) {
   return settings.model;
 }
 
+function requestHeaders(settings) {
+  return authHeaders(settings.authMode, decryptApiKey(settings));
+}
+
 async function callResponsesApi(payload) {
   const settings = await readSettingsRaw();
-  const apiKey = decryptApiKey(settings);
-  if (!apiKey) throw new Error("No model API key is configured.");
   const model = modelForPayload(settings, payload);
 
   const baseUrl = confirmedBaseUrl(settings);
-  const endpoint = `${baseUrl}/responses`;
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${apiKey}`,
-  };
+  const endpoint = appendApiPath(baseUrl, "responses");
+  const headers = requestHeaders(settings);
+  const outputMode = normalizeStructuredOutputMode(settings.structuredOutput);
+  const textFormat = responsesTextFormat(outputMode, payload);
   const primaryBody = {
     model,
-    instructions: payload.instructions,
+    instructions:
+      outputMode === "json_schema"
+        ? payload.instructions
+        : schemaInstructions(payload),
     input: payload.input,
     store: false,
-    ...(payload.route === "flash"
-      ? {}
-      : { reasoning: { effort: settings.reasoningEffort || "low" } }),
-    text: {
-      format: {
-        type: "json_schema",
-        name: payload.name,
-        strict: true,
-        schema: payload.schema,
-      },
-    },
+    ...(payload.route !== "flash" &&
+    settings.sendReasoning !== false &&
+    settings.reasoningEffort !== "none"
+      ? { reasoning: { effort: settings.reasoningEffort || "low" } }
+      : {}),
+    ...(textFormat ? { text: { format: textFormat } } : {}),
   };
   let response = await fetch(endpoint, {
     method: "POST",
     headers,
     body: JSON.stringify(primaryBody),
   });
-  let data = await response.json().catch(() => ({}));
+  let data = await readResponseData(response);
 
   if (!response.ok) {
     const message = apiErrorMessage(data, response.status);
@@ -176,22 +184,18 @@ async function callResponsesApi(payload) {
 
 async function callChatApi(payload) {
   const settings = await readSettingsRaw();
-  const apiKey = decryptApiKey(settings);
-  if (!apiKey) throw new Error("No model API key is configured.");
   const model = modelForPayload(settings, payload);
 
   const baseUrl = confirmedBaseUrl(settings);
-  const endpoint = `${baseUrl}/chat/completions`;
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${apiKey}`,
-  };
+  const endpoint = appendApiPath(baseUrl, "chat/completions");
+  const headers = requestHeaders(settings);
   return requestChatStructured({
     fetchImpl: fetch,
     endpoint,
     headers,
     model,
     payload,
+    structuredOutput: settings.structuredOutput,
   });
 }
 
@@ -270,6 +274,10 @@ app.whenReady().then(() => {
       ...current,
       provider: payload.provider ?? current.provider,
       protocol: payload.protocol ?? current.protocol,
+      authMode: normalizeAuthMode(payload.authMode ?? current.authMode),
+      structuredOutput: normalizeStructuredOutputMode(
+        payload.structuredOutput ?? current.structuredOutput,
+      ),
       baseUrl: normalizedBaseUrl,
       model: payload.model ?? current.model,
       flashModel: payload.flashModel ?? current.flashModel,
@@ -279,6 +287,7 @@ app.whenReady().then(() => {
       consentedEndpointHost: payload.confirmEndpoint
         ? endpointHost
         : current.consentedEndpointHost,
+      sendReasoning: payload.sendReasoning ?? current.sendReasoning,
       reasoningEffort: payload.reasoningEffort ?? current.reasoningEffort,
     };
     if (payload.clearApiKey) next.apiKeyEncrypted = "";
@@ -304,12 +313,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle("media:image", async (_event, payload) => {
     const settings = await readSettingsRaw();
-    const apiKey = decryptApiKey(settings);
-    if (!apiKey) throw new Error("No model API key is configured.");
     if (!String(settings.imageModel || "").trim()) throw new Error("Configure an image model first.");
-    const endpoint = `${confirmedBaseUrl(settings)}/images/generations`;
-    const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` }, body: JSON.stringify({ model: settings.imageModel, prompt: payload.prompt, size: "1024x1536", response_format: "b64_json" }) });
-    const data = await response.json().catch(() => ({}));
+    const endpoint = appendApiPath(confirmedBaseUrl(settings), "images/generations");
+    const response = await fetch(endpoint, { method: "POST", headers: requestHeaders(settings), body: JSON.stringify({ model: settings.imageModel, prompt: payload.prompt, size: "1024x1536", response_format: "b64_json" }) });
+    const data = await readResponseData(response);
     if (!response.ok) throw new Error(apiErrorMessage(data, response.status));
     let content;
     if (data.data?.[0]?.b64_json) content = Buffer.from(data.data[0].b64_json, "base64");
@@ -324,13 +331,11 @@ app.whenReady().then(() => {
 
   ipcMain.handle("media:speech", async (_event, payload) => {
     const settings = await readSettingsRaw();
-    const apiKey = decryptApiKey(settings);
-    if (!apiKey) throw new Error("No model API key is configured.");
     if (!String(settings.speechModel || "").trim()) throw new Error("Configure a speech model first.");
-    const endpoint = `${confirmedBaseUrl(settings)}/audio/speech`;
-    const response = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` }, body: JSON.stringify({ model: settings.speechModel, voice: settings.speechVoice || "alloy", input: payload.text, format: "mp3" }) });
+    const endpoint = appendApiPath(confirmedBaseUrl(settings), "audio/speech");
+    const response = await fetch(endpoint, { method: "POST", headers: requestHeaders(settings), body: JSON.stringify({ model: settings.speechModel, voice: settings.speechVoice || "alloy", input: payload.text, format: "mp3" }) });
     if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
+      const data = await readResponseData(response);
       throw new Error(apiErrorMessage(data, response.status));
     }
     const content = Buffer.from(await response.arrayBuffer());

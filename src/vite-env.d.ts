@@ -3,6 +3,8 @@
 interface ModelSettings {
   provider: string;
   protocol: "responses" | "chat";
+  authMode: "bearer" | "api-key" | "x-api-key" | "x-goog-api-key" | "none";
+  structuredOutput: "json_schema" | "json_object" | "prompt_only";
   baseUrl: string;
   model: string;
   flashModel: string;
@@ -10,6 +12,7 @@ interface ModelSettings {
   speechModel: string;
   speechVoice: string;
   consentedEndpointHost: string;
+  sendReasoning: boolean;
   reasoningEffort: "none" | "low" | "medium" | "high";
   hasApiKey: boolean;
   hasFlashModel: boolean;

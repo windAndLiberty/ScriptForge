@@ -1,6 +1,6 @@
 {
   "name": "scriptforge-desktop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "长篇小说转中国微短剧剧本的本地优先桌面工作台",
   "author": "ScriptForge",
   "main": "electron/main.cjs",
@@ -10,7 +10,7 @@
     "build": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && vite build",
     "dist": "npm run build && electron-builder --win nsis",
     "dist:windows": "npm run build && electron-builder --win nsis --publish never",
-    "dist:windows:store": "npm run build && electron-builder --win appx --publish never",
+    "dist:windows:store": "npm run build && electron-builder --win appx --x64 --publish never",
     "test": "vitest run",
     "acceptance": "tsx scripts/acceptance.ts",
     "smoke:desktop": "electron electron/smoke.cjs",
@@ -55,6 +55,16 @@
       "target": "nsis",
       "icon": "build/icon.png",
       "artifactName": "ScriptForge-${version}-${arch}.${ext}"
+    },
+    "appx": {
+      "identityName": "YuSeTech.ScriptForge",
+      "publisher": "CN=5E86A6E9-6F90-4E5A-A9DA-086C3BF2C80C",
+      "publisherDisplayName": "YuSeTech",
+      "displayName": "剧擎 ScriptForge",
+      "languages": [
+        "zh-CN",
+        "en-US"
+      ]
     },
     "nsis": {
       "oneClick": false,

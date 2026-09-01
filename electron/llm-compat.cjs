@@ -1,5 +1,69 @@
+const GENERIC_PROVIDER_ERROR = /^(?:provider returned (?:an )?error|upstream provider error|model request failed)\.?$/i;
+
+function cleanErrorText(value) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  return text.length > 1200 ? `${text.slice(0, 1197)}...` : text;
+}
+
+function nestedErrorMessage(value, depth = 0) {
+  if (depth > 6 || value == null) return "";
+  if (typeof value === "string") {
+    const text = cleanErrorText(value);
+    if (!text) return "";
+    if (/^[{[]/.test(text)) {
+      try {
+        const parsed = JSON.parse(text);
+        const nested = nestedErrorMessage(parsed, depth + 1);
+        if (nested) return nested;
+      } catch {
+        // Preserve a non-JSON provider message below.
+      }
+    }
+    return text;
+  }
+  if (Array.isArray(value)) {
+    const messages = value
+      .map((item) => nestedErrorMessage(item, depth + 1))
+      .filter(Boolean);
+    return messages.find((message) => !GENERIC_PROVIDER_ERROR.test(message)) || messages[0] || "";
+  }
+  if (typeof value !== "object") return "";
+
+  const candidates = [
+    value.error?.metadata?.raw,
+    value.metadata?.raw,
+    value.raw,
+    value.error?.metadata?.previous_errors,
+    value.metadata?.previous_errors,
+    value.issues,
+    value.errors,
+    value._errors,
+    value.error?.details,
+    value.details,
+    value.error?.message,
+    value.message,
+    value.detail,
+    value.error,
+  ];
+  const messages = candidates
+    .map((candidate) => nestedErrorMessage(candidate, depth + 1))
+    .filter(Boolean);
+  return messages.find((message) => !GENERIC_PROVIDER_ERROR.test(message)) || messages[0] || "";
+}
+
 function apiErrorMessage(data, status) {
-  return data?.error?.message || data?.message || `Model request failed (HTTP ${status})`;
+  const providerName = cleanErrorText(
+    data?.error?.metadata?.provider_name || data?.metadata?.provider_name,
+  );
+  const message = nestedErrorMessage(data);
+  if (message && !GENERIC_PROVIDER_ERROR.test(message)) {
+    return providerName ? `[${providerName}] ${message}` : message;
+  }
+  const statusSuffix = Number.isFinite(status) ? ` (HTTP ${status})` : "";
+  if (message) {
+    return `${providerName ? `[${providerName}] ` : ""}${message}${statusSuffix}. No additional error details were provided.`;
+  }
+  return `Model request failed${statusSuffix}. The provider returned no error details.`;
 }
 
 function isFormatUnavailable(message) {
@@ -23,6 +87,60 @@ function schemaInstructions(payload) {
 Return only one JSON value that JSON.parse can parse directly. Do not include Markdown fences, explanations, prefixes, or suffixes.
 The output must match this JSON Schema exactly:
 ${JSON.stringify(payload.schema)}`;
+}
+
+function normalizeStructuredOutputMode(value) {
+  return ["json_schema", "json_object", "prompt_only"].includes(value)
+    ? value
+    : "json_schema";
+}
+
+function normalizeAuthMode(value) {
+  return ["bearer", "api-key", "x-api-key", "x-goog-api-key", "none"].includes(value)
+    ? value
+    : "bearer";
+}
+
+function authHeaders(mode, apiKey) {
+  const headers = { "Content-Type": "application/json" };
+  const authMode = normalizeAuthMode(mode);
+  if (authMode === "none") return headers;
+  const key = String(apiKey || "").trim();
+  if (!key) throw new Error("No model API key is configured.");
+  if (authMode === "bearer") headers.Authorization = `Bearer ${key}`;
+  else headers[authMode] = key;
+  return headers;
+}
+
+function chatResponseFormat(mode, payload) {
+  if (mode === "prompt_only") return undefined;
+  if (mode === "json_object") return { type: "json_object" };
+  return {
+    type: "json_schema",
+    json_schema: { name: payload.name, strict: true, schema: payload.schema },
+  };
+}
+
+function responsesTextFormat(mode, payload) {
+  const outputMode = normalizeStructuredOutputMode(mode);
+  if (outputMode === "prompt_only") return undefined;
+  if (outputMode === "json_object") return { type: "json_object" };
+  return {
+    type: "json_schema",
+    name: payload.name,
+    strict: true,
+    schema: payload.schema,
+  };
+}
+
+async function readResponseData(response) {
+  const text = await response.text().catch(() => "");
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: cleanErrorText(text) };
+  }
 }
 
 function parseStructuredText(value) {
@@ -156,7 +274,10 @@ async function requestChatStructured({
   headers,
   model,
   payload,
+  structuredOutput,
 }) {
+  const outputMode = normalizeStructuredOutputMode(structuredOutput);
+  const responseFormat = chatResponseFormat(outputMode, payload);
   const schemaMessages = [
     { role: "system", content: schemaInstructions(payload) },
     { role: "user", content: payload.input },
@@ -167,25 +288,28 @@ async function requestChatStructured({
     body: JSON.stringify({
       model,
       messages: schemaMessages,
-      response_format: {
-        type: "json_schema",
-        json_schema: { name: payload.name, strict: true, schema: payload.schema },
-      },
+      ...(responseFormat ? { response_format: responseFormat } : {}),
     }),
   });
-  const data = await response.json().catch(() => ({}));
+  const data = await readResponseData(response);
   if (!response.ok) throw new Error(apiErrorMessage(data, response.status));
   return parseAndValidateStructuredText(chatOutputText(data), payload.schema);
 }
 
 module.exports = {
   apiErrorMessage,
+  authHeaders,
+  chatResponseFormat,
   chatOutputText,
   isFormatUnavailable,
   isResponsesEndpointUnavailable,
   parseStructuredText,
   parseAndValidateStructuredText,
+  normalizeAuthMode,
+  normalizeStructuredOutputMode,
+  readResponseData,
   requestChatStructured,
+  responsesTextFormat,
   responsesOutputText,
   schemaInstructions,
   schemaValidationErrors,
