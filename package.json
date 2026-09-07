@@ -1,6 +1,6 @@
 {
   "name": "scriptforge-desktop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "长篇小说转中国微短剧剧本的本地优先桌面工作台",
   "author": "ScriptForge",
   "main": "electron/main.cjs",
@@ -9,15 +9,22 @@
     "dev": "concurrently -k \"vite --host 127.0.0.1 --port 5417 --strictPort\" \"wait-on http://127.0.0.1:5417 && cross-env VITE_DEV_SERVER_URL=http://127.0.0.1:5417 electron .\"",
     "build": "tsc --noEmit -p tsconfig.app.json && tsc --noEmit -p tsconfig.node.json && vite build",
     "dist": "npm run build && electron-builder --win nsis",
+    "dist:windows": "npm run build && electron-builder --win nsis --publish never",
+    "assets:windows:store": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-windows-appx-assets.ps1",
+    "dist:windows:store": "npm run assets:windows:store && npm run build && electron-builder --win appx --x64 --publish never",
     "test": "vitest run",
     "acceptance": "tsx scripts/acceptance.ts",
     "smoke:desktop": "electron electron/smoke.cjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
+    "iconv-lite": "^0.7.3",
+    "jszip": "^3.10.1",
     "lucide-react": "^1.27.0",
+    "pdfjs-dist": "^6.2.108",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "word-extractor": "^1.0.4"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
@@ -43,12 +50,23 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
+      "build/icon-aura.png",
       "package.json"
     ],
     "win": {
       "target": "nsis",
-      "icon": "build/icon.png",
+      "icon": "build/icon-aura.png",
       "artifactName": "ScriptForge-${version}-${arch}.${ext}"
+    },
+    "appx": {
+      "identityName": "YuSeTech.ScriptForge",
+      "publisher": "CN=5E86A6E9-6F90-4E5A-A9DA-086C3BF2C80C",
+      "publisherDisplayName": "YuSeTech",
+      "displayName": "剧擎 ScriptForge",
+      "languages": [
+        "zh-CN",
+        "en-US"
+      ]
     },
     "nsis": {
       "oneClick": false,

@@ -1,10 +1,18 @@
 const { app, BrowserWindow } = require("electron");
+const fsSync = require("node:fs");
 const fs = require("node:fs/promises");
+const os = require("node:os");
 const path = require("node:path");
 
 app.commandLine.appendSwitch("disable-gpu");
 
+const smokeUserDataDir = fsSync.mkdtempSync(
+  path.join(os.tmpdir(), "scriptforge-smoke-"),
+);
+app.setPath("userData", smokeUserDataDir);
+
 const fixtureProject = {
+  schemaVersion: 5,
   id: "visual-smoke",
   qualityProfileVersion: 2,
   name: "开局地摊卖大力·短剧改编",
@@ -62,25 +70,81 @@ const fixtureProject = {
     trendPreset: "精品爽剧",
   },
   result: null,
+  creativeWorkspace: {
+    projectInstruction: "",
+    briefs: [], storyBibles: [], outlines: [], chapters: [], characterStates: [], timeline: [], foreshadowing: [], continuityIssues: [], runs: [], artifacts: [], promptOverrides: [], handoffs: [],
+  },
   phase: "characters",
   updatedAt: new Date().toISOString(),
 };
 
 async function capture(window, fileName) {
+  await window.webContents.executeJavaScript(`Promise.race([
+    new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    new Promise((resolve) => setTimeout(resolve, 1000)),
+  ])`);
   await new Promise((resolve) => setTimeout(resolve, 700));
-  const image = await window.webContents.capturePage();
+  let image;
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      image = await window.webContents.capturePage();
+      break;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+    }
+  }
+  if (!image) {
+    throw new Error(
+      `Unable to capture ${fileName} after three attempts: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
+    );
+  }
   const outputDir = path.join(__dirname, "../acceptance");
   await fs.mkdir(outputDir, { recursive: true });
   await fs.writeFile(path.join(outputDir, fileName), image.toPNG());
+}
+
+function reloadWindow(window) {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error("Timed out waiting for the smoke window to reload."));
+    }, 15_000);
+    const cleanup = () => {
+      clearTimeout(timeout);
+      window.webContents.removeListener("did-finish-load", onFinish);
+      window.webContents.removeListener("did-fail-load", onFail);
+    };
+    const onFinish = () => {
+      cleanup();
+      resolve();
+    };
+    const onFail = (_event, code, description, url, isMainFrame) => {
+      if (!isMainFrame) return;
+      cleanup();
+      reject(new Error(`Smoke window reload failed (${code}) at ${url}: ${description}`));
+    };
+    window.webContents.on("did-finish-load", onFinish);
+    window.webContents.on("did-fail-load", onFail);
+    window.reload();
+  });
 }
 
 app.whenReady().then(async () => {
   const window = new BrowserWindow({
     width: 1440,
     height: 900,
-    show: false,
+    // A hidden BrowserWindow can stop compositing after in-page navigation on
+    // Windows, causing capturePage() to save the previous view. Keep the smoke
+    // window visible so every acceptance screenshot reflects the asserted page.
+    show: true,
     backgroundColor: "#efede7",
+    icon: path.join(__dirname, "../build/icon-aura.png"),
     webPreferences: {
+      backgroundThrottling: false,
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
@@ -94,13 +158,68 @@ app.whenReady().then(async () => {
       JSON.stringify(fixtureProject),
     )})`,
   );
-  await window.reload();
+  await reloadWindow(window);
   await capture(window, "ui-workbench.png");
   await window.webContents.executeJavaScript(
     'localStorage.setItem("scriptforge.locale.v1", "en-US")',
   );
-  await window.reload();
+  await reloadWindow(window);
   await capture(window, "ui-workbench-en.png");
+  const settingsCompatibilityChecked = await window.webContents.executeJavaScript(`(async () => {
+    const button = [...document.querySelectorAll(".sidebar-bottom button")].find((item) =>
+      item.textContent.includes("Model & Preferences")
+    );
+    button?.click();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    const dialog = document.querySelector(".settings-dialog");
+    const auth = dialog?.querySelector('select option[value="x-goog-api-key"]');
+    const local = dialog?.querySelector('select option[value="none"]');
+    const promptOnly = dialog?.querySelector('select option[value="prompt_only"]');
+    return Boolean(
+      button &&
+      dialog &&
+      dialog.textContent.includes("Structured Output") &&
+      auth &&
+      local &&
+      promptOnly
+    );
+  })()`);
+  if (!settingsCompatibilityChecked) {
+    throw new Error("Model compatibility settings smoke check failed");
+  }
+  await capture(window, "ui-model-compatibility-en.png");
+  await window.webContents.executeJavaScript(
+    `document.querySelector(".settings-dialog .dialog-heading .icon-button")?.click()`,
+  );
+  const authorOpened = await window.webContents.executeJavaScript(`(async () => {
+    const item = [...document.querySelectorAll(".nav-item")].find((button) =>
+      button.textContent.includes("Author Studio")
+    );
+    item?.click();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    return Boolean(item && document.querySelector(".author-studio"));
+  })()`);
+  if (!authorOpened) throw new Error("Author Studio navigation smoke check failed");
+  await capture(window, "ui-author-studio-en.png");
+  const lightThemeApplied = await window.webContents.executeJavaScript(`(async () => {
+    const toggle = document.querySelector('.accessibility-controls button[title="Switch theme"]');
+    toggle?.click();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    return Boolean(toggle && document.documentElement.dataset.theme === "light");
+  })()`);
+  if (!lightThemeApplied) throw new Error("Light theme smoke check failed");
+  await capture(window, "ui-author-studio-light-en.png");
+  await window.webContents.executeJavaScript(`document.querySelector('.accessibility-controls button[title="Switch theme"]')?.click()`);
+  const bookOpened = await window.webContents.executeJavaScript(`(async () => {
+    const item = [...document.querySelectorAll(".nav-item")].find((button) =>
+      button.textContent.includes("One-click Book Analysis")
+    );
+    item?.click();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    return Boolean(item && document.querySelector(".book-analysis-workspace"));
+  })()`);
+  if (!bookOpened) throw new Error("Book Analysis navigation smoke check failed");
+  await capture(window, "ui-book-analysis-en.png");
   const projectsOpened = await window.webContents.executeJavaScript(`(async () => {
     const item = [...document.querySelectorAll(".nav-item")].find((button) =>
       button.textContent.includes("Projects")
@@ -143,5 +262,11 @@ app.whenReady().then(async () => {
   if (!resetOpenedHome) throw new Error("Reset Home smoke check failed");
   await capture(window, "ui-reset-home-en.png");
   window.destroy();
+  await fs.rm(smokeUserDataDir, { recursive: true, force: true });
   app.quit();
+}).catch(async (error) => {
+  console.error(error);
+  for (const window of BrowserWindow.getAllWindows()) window.destroy();
+  await fs.rm(smokeUserDataDir, { recursive: true, force: true }).catch(() => {});
+  app.exit(1);
 });

@@ -151,21 +151,21 @@ function auditPayload(episode: Episode) {
 }
 
 function auditInstructions() {
-  return `你是竖屏短剧交付终审，不参与创作，只依据给定证据登记实质缺陷。
-逐集与跨集检查：
-1. 原著事实与故事圣经：不得新增无证据的核心身份、关系、能力、因果；
-2. 连续性：上一集出口状态必须能推出下一集入口，人物、地点、时间、伤势、道具状态不能跳变；
-3. 推进与去重复：相邻集不得重复同一羞辱、退婚、身份确认或放狠话，每集必须产生新信息和不可逆状态变化；
-4. 60/90秒可拍性：钩子进入前5秒，单集聚焦一个冲突，台词有攻守而非轮流解释，结尾是正在发生的动作卡点；
-5. 角色声音与动机：同一角色的目标、称谓和行为逻辑稳定，配角不能仅排队报到；
-6. 制作与合规：避免无法落地的大场面堆叠，标记必须人工复核的高风险内容。
+  return `You are the final delivery reviewer for a vertical micro-drama. Do not participate in creative writing; register only material defects supported by supplied evidence.
+Check within and across episodes:
+1. source facts and story bible: no unsupported core identity, relationship, ability, or causality;
+2. continuity: an episode's exit state must support the next entry state; character, location, time, injury, and prop state cannot jump;
+3. progression and repetition: adjacent episodes cannot repeat the same humiliation, breakup, identity confirmation, or threat; each episode must add information and an irreversible state change;
+4. 60/90-second shootability: hook in the first five seconds, one conflict per episode, adversarial dialogue rather than rotating exposition, and an ending built from an action in progress;
+5. character voice and motivation: stable goals, forms of address, and behavior logic; supporting characters cannot merely queue to appear;
+6. production and safety: avoid unshootable spectacle stacking and flag high-risk content requiring human review.
 
-严重级别：
-- blocker：事实、人物或连续性错误会让观众无法理解，或存在明显合规风险；
-- major：影响留存、节奏或拍摄，必须修复；
-- minor：不阻断交付的润色建议。
+Severity:
+- blocker: a factual, character, continuity, or safety defect that prevents comprehension or delivery;
+- major: a retention, pacing, or production defect that must be repaired;
+- minor: a non-blocking polish suggestion.
 
-每条问题必须引用具体集数与可见证据，并给出可执行的短修复指令。没有实质问题时 issues 必须为空，禁止为了显得严格而虚构问题。`;
+Every issue must cite episode numbers and visible evidence and include a short executable repair instruction. When there is no material defect, issues must be empty. Never invent issues to appear strict.`;
 }
 
 async function auditEpisodeCandidate(params: {
@@ -179,9 +179,9 @@ async function auditEpisodeCandidate(params: {
     callStructured,
     "episode_semantic_audit",
     {
-      instructions: `你是短剧修订复验员，只判断候选版本是否真正修复问题且没有制造新问题。
-检查故事圣经、分集契约、上一集出口状态、场景动作、台词攻守、可拍钩子和道具状态。
-只有存在影响理解、留存或拍摄的实质问题时才判定不通过。`,
+      instructions: `You are a revision verification reviewer. Decide only whether the candidate truly fixes the defect without introducing a new one.
+Check the story bible, episode contract, previous exit state, scene action, adversarial dialogue, shootable hook, and prop state.
+Fail only for a material issue affecting comprehension, retention, or production.`,
       input: `【故事圣经】${JSON.stringify(compactStoryBible(storyBible))}
 【上一集】${JSON.stringify(previousEpisode ? auditPayload(previousEpisode) : null)}
 【本集契约】${JSON.stringify(episode.contract)}
@@ -316,9 +316,9 @@ export async function runTrustedFinalGate(params: {
       callStructured,
       "series_quality_repair",
       {
-        instructions: `你是短剧交付修订编剧。只修复问题台账中的实质缺陷，保持本集分集契约、原著事实、人物新名和动态场次数。
-必须输出完整场景，不解释修改过程。不得通过增加旁白、重复台词、凭空设定或删除关键事实来规避问题。
-修复后仍须符合目标时长、对白密度、发言角色数和动作节拍预算。`,
+        instructions: `You are the delivery revision writer. Repair only material defects in the issue ledger while preserving the episode contract, source facts, approved names, and dynamic scene count.
+Return complete scenes without explaining the revision process. Never evade an issue through added narration, repeated dialogue, invented rules, or removal of a key fact.
+The repaired episode must still meet runtime, dialogue-density, speaking-character, and action-rhythm budgets.`,
         input: `【故事圣经】${JSON.stringify(compactStoryBible(storyBible))}
 【上一集】${JSON.stringify(previousEpisode ? auditPayload(previousEpisode) : null)}
 【待修复本集】${JSON.stringify(auditPayload(currentEpisode))}

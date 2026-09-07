@@ -601,10 +601,12 @@ function createInitialVersion(report: BookAnalysisReport): BookAnalysisVersion {
 export async function runOnlineBookAnalysis(params: {
   document: NovelDocument;
   characters: CharacterProfile[];
+  outputLanguage?: "Simplified Chinese" | "English";
   callStructured: StructuredCaller;
   onProgress?: (progress: BookAnalysisProgress) => void;
 }): Promise<BookAnalysisResult> {
   const { document, characters, callStructured, onProgress } = params;
+  const outputLanguage = params.outputLanguage || "Simplified Chinese";
   const chunks = chunkNovelForBookAnalysis(document);
   onProgress?.({
     stage: "preparing",
@@ -620,14 +622,14 @@ export async function runOnlineBookAnalysis(params: {
       callStructured,
       "book_analysis_extract",
       {
-        instructions: `你是网文拆书证据分析员。只分析当前证据块，不推测全书结局。
-需要提取事件因果、人物状态变化、读者钩子、爽点机制、伏笔与文风信号。
-所有判断必须能回溯到输入中的 chapterIds；不确定的信息放入 uncertainties，不得补写原文没有的情节。
-输出使用简体中文，描述具体，不使用“节奏很好、人物丰满”等无证据套话。`,
-        input: `【证据块】${chunk.id}
-【章节ID】${chunk.chapterIds.join("、")}
-【章节范围】${chunk.label}
-【原文】
+        instructions: `You are a long-form fiction evidence analyst. Analyze only the current evidence block and never infer the ending of the entire book.
+Extract event causality, character-state changes, reader hooks, payoff mechanisms, foreshadowing, and prose-style signals.
+Every judgment must trace to a supplied chapterId. Put uncertain information in uncertainties and never invent an event absent from the source.
+Write every natural-language field in ${outputLanguage}. Be specific and avoid unsupported boilerplate praise.`,
+        input: `[Evidence Block] ${chunk.id}
+[Chapter IDs] ${chunk.chapterIds.join(", ")}
+[Chapter Range] ${chunk.label}
+[Source Text]
 ${chunk.content}`,
         name: "book_analysis_extract",
         schema: chunkEvidenceSchema,
@@ -656,9 +658,9 @@ ${chunk.content}`,
         callStructured,
         "book_analysis_digest",
         {
-          instructions: `你是拆书证据压缩编辑。把连续证据块压缩成一个可供专项分析使用的证据摘要。
-必须保留事件因果、人物变化、钩子、爽点、伏笔、文风信号和不确定性；不得把不确定信息改写成事实。
-coverageChapterIds 必须覆盖输入中出现的全部章节ID。输出简体中文。`,
+          instructions: `You are an evidence-compression editor. Compress consecutive evidence blocks into one digest for specialist analysis.
+Preserve event causality, character changes, hooks, payoff patterns, foreshadowing, prose signals, and uncertainties. Never rewrite uncertainty as fact.
+coverageChapterIds must contain every chapter ID in the input. Write every natural-language field in ${outputLanguage}.`,
           input: JSON.stringify(batch),
           name: "book_analysis_digest",
           schema: digestSchema,
@@ -705,9 +707,9 @@ coverageChapterIds 必须覆盖输入中出现的全部章节ID。输出简体�
       callStructured,
       "book_analysis_structure",
       {
-        instructions: `你是资深网文结构编辑。基于全书分层证据分析开篇钩子、结构类型、蓄力—爆发周期、节奏断层和伏笔回收。
-每个阶段和伏笔必须填写真实 chapter-* 证据ID。明确区分“证据已证实”和“尚未回收”，不得把摘要重复包装成评价。
-输出简体中文，给出可供作者学习的优点，也直说注水、重复或逻辑风险。`,
+        instructions: `You are a senior long-form fiction structure editor. Use the layered full-book evidence to analyze the opening hook, structural type, buildup-to-payoff cycles, pacing gaps, and foreshadowing payoffs.
+Every phase and foreshadowing record must cite real chapter-* evidence IDs. Clearly distinguish confirmed evidence from unresolved setup; never repackage a summary as evaluation.
+Write every natural-language field in ${outputLanguage}. Identify learnable strengths as well as padding, repetition, and logic risks.`,
         input: context,
         name: "book_analysis_structure",
         schema: structureSchema,
@@ -720,9 +722,9 @@ coverageChapterIds 必须覆盖输入中出现的全部章节ID。输出简体�
       callStructured,
       "book_analysis_characters",
       {
-        instructions: `你是网文人物体系编辑。基于证据识别主角驱动力、成长弧、金手指或能力来源、反派梯队、关键配角功能及关系变化。
-必须使用原著角色名，不使用短剧改名；不得把同一人物拆成多人，也不得合并身份相似但证据不同的人。
-所有核心角色都要给出 chapter-* 证据ID。输出简体中文。`,
+        instructions: `You are a character-system editor for long-form fiction. Use evidence to identify the protagonist's drive, growth arc, special ability or its source, antagonist tiers, supporting-character functions, and relationship changes.
+Use source character names rather than adaptation names. Never split one person into several or merge distinct people because their roles look similar.
+Every core character must cite chapter-* evidence IDs. Write every natural-language field in ${outputLanguage}.`,
         input: context,
         name: "book_analysis_characters",
         schema: characterSectionSchema,
@@ -735,9 +737,9 @@ coverageChapterIds 必须覆盖输入中出现的全部章节ID。输出简体�
       callStructured,
       "book_analysis_commercial",
       {
-        instructions: `你是网文商业卖点、文风与仿写方法论编辑。根据证据完成书籍元信息、爽点卖点、文笔风格和学习建议。
-title 优先使用原书名；只有原书名缺失时才根据内容提炼。爽点要解释“铺垫—触发—释放—余波”机制，文风判断必须有 chapter-* 证据ID。
-仿写建议只能复用方法，不能复制原作人物、设定和具体表达。评分为0到10的整数。输出简体中文。`,
+        instructions: `You are an editor specializing in commercial appeal, prose style, and transferable writing methods. Use evidence to complete book metadata, payoff analysis, style analysis, and learning recommendations.
+Prefer the original book title; derive one only when it is missing. Explain payoff through setup, trigger, release, and aftermath. Every style judgment must cite chapter-* evidence IDs.
+Recommendations may reuse methods but never copy characters, settings, or distinctive wording. The score must be an integer from 0 to 10. Write every natural-language field in ${outputLanguage}.`,
         input: context,
         name: "book_analysis_commercial",
         schema: commercialSchema,
@@ -789,6 +791,7 @@ title 优先使用原书名；只有原书名缺失时才根据内容提炼。�
     analyzedChunks: chunks.length,
     coveragePercent: 100,
     warnings,
+    outputLanguage,
   };
 }
 
@@ -979,13 +982,13 @@ export async function reviseBookAnalysis(params: {
     callStructured,
     "book_analysis_revision",
     {
-      instructions: `你是拆书报告修订编辑。根据用户指令修改报告，只改与指令直接相关的内容，其余结论与章节证据保持不变。
-不得删除书籍元信息、六大分析模块或 evidenceChapterIds。不得把不确定判断改写成确定事实。
-输出完整结构化报告，使用简体中文。`,
-      input: `【用户指令】
+      instructions: `You are a book-analysis revision editor. Apply the user's instruction only to directly relevant content; preserve every other conclusion and chapter citation.
+Never remove book metadata, required analysis modules, or evidenceChapterIds. Never rewrite an uncertain claim as established fact.
+Return the complete structured report. Write every natural-language field in ${result.outputLanguage || "Simplified Chinese"}.`,
+      input: `[User Instruction]
 ${instruction}
 
-【当前报告】
+[Current Report]
 ${JSON.stringify(result.report)}`,
       name: "book_analysis_revision",
       schema: reportSchema,

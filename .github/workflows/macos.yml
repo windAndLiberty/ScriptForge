@@ -1,0 +1,37 @@
+name: macOS Build
+
+on:
+  push:
+    branches: [main, macos-native]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate project
+        working-directory: macos
+        run: xcodegen generate --spec project.yml
+      - name: Swift package tests
+        working-directory: macos
+        run: swift test
+      - name: Xcode build and tests
+        working-directory: macos
+        run: |
+          xcodebuild \
+            -project ScriptForge.xcodeproj \
+            -scheme ScriptForge \
+            -destination 'platform=macOS' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            test

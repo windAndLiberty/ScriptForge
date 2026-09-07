@@ -1,3 +1,5 @@
+import type { CreativeWorkspace } from "./creative/types";
+
 export type PipelinePhase =
   | "idle"
   | "ingest"
@@ -227,6 +229,43 @@ export interface AdaptationResult {
   mode: "offline" | "online";
 }
 
+export interface StoryboardShot {
+  id: string;
+  number: number;
+  sceneId: string;
+  title: string;
+  durationSeconds: number;
+  shotSize: string;
+  cameraMovement: string;
+  composition: string;
+  visualAction: string;
+  dialogue: string;
+  narration: string;
+  soundEffects: string;
+  imagePrompt: string;
+  negativePrompt: string;
+  continuityNotes: string;
+  productionNotes: string;
+  keyframePath?: string;
+  narrationPath?: string;
+}
+
+export interface EpisodeStoryboard {
+  episodeNumber: number;
+  title: string;
+  aspectRatio: "9:16";
+  visualStyle: string;
+  characterVisualAnchors: string[];
+  shots: StoryboardShot[];
+}
+
+export interface ProductionPackage {
+  version: "storyboard-v1";
+  createdAt: string;
+  mode: "offline" | "online";
+  episodes: EpisodeStoryboard[];
+}
+
 export interface BookAnalysisPhase {
   name: string;
   chapterRange: string;
@@ -342,9 +381,11 @@ export interface BookAnalysisResult {
   analyzedChunks: number;
   coveragePercent: number;
   warnings: string[];
+  outputLanguage?: "Simplified Chinese" | "English";
 }
 
 export interface StoredProject {
+  schemaVersion?: 5;
   id: string;
   qualityProfileVersion?: number;
   archivedAt?: string;
@@ -354,6 +395,8 @@ export interface StoredProject {
   options: AdaptationOptions;
   result: AdaptationResult | null;
   bookAnalysis?: BookAnalysisResult | null;
+  productionPackage?: ProductionPackage | null;
+  creativeWorkspace?: CreativeWorkspace;
   phase: PipelinePhase;
   updatedAt: string;
 }

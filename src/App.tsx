@@ -20,6 +20,7 @@ import {
   Library,
   Languages,
   MoreHorizontal,
+  Moon,
   PenLine,
   Play,
   RefreshCw,
@@ -34,6 +35,9 @@ import {
   UserRound,
   UsersRound,
   WandSparkles,
+  Sun,
+  ZoomIn,
+  ZoomOut,
   X,
 } from "lucide-react";
 import {
@@ -96,8 +100,11 @@ import {
   selectBookAnalysisVersion,
   type BookAnalysisProgress,
 } from "./pipeline/bookAnalysis";
+import { AuthorStudio } from "./creative/AuthorStudio";
+import { emptyCreativeWorkspace, type CreativeWorkspace } from "./creative/types";
+import { StoryboardWorkspace } from "./StoryboardWorkspace";
 
-type PrimaryView = "book" | "studio" | "projects" | "prompts";
+type PrimaryView = "book" | "creative" | "studio" | "projects" | "prompts";
 
 const DEFAULT_OPTIONS: AdaptationOptions = {
   episodeCount: 8,
@@ -107,6 +114,14 @@ const DEFAULT_OPTIONS: AdaptationOptions = {
   tone: "高燃、机敏、轻喜",
   trendPreset: "精品爽剧",
 };
+
+function hasModelConnection(settings: ModelSettings | null | undefined) {
+  return Boolean(
+    settings &&
+      (settings.authMode === "none" || settings.hasApiKey) &&
+      settings.hasFlashModel,
+  );
+}
 const PHASES: Array<{ id: PipelinePhase; label: string }> = [
   { id: "ingest", label: "文本拆解" },
   { id: "analysis", label: "故事事实" },
@@ -131,6 +146,7 @@ const PHASE_ORDER: PipelinePhase[] = [
 function createProject(): StoredProject {
   const locale = localStorage.getItem("scriptforge.locale.v1");
   return {
+    schemaVersion: 5,
     id: crypto.randomUUID(),
     qualityProfileVersion: 6,
     name: locale === "en-US" ? "New Adaptation Project" : "新建改编项目",
@@ -138,7 +154,9 @@ function createProject(): StoredProject {
     characters: [],
     options: DEFAULT_OPTIONS,
     result: null,
+    productionPackage: null,
     bookAnalysis: null,
+    creativeWorkspace: emptyCreativeWorkspace(),
     phase: "idle",
     updatedAt: new Date().toISOString(),
   };
@@ -165,6 +183,7 @@ function normalizeStoredProject(value: StoredProject): StoredProject {
     options,
     result: null,
     bookAnalysis: sanitizeBookAnalysisResult(value?.bookAnalysis),
+    creativeWorkspace: value?.creativeWorkspace || emptyCreativeWorkspace(),
   };
   normalized.result = sanitizeAdaptationResult(
     value?.result,
@@ -231,6 +250,13 @@ function wait(ms: number) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
+function sourceOutputLanguage(text: string): "Simplified Chinese" | "English" {
+  const sample = text.slice(0, 12000);
+  const han = (sample.match(/[\u3400-\u9fff]/g) || []).length;
+  const latin = (sample.match(/[A-Za-z]/g) || []).length;
+  return han > latin * 0.15 ? "Simplified Chinese" : "English";
+}
+
 function projectExport(
   result: AdaptationResult,
   project: StoredProject,
@@ -256,10 +282,16 @@ export default function App() {
   const [promptAssets, setPromptAssets] =
     useState<PromptAsset[]>(loadPromptAssets);
   const [primaryView, setPrimaryView] = useState<PrimaryView>("studio");
+  const [appearance, setAppearance] = useState<"light" | "dark">(() =>
+    (localStorage.getItem("scriptforge.appearance.v1") as "light" | "dark") || "dark",
+  );
+  const [uiScale, setUiScale] = useState(() =>
+    Math.max(0.85, Math.min(1.3, Number(localStorage.getItem("scriptforge.ui-scale.v1")) || 1)),
+  );
   const [selectedChapter, setSelectedChapter] = useState(0);
   const [selectedEpisode, setSelectedEpisode] = useState(0);
   const [activeTab, setActiveTab] = useState<
-    "outline" | "bible" | "script" | "quality"
+    "outline" | "bible" | "script" | "storyboard" | "quality"
   >("outline");
   const [progress, setProgress] = useState(0);
   const [progressDetail, setProgressDetail] = useState("");
@@ -272,6 +304,8 @@ export default function App() {
   const [running, setRunning] = useState(false);
   const [bookRunning, setBookRunning] = useState(false);
   const [bookRevising, setBookRevising] = useState(false);
+  const [bookUseSourceLanguage, setBookUseSourceLanguage] = useState(true);
+  const [bookTargetLanguage, setBookTargetLanguage] = useState<"zh-CN" | "en-US">(locale);
   const [bookProgress, setBookProgress] = useState<BookAnalysisProgress>({
     stage: "preparing",
     completed: 0,
@@ -280,17 +314,47 @@ export default function App() {
     message: "",
   });
   const fileInput = useRef<HTMLInputElement>(null);
+  const skipNextPersist = useRef(true);
 
   useEffect(() => {
+    document.documentElement.dataset.theme = appearance;
+    document.documentElement.style.setProperty("--ui-scale", String(uiScale));
+    localStorage.setItem("scriptforge.appearance.v1", appearance);
+    localStorage.setItem("scriptforge.ui-scale.v1", String(uiScale));
+  }, [appearance, uiScale]);
+
+  useEffect(() => {
+    if (skipNextPersist.current) {
+      skipNextPersist.current = false;
+      return;
+    }
     const handle = window.setTimeout(() => {
       const snapshot = { ...project, updatedAt: new Date().toISOString() };
       localStorage.setItem("scriptforge.project.v1", JSON.stringify(snapshot));
+      void window.desktopAPI?.saveProject(snapshot).catch(() => undefined);
       setProjectLibrary((current) => {
         return persistProjectLibrary(upsertProject(current, snapshot));
       });
     }, 250);
     return () => window.clearTimeout(handle);
   }, [project]);
+
+  useEffect(() => {
+    if (!window.desktopAPI) return;
+    const hasLocalProject = Boolean(localStorage.getItem("scriptforge.project.v1"));
+    void window.desktopAPI.listProjects<StoredProject>().then((items) => {
+      const diskProjects = items.map(normalizeStoredProject);
+      if (!diskProjects.length) return;
+      setProjectLibrary((current) => persistProjectLibrary(enforceRecentProjectLimit([
+        ...diskProjects,
+        ...current.filter((item) => !diskProjects.some((disk) => disk.id === item.id)),
+      ])));
+      if (!hasLocalProject) {
+        skipNextPersist.current = true;
+        setProject(diskProjects[0]);
+      }
+    }).catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -305,7 +369,7 @@ export default function App() {
   useEffect(() => {
     window.desktopAPI?.getSettings().then((value) => {
       setSettings(value);
-      setUseOnline(value.hasApiKey && value.hasFlashModel);
+      setUseOnline(hasModelConnection(value));
     });
   }, []);
 
@@ -333,8 +397,7 @@ export default function App() {
   ) => {
     if (
       !window.desktopAPI ||
-      !connection?.hasApiKey ||
-      !connection.hasFlashModel ||
+      !hasModelConnection(connection) ||
       !characters.some(
         (character) =>
           !["model", "manual"].includes(character.nameSource || "") ||
@@ -374,7 +437,12 @@ export default function App() {
     }
   };
 
-  const importText = (text: string, fileName: string) => {
+  const importText = (
+    text: string,
+    fileName: string,
+    preserveCreative?: CreativeWorkspace,
+    nameOverride?: string,
+  ) => {
     try {
       setError("");
       const document = parseNovelText(text, fileName);
@@ -392,13 +460,16 @@ export default function App() {
           ),
         ),
       };
+      const nextProjectId = preserveCreative ? project.id : crypto.randomUUID();
       setProject({
         ...createProject(),
-        name: t("{{title}}·短剧改编", { title: document.title }),
+        id: nextProjectId,
+        name: nameOverride || t("{{title}}·短剧改编", { title: document.title }),
         document,
         characters,
         options,
         phase: "characters",
+        creativeWorkspace: preserveCreative || emptyCreativeWorkspace(),
       });
       setSelectedChapter(0);
       setSelectedEpisode(0);
@@ -411,6 +482,44 @@ export default function App() {
         }),
       );
       setToast(t("已导入《{{title}}》", { title: document.title }));
+      if (!preserveCreative && window.desktopAPI) {
+        void Promise.all(document.chapters.map(async (chapter) => {
+          const chapterId = crypto.randomUUID();
+          const versionId = crypto.randomUUID();
+          const contentPath = await window.desktopAPI!.writeProjectText({
+            projectId: nextProjectId,
+            category: `chapters/${chapterId}/versions`,
+            itemId: versionId,
+            content: chapter.content,
+          });
+          return {
+            id: chapterId,
+            number: chapter.index + 1,
+            volumeNumber: 1,
+            title: chapter.title,
+            status: "accepted" as const,
+            currentVersionId: versionId,
+            versions: [{
+              id: versionId,
+              createdAt: new Date().toISOString(),
+              source: "imported" as const,
+              contentPath,
+              summary: chapter.content.slice(0, 120),
+              wordCount: chapter.content.trim().split(/\s+/).filter(Boolean).length,
+              accepted: true,
+            }],
+          };
+        })).then((chapters) => {
+          setProject((current) => current.id !== nextProjectId ? current : {
+            ...current,
+            creativeWorkspace: {
+              ...(current.creativeWorkspace || emptyCreativeWorkspace()),
+              chapters,
+              selectedChapterId: chapters[0]?.id,
+            },
+          });
+        }).catch((caught) => setError(cleanAppError(caught, t("章节版本写入失败"))));
+      }
       void runAutomaticNaming(document, characters, options);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : t("文本导入失败"));
@@ -441,7 +550,7 @@ export default function App() {
   const openFile = async () => {
     if (window.desktopAPI) {
       try {
-        const file = await window.desktopAPI.openTextFile();
+        const file = await window.desktopAPI.openDocument();
         if (file) importText(file.text, file.name);
       } catch {
         setError(t("文件读取失败，请确认文本为 UTF-8 编码"));
@@ -453,7 +562,16 @@ export default function App() {
 
   const onBrowserFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) importText(await file.text(), file.name);
+    if (file) {
+      if (window.desktopAPI) {
+        const imported = await window.desktopAPI.readDroppedDocument(file);
+        importText(imported.text, imported.name);
+      } else if (/\.(txt|md|text|markdown)$/i.test(file.name)) {
+        importText(await file.text(), file.name);
+      } else {
+        setError(t("桌面应用支持 DOCX、DOC、PDF、RTF、HTML、ODT、TXT 和 Markdown"));
+      }
+    }
     event.target.value = "";
   };
 
@@ -461,11 +579,18 @@ export default function App() {
     event.preventDefault();
     const file = event.dataTransfer.files?.[0];
     if (!file) return;
-    if (!/\.(txt|md|text)$/i.test(file.name)) {
-      setError(t("仅支持 txt、md 或 text 文件"));
-      return;
+    try {
+      if (window.desktopAPI) {
+        const imported = await window.desktopAPI.readDroppedDocument(file);
+        importText(imported.text, imported.name);
+      } else if (/\.(txt|md|text|markdown)$/i.test(file.name)) {
+        importText(await file.text(), file.name);
+      } else {
+        setError(t("桌面应用支持 DOCX、DOC、PDF、RTF、HTML、ODT、TXT 和 Markdown"));
+      }
+    } catch (caught) {
+      setError(cleanAppError(caught, t("文件读取失败")));
     }
-    importText(await file.text(), file.name);
   };
 
   const updateOptions = (patch: Partial<AdaptationOptions>) => {
@@ -500,8 +625,7 @@ export default function App() {
       if (useOnline) {
         if (
           !window.desktopAPI ||
-          !settings?.hasApiKey ||
-          !settings.hasFlashModel
+          !hasModelConnection(settings)
         ) {
           throw new Error(t("请先完成双模型配置"));
         }
@@ -555,6 +679,7 @@ export default function App() {
       setProject((current) => ({
         ...current,
         result,
+        productionPackage: null,
         phase: passedQualityGate ? "completed" : "quality",
       }));
       setProgress(100);
@@ -632,12 +757,15 @@ export default function App() {
         message: t("正在准备全书证据"),
       });
       const onlineReady = Boolean(
-        window.desktopAPI && settings?.hasApiKey && settings.hasFlashModel,
+        window.desktopAPI && hasModelConnection(settings),
       );
       const result = onlineReady
         ? await runOnlineBookAnalysis({
             document: project.document,
             characters: project.characters,
+            outputLanguage: bookUseSourceLanguage
+              ? sourceOutputLanguage(project.document.rawText)
+              : bookTargetLanguage === "zh-CN" ? "Simplified Chinese" : "English",
             callStructured: (payload) =>
               window.desktopAPI!.callStructured(payload),
             onProgress: setBookProgress,
@@ -672,8 +800,7 @@ export default function App() {
     if (!project.document || !project.bookAnalysis) return;
     if (
       !window.desktopAPI ||
-      !settings?.hasApiKey ||
-      !settings.hasFlashModel
+      !hasModelConnection(settings)
     ) {
       setError(t("报告微调需要先完成双模型配置"));
       return;
@@ -748,6 +875,7 @@ export default function App() {
             index === selectedEpisode ? { ...episode, content } : episode,
           ),
         },
+        productionPackage: null,
       };
     });
   };
@@ -800,7 +928,7 @@ export default function App() {
     );
   };
 
-  const duplicateProject = (item: StoredProject) => {
+  const duplicateProject = async (item: StoredProject) => {
     const copy: StoredProject = {
       ...structuredClone(item),
       id: crypto.randomUUID(),
@@ -808,15 +936,26 @@ export default function App() {
       updatedAt: new Date().toISOString(),
       archivedAt: undefined,
     };
-    setProjectLibrary((current) => {
-      return persistProjectLibrary(upsertProject(current, copy));
-    });
-    openProject(copy);
-    setToast(t("项目副本已创建"));
+    try {
+      if (window.desktopAPI) {
+        await window.desktopAPI.duplicateProject({
+          sourceProjectId: item.id,
+          project: copy,
+        });
+      }
+      setProjectLibrary((current) =>
+        persistProjectLibrary(upsertProject(current, copy)),
+      );
+      openProject(copy);
+      setToast(t("项目副本已创建"));
+    } catch (caught) {
+      setError(cleanAppError(caught, t("项目复制失败")));
+    }
   };
 
   const archiveProjectCard = (item: StoredProject) => {
     const archivedAt = new Date().toISOString();
+    void window.desktopAPI?.saveProject({ ...item, archivedAt }).catch(() => undefined);
     setProjectLibrary((current) =>
       persistProjectLibrary(
         archiveProjectInLibrary(current, item.id, archivedAt),
@@ -830,6 +969,11 @@ export default function App() {
 
   const restoreProjectCard = (item: StoredProject) => {
     const restoredAt = new Date().toISOString();
+    void window.desktopAPI?.saveProject({
+      ...item,
+      archivedAt: undefined,
+      updatedAt: restoredAt,
+    }).catch(() => undefined);
     setProjectLibrary((current) =>
       persistProjectLibrary(
         restoreProjectInLibrary(current, item.id, restoredAt),
@@ -850,9 +994,15 @@ export default function App() {
     setPendingDelete(item);
   };
 
-  const confirmDeleteProject = () => {
+  const confirmDeleteProject = async () => {
     if (!pendingDelete?.archivedAt) return;
     const item = pendingDelete;
+    try {
+      await window.desktopAPI?.deleteProject(item.id);
+    } catch (caught) {
+      setError(cleanAppError(caught, t("项目删除失败")));
+      return;
+    }
     setProjectLibrary((current) =>
       persistProjectLibrary(
         deleteArchivedProjectInLibrary(current, item.id),
@@ -889,7 +1039,7 @@ export default function App() {
         ref={fileInput}
         className="visually-hidden"
         type="file"
-        accept=".txt,.md,.text,text/plain"
+        accept=".txt,.text,.md,.markdown,.rtf,.docx,.doc,.pdf,.html,.htm,.odt"
         onChange={onBrowserFile}
       />
       <aside className="sidebar">
@@ -910,6 +1060,13 @@ export default function App() {
           >
             <BookOpen size={17} />
             {t("一键拆书")}
+          </button>
+          <button
+            className={`nav-item ${primaryView === "creative" ? "active" : ""}`}
+            onClick={() => setPrimaryView("creative")}
+          >
+            <PenLine size={17} />
+            {t("创作工坊")}
           </button>
           <button
             className={`nav-item ${primaryView === "studio" ? "active" : ""}`}
@@ -976,7 +1133,7 @@ export default function App() {
             {t("模型与偏好")}
             <span
               className={`status-dot ${
-                settings?.hasApiKey && settings.hasFlashModel ? "online" : ""
+                hasModelConnection(settings) ? "online" : ""
               }`}
             />
           </button>
@@ -1001,6 +1158,8 @@ export default function App() {
               {t(
                 primaryView === "book"
                   ? "创作系统 / 一键拆书"
+                  : primaryView === "creative"
+                    ? "创作系统 / 创作工坊"
                   : primaryView === "studio"
                     ? "改编工坊 / 当前项目"
                     : primaryView === "projects"
@@ -1008,7 +1167,7 @@ export default function App() {
                       : "创作系统 / 提示词资产",
               )}
             </div>
-            {primaryView === "studio" ? (
+            {primaryView === "studio" || primaryView === "creative" ? (
               <input
                 value={project.name}
                 onChange={(event) =>
@@ -1049,7 +1208,15 @@ export default function App() {
                 EN
               </button>
             </div>
-            {primaryView === "studio" && (
+            <div className="accessibility-controls" aria-label={t("显示设置")}>
+              <button onClick={() => setUiScale((value) => Math.max(0.85, Number((value - 0.1).toFixed(2))))} title={t("缩小界面")} disabled={uiScale <= 0.85}><ZoomOut size={15}/></button>
+              <span>{Math.round(uiScale * 100)}%</span>
+              <button onClick={() => setUiScale((value) => Math.min(1.3, Number((value + 0.1).toFixed(2))))} title={t("放大界面")} disabled={uiScale >= 1.3}><ZoomIn size={15}/></button>
+              <button onClick={() => setAppearance((value) => value === "dark" ? "light" : "dark")} title={t("切换主题")}>
+                {appearance === "dark" ? <Sun size={15}/> : <Moon size={15}/>}<span className="visually-hidden">{t("切换主题")}</span>
+              </button>
+            </div>
+            {(primaryView === "studio" || primaryView === "creative") && (
               <button
                 className="button secondary reset-home-button"
                 onClick={resetHome}
@@ -1063,7 +1230,7 @@ export default function App() {
               <Import size={16} />
               {t("导入小说")}
             </button>
-            <button
+            {primaryView !== "creative" && <button
               className="button dark"
               onClick={
                 primaryView === "book" ? exportBookAnalysis : exportScript
@@ -1076,7 +1243,7 @@ export default function App() {
             >
               <Download size={16} />
               {t(primaryView === "book" ? "导出报告" : "导出成稿")}
-            </button>
+            </button>}
           </div>
         </header>
 
@@ -1093,6 +1260,29 @@ export default function App() {
             onSelectVersion={selectCurrentBookVersion}
             onExport={exportBookAnalysis}
             onOpenSettings={() => setSettingsOpen(true)}
+            useSourceLanguage={bookUseSourceLanguage}
+            targetLanguage={bookTargetLanguage}
+            onUseSourceLanguage={setBookUseSourceLanguage}
+            onTargetLanguage={setBookTargetLanguage}
+          />
+        ) : primaryView === "creative" ? (
+          <AuthorStudio
+            projectId={project.id}
+            projectName={project.name}
+            workspace={project.creativeWorkspace || emptyCreativeWorkspace()}
+            locale={locale}
+            settings={settings}
+            onChange={(creativeWorkspace) =>
+              setProject((current) => ({ ...current, creativeWorkspace }))
+            }
+            onError={setError}
+            onNotice={setToast}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onHandoff={(text, name, creativeWorkspace) => {
+              importText(text, `${name}.md`, creativeWorkspace, name);
+              setPrimaryView("studio");
+              setToast(t("已创建不可变移交快照并送入改编工坊"));
+            }}
           />
         ) : primaryView === "projects" ? (
           <ProjectArchiveWorkspace
@@ -1149,7 +1339,7 @@ export default function App() {
               </div>
             </section>
 
-            <section className="workspace-grid">
+            <section className={`workspace-grid ${activeTab === "storyboard" ? "storyboard-mode" : ""}`}>
               <SourcePanel
                 project={project}
                 selectedChapter={selectedChapter}
@@ -1173,6 +1363,13 @@ export default function App() {
                       disabled={!project.result}
                     >
                       {t("剧本编辑")}
+                    </button>
+                    <button
+                      className={activeTab === "storyboard" ? "active" : ""}
+                      onClick={() => setActiveTab("storyboard")}
+                      disabled={!project.result}
+                    >
+                      {t("分镜制作")}
                     </button>
                     <button
                       className={activeTab === "bible" ? "active" : ""}
@@ -1218,6 +1415,19 @@ export default function App() {
                 {activeTab === "bible" && project.result?.storyBible && (
                   <BibleWorkspace result={project.result} />
                 )}
+                {activeTab === "storyboard" && project.result && (
+                  <StoryboardWorkspace
+                    project={project}
+                    locale={locale}
+                    settings={settings}
+                    promptAssets={promptAssets}
+                    onPackage={(productionPackage) =>
+                      setProject((current) => ({ ...current, productionPackage }))
+                    }
+                    onError={setError}
+                    onNotice={setToast}
+                  />
+                )}
                 {activeTab === "quality" && project.result && (
                   <QualityWorkspace result={project.result} />
                 )}
@@ -1254,7 +1464,7 @@ export default function App() {
           onClose={() => setSettingsOpen(false)}
           onSaved={(value) => {
             setSettings(value);
-            setUseOnline(value.hasApiKey && value.hasFlashModel);
+            setUseOnline(hasModelConnection(value));
             setSettingsOpen(false);
             setToast(t("模型设置已安全保存"));
             if (project.document) {
@@ -1333,6 +1543,10 @@ function BookAnalysisWorkspace({
   onSelectVersion,
   onExport,
   onOpenSettings,
+  useSourceLanguage,
+  targetLanguage,
+  onUseSourceLanguage,
+  onTargetLanguage,
 }: {
   project: StoredProject;
   settings: ModelSettings | null;
@@ -1345,13 +1559,17 @@ function BookAnalysisWorkspace({
   onSelectVersion: (index: number) => void;
   onExport: () => void;
   onOpenSettings: () => void;
+  useSourceLanguage: boolean;
+  targetLanguage: "zh-CN" | "en-US";
+  onUseSourceLanguage: (value: boolean) => void;
+  onTargetLanguage: (value: "zh-CN" | "en-US") => void;
 }) {
   const { locale, t } = useI18n();
   const [revision, setRevision] = useState("");
   const document = project.document;
   const result = project.bookAnalysis;
   const report = result?.report;
-  const modelReady = Boolean(settings?.hasApiKey && settings.hasFlashModel);
+  const modelReady = hasModelConnection(settings);
   const submitRevision = async () => {
     const instruction = revision.trim();
     if (!instruction || revising) return;
@@ -1425,6 +1643,16 @@ function BookAnalysisWorkspace({
           </p>
         </div>
         <div className="book-hero-actions">
+          <div className="book-language-control">
+            <label>
+              <input type="checkbox" checked={useSourceLanguage} onChange={(event) => onUseSourceLanguage(event.target.checked)} />
+              <span>{t("使用原文语言")}</span>
+            </label>
+            {!useSourceLanguage && <select value={targetLanguage} onChange={(event) => onTargetLanguage(event.target.value as "zh-CN" | "en-US")} aria-label={t("报告语言")}>
+              <option value="zh-CN">{t("简体中文")}</option>
+              <option value="en-US">English</option>
+            </select>}
+          </div>
           <div className={`book-model-state ${modelReady ? "online" : ""}`}>
             {modelReady ? <Cloud size={16} /> : <ShieldCheck size={16} />}
             <span>
@@ -2196,6 +2424,7 @@ function PromptAssetsWorkspace({
     bible: "影响人物消歧、关系、世界规则、时间线和道具生命周期。",
     outline: "影响分集核心冲突、新增信息、动态场次、转场、反转和结尾卡点。",
     episode: "影响逐集动作、对白、口语感、节拍密度、状态变化和可拍性。",
+    storyboard: "影响镜头拆分、构图、运镜、声音设计、连续性和图像提示词。",
   };
 
   return (
@@ -2585,7 +2814,7 @@ function OutlineWorkspace({
             <strong>{t(useOnline ? "结构化大模型管线" : "离线验收管线")}</strong>
             <span>
               {useOnline
-                ? settings?.hasApiKey && settings.hasFlashModel
+                ? hasModelConnection(settings)
                   ? t("双模型协同已就绪")
                   : t("需要完成双模型配置")
                 : t("无需密钥，适合流程验收与界面演示")}
@@ -2601,7 +2830,7 @@ function OutlineWorkspace({
           </button>
         </div>
         {useOnline &&
-          (!settings?.hasApiKey || !settings.hasFlashModel) && (
+          !hasModelConnection(settings) && (
           <button className="text-button" onClick={onOpenSettings}>
             <KeyRound size={14} />
             {t("配置模型")}
@@ -3104,9 +3333,17 @@ function SettingsDialog({
   const { t } = useI18n();
   const [form, setForm] = useState({
     protocol: settings?.protocol || ("responses" as const),
+    authMode: settings?.authMode || ("bearer" as const),
+    structuredOutput:
+      settings?.structuredOutput || ("json_schema" as const),
     baseUrl: settings?.baseUrl || "https://api.openai.com/v1",
     model: settings?.model || "gpt-5.6-terra",
     flashModel: settings?.flashModel || "",
+    imageModel: settings?.imageModel || "",
+    speechModel: settings?.speechModel || "",
+    speechVoice: settings?.speechVoice || "alloy",
+    confirmEndpoint: false,
+    sendReasoning: settings?.sendReasoning ?? true,
     reasoningEffort: settings?.reasoningEffort || ("low" as const),
     apiKey: "",
   });
@@ -3151,7 +3388,7 @@ function SettingsDialog({
         <div className="settings-grid">
           <div className="settings-model-note full">
             <Sparkles size={15} />
-            <span>{t("系统会自动调度两个模型，无需手动分配阶段；两者共享当前 API 连接和加密密钥。")}</span>
+            <span>{t("系统会自动调度两个模型；兼容模式由你显式选择，格式失败时不会自动发起第二次付费请求。")}</span>
           </div>
           <label>
             <span>{t("接口协议")}</span>
@@ -3163,6 +3400,41 @@ function SettingsDialog({
             >
               <option value="responses">{t("OpenAI Responses API（推荐）")}</option>
               <option value="chat">{t("兼容 Chat Completions")}</option>
+            </select>
+          </label>
+          <label>
+            <span>{t("认证方式")}</span>
+            <select
+              value={form.authMode}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  authMode: event.target.value as ModelSettings["authMode"],
+                })
+              }
+            >
+              <option value="bearer">Authorization: Bearer</option>
+              <option value="api-key">api-key</option>
+              <option value="x-api-key">x-api-key</option>
+              <option value="x-goog-api-key">x-goog-api-key</option>
+              <option value="none">{t("无认证（本地服务）")}</option>
+            </select>
+          </label>
+          <label>
+            <span>{t("结构化输出")}</span>
+            <select
+              value={form.structuredOutput}
+              onChange={(event) =>
+                setForm({
+                  ...form,
+                  structuredOutput: event.target
+                    .value as ModelSettings["structuredOutput"],
+                })
+              }
+            >
+              <option value="json_schema">{t("严格 JSON Schema")}</option>
+              <option value="json_object">JSON Object</option>
+              <option value="prompt_only">{t("纯提示词 JSON")}</option>
             </select>
           </label>
           <label>
@@ -3192,9 +3464,22 @@ function SettingsDialog({
             />
           </label>
           <label>
+            <span>{t("图片模型（可选）")}</span>
+            <input value={form.imageModel} onChange={(event) => setForm({ ...form, imageModel: event.target.value })} placeholder="gpt-image-1" />
+          </label>
+          <label>
+            <span>{t("语音模型（可选）")}</span>
+            <input value={form.speechModel} onChange={(event) => setForm({ ...form, speechModel: event.target.value })} placeholder="gpt-4o-mini-tts" />
+          </label>
+          <label>
+            <span>{t("语音角色")}</span>
+            <input value={form.speechVoice} onChange={(event) => setForm({ ...form, speechVoice: event.target.value })} placeholder="alloy" />
+          </label>
+          <label>
             <span>{t("推理强度")}</span>
             <select
               value={form.reasoningEffort}
+              disabled={!form.sendReasoning}
               onChange={(event) =>
                 setForm({
                   ...form,
@@ -3208,6 +3493,16 @@ function SettingsDialog({
               <option value="high">{t("high · 高成本")}</option>
             </select>
           </label>
+          <label className="full endpoint-consent">
+            <input
+              type="checkbox"
+              checked={form.sendReasoning}
+              onChange={(event) =>
+                setForm({ ...form, sendReasoning: event.target.checked })
+              }
+            />
+            <span>{t("向主模型发送 reasoning.effort 参数")}</span>
+          </label>
           <label className="full">
             <span>
               API Key{" "}
@@ -3219,9 +3514,24 @@ function SettingsDialog({
               type="password"
               value={form.apiKey}
               onChange={(event) => setForm({ ...form, apiKey: event.target.value })}
-              placeholder={settings?.hasApiKey ? t("留空则保持现有密钥") : "sk-…"}
+              placeholder={
+                form.authMode === "none"
+                  ? t("无认证模式不需要密钥")
+                  : settings?.hasApiKey
+                    ? t("留空则保持现有密钥")
+                    : "sk-…"
+              }
+              disabled={form.authMode === "none"}
               autoComplete="off"
             />
+          </label>
+          <label className="full endpoint-consent">
+            <input
+              type="checkbox"
+              checked={form.confirmEndpoint}
+              onChange={(event) => setForm({ ...form, confirmEndpoint: event.target.checked })}
+            />
+            <span>{t("我确认仅在主动运行模型节点时，将所选上下文发送到此 API 端点")}</span>
           </label>
         </div>
         {message && <div className="dialog-message">{message}</div>}

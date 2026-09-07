@@ -1,0 +1,36 @@
+name: Windows parity
+
+on:
+  push:
+    branches: [windows-parity]
+  pull_request:
+    branches: [main, macos-native]
+  workflow_dispatch:
+
+jobs:
+  test-and-package:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npm run smoke:desktop
+      - run: npm run dist:windows
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ScriptForge-Windows-NSIS
+          path: release/*.exe
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ScriptForge-Windows-Smoke-Screenshots
+          path: acceptance/*.png
+          if-no-files-found: error

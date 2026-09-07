@@ -47,8 +47,18 @@ temp/
 # Swift/macOS local build state
 macos/.build/
 macos/.swiftpm/
+macos/ScriptForge.xcodeproj/
+macos/dist/
 DerivedData/
 xcuserdata/
+*.xcarchive
+*.dmg
+*.pkg
+*.cer
+*.mobileprovision
+*.provisionprofile
+Signing.xcconfig
+AcceptanceData/
 
 # Editors and operating systems
 .idea/

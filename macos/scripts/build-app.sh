@@ -3,22 +3,56 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
-APP_DIR="${PROJECT_DIR}/dist/ScriptForge.app"
-CONTENTS_DIR="${APP_DIR}/Contents"
+OUTPUT_DIR="${PROJECT_DIR}/dist"
+ARCHIVE_PATH="${OUTPUT_DIR}/ScriptForge.xcarchive"
+MODE="${1:---archive}"
 
 cd "${PROJECT_DIR}"
-swift build -c release
+"${SCRIPT_DIR}/bootstrap-macos.sh"
+mkdir -p "${OUTPUT_DIR}"
 
-if [[ "${APP_DIR}" != "${PROJECT_DIR}/dist/ScriptForge.app" ]]; then
-  echo "Unexpected output path: ${APP_DIR}" >&2
-  exit 1
+if [[ "${MODE}" == "--local" ]]; then
+  DERIVED_DATA_PATH="${PROJECT_DIR}/.build/release"
+  APP_PATH="${DERIVED_DATA_PATH}/Build/Products/Release/ScriptForge.app"
+  OUTPUT_APP_PATH="${OUTPUT_DIR}/ScriptForge.app"
+
+  xcodebuild \
+    -project ScriptForge.xcodeproj \
+    -scheme ScriptForge \
+    -configuration Release \
+    -destination "generic/platform=macOS" \
+    -derivedDataPath "${DERIVED_DATA_PATH}" \
+    CODE_SIGNING_ALLOWED=NO \
+    ONLY_ACTIVE_ARCH=NO \
+    build
+
+  ditto "${APP_PATH}" "${OUTPUT_APP_PATH}"
+  codesign \
+    --force \
+    --deep \
+    --sign - \
+    --timestamp=none \
+    --options runtime \
+    --entitlements AppResources/ScriptForge.entitlements \
+    "${OUTPUT_APP_PATH}"
+
+  echo "Local universal app created: ${OUTPUT_APP_PATH}"
+  echo "This ad-hoc build is for local testing; public distribution still requires Developer ID or App Store signing and notarization."
+  exit 0
 fi
 
-rm -rf "${APP_DIR}"
-mkdir -p "${CONTENTS_DIR}/MacOS" "${CONTENTS_DIR}/Resources"
-cp "${PROJECT_DIR}/.build/release/ScriptForgeMac" "${CONTENTS_DIR}/MacOS/ScriptForgeMac"
-cp "${PROJECT_DIR}/AppResources/Info.plist" "${CONTENTS_DIR}/Info.plist"
-chmod +x "${CONTENTS_DIR}/MacOS/ScriptForgeMac"
+if [[ "${MODE}" != "--archive" ]]; then
+  echo "Usage: $0 [--local|--archive]" >&2
+  exit 2
+fi
 
-codesign --force --deep --sign - "${APP_DIR}"
-echo "Built ${APP_DIR}"
+xcodebuild \
+  -project ScriptForge.xcodeproj \
+  -scheme ScriptForge \
+  -configuration Release \
+  -destination "generic/platform=macOS" \
+  -archivePath "${ARCHIVE_PATH}" \
+  archive
+
+echo "Archive created: ${ARCHIVE_PATH}"
+echo "Open Xcode Organizer to validate, sign, and distribute the archive."

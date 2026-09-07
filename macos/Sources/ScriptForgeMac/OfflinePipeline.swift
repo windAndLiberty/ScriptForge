@@ -1,253 +1,421 @@
 import Foundation
 
 enum OfflinePipeline {
-    private struct Passage {
-        let text: String
-        let location: Int
-    }
-
     static func run(
         document: NovelDocument,
         characters: [CharacterProfile],
         options: AdaptationOptions
     ) throws -> AdaptationResult {
-        guard CharacterExtractor.validate(characters) else {
-            throw PipelineError.invalidNames
-        }
-        let groups = group(document.chapters, count: options.episodeCount)
-        let protagonist = characters.first?.targetName ?? "主角"
-        let episodes = groups.enumerated().map { offset, chapters in
-            buildEpisode(
+        guard !document.chapters.isEmpty else { throw PipelineError.noDocument }
+        guard CharacterExtractor.validate(characters) else { throw PipelineError.invalidNames }
+        let outputLanguage = options.outputLanguage(for: document)
+
+        let bible = makeStoryBible(
+            document: document,
+            characters: characters,
+            episodeCount: options.episodeCount,
+            language: outputLanguage
+        )
+        var episodes = (0..<options.episodeCount).map { offset in
+            makeEpisode(
                 number: offset + 1,
-                chapters: chapters,
+                document: document,
                 characters: characters,
-                protagonist: protagonist,
-                options: options
+                options: options,
+                previousExit: outputLanguage == .english
+                    ? (offset == 0 ? "The story has not begun" : "The previous cliffhanger remains unresolved")
+                    : (offset == 0 ? "故事尚未开始" : "上一集卡点尚未解决"),
+                language: outputLanguage
             )
         }
-        let genre = document.rawText.range(
-            of: #"系统|异能|觉醒|灵气"#,
-            options: .regularExpression
-        ) == nil ? options.genre : "都市异能·系统逆袭·热血轻喜"
-        let facts = document.chapters.prefix(5).map {
-            "第\($0.index)章：\(CharacterExtractor.applyRenames(firstAction(in: $0.content), characters: characters))"
+        episodes = episodes.map { episode in
+            var updated = episode
+            updated.runtime = EpisodeBudget.estimateRuntime(
+                scenes: episode.scenes,
+                language: outputLanguage
+            )
+            updated.content = render(updated, language: outputLanguage)
+            return updated
         }
-        let report = QualityEvaluator.evaluate(
+        let quality = QualityEvaluator.evaluate(
             episodes: episodes,
             characters: characters,
-            options: options
+            options: options,
+            outputLanguage: outputLanguage
         )
         return AdaptationResult(
-            logline: "\(protagonist)从人生低谷意外获得改变命运的能力，在一次次公开冲突中用机敏和行动完成逆袭，却也被卷入更大的危机。",
-            genre: genre,
-            themes: ["尊严与生存", "小人物逆袭", "能力与代价", "轻喜反转"],
-            sourceFacts: facts,
+            logline: outputLanguage == .english
+                ? "\(characters.first?.targetName ?? "The protagonist") returns from ruin and fights through betrayal to reclaim control of their fate."
+                : "\(characters.first?.targetName ?? "主人公")从绝境归来，在层层背叛与真相中夺回命运。",
+            genre: options.resolvedGenre(for: outputLanguage),
+            themes: outputLanguage == .english
+                ? ["Return", "Choice", "Truth", "Cost"]
+                : ["归来", "选择", "真相", "代价"],
+            sourceFacts: document.chapters.prefix(8).map {
+                "[\($0.id)] \(summarySentence($0.content))"
+            },
+            storyBible: bible,
             episodes: episodes,
-            quality: report,
+            quality: quality,
             generatedAt: Date(),
             mode: .offline
         )
     }
 
-    private static func buildEpisode(
-        number: Int,
-        chapters: [Chapter],
-        characters: [CharacterProfile],
-        protagonist: String,
-        options: AdaptationOptions
-    ) -> Episode {
-        let source = chapters.map(\.content).joined(separator: "\n")
-        let quotes = quoted(in: source).map {
-            CharacterExtractor.applyRenames($0.text, characters: characters)
-        }
-        let actions = actionLines(in: source).map {
-            CharacterExtractor.applyRenames($0, characters: characters)
-        }
-        let sceneCount = max(2, options.scenesPerEpisode)
-        let scenes = (0..<sceneCount).map { index in
-            buildScene(
-                episode: number,
-                index: index,
-                source: segment(source, index: index, count: sceneCount),
-                characters: characters
-            )
-        }
-        let title = chapters.first?.title
-            .replacingOccurrences(of: #"[？！?!]+$"#, with: "", options: .regularExpression)
-            ?? "命运转折"
-        var episode = Episode(
-            id: "episode-\(number)",
-            number: number,
-            title: String(title.prefix(18)),
-            sourceChapterIDs: chapters.map(\.id),
-            openingHook: quotes.first ?? "\(protagonist)被逼到退无可退，异变在此刻发生。",
-            objective: actions.first ?? "\(protagonist)必须在公开冲突中夺回主动权。",
-            reversal: quotes.dropFirst(2).first
-                ?? "所有人以为\(protagonist)已经落败，他却亮出意想不到的底牌。",
-            endHook: quotes.last ?? "更强的对手现身，直指\(protagonist)刚得到的秘密。",
-            scenes: scenes,
-            content: ""
-        )
-        episode.content = render(episode)
-        return episode
-    }
-
-    private static func buildScene(
-        episode: Int,
-        index: Int,
-        source: String,
-        characters: [CharacterProfile]
-    ) -> ScriptScene {
-        let location = inferLocation(source)
-        let quotes = quoted(in: source)
-        let action = CharacterExtractor.applyRenames(
-            actionLines(in: source).first
-                ?? "局面骤然变化，众人的目光同时落在主角身上。",
-            characters: characters
-        )
-        let fallback = characters.first?.targetName ?? "主角"
-        var lines = Array(quotes.prefix(6).enumerated()).map { quoteIndex, quote in
-            DialogueLine(
-                speaker: inferSpeaker(
-                    source: source,
-                    position: quote.location,
-                    characters: characters
-                ) ?? fallback,
-                text: CharacterExtractor.applyRenames(quote.text, characters: characters)
-            )
-        }
-        if lines.count < 3 {
-            let opponent = characters.dropFirst().first?.targetName ?? "对手"
-            lines = [
-                DialogueLine(speaker: fallback, text: "想让我认输？这才刚刚开始。"),
-                DialogueLine(speaker: opponent, text: "你拿什么翻盘？"),
-                DialogueLine(speaker: fallback, text: "就拿你最看不起的这一步。"),
+    static func render(_ episode: Episode, language: AppLanguage = .chinese) -> String {
+        var lines = language == .english
+            ? [
+                "EPISODE \(episode.number) — \(episode.title)",
+                "[EPISODE OBJECTIVE] \(episode.objective)",
+                "[COLD OPEN] \(episode.openingHook)",
+                "",
             ]
-        }
-        return ScriptScene(
-            id: "episode-\(episode)-scene-\(index + 1)",
-            heading: location.heading,
-            location: location.name,
-            action: action,
-            dialogue: lines
-        )
-    }
-
-    static func render(_ episode: Episode) -> String {
-        var lines = [
-            "第\(episode.number)集《\(episode.title)》",
-            "【本集目标】\(episode.objective)",
-            "【冷开场】\(episode.openingHook)",
-            "",
-        ]
+            : [
+                "第\(episode.number)集《\(episode.title)》",
+                "【本集目标】\(episode.objective)",
+                "【冷开场】\(episode.openingHook)",
+                "",
+            ]
         for (index, scene) in episode.scenes.enumerated() {
             lines.append("\(index + 1). \(scene.heading) \(scene.location)")
-            lines.append("△ \(scene.action)")
-            lines.append(contentsOf: scene.dialogue.map { "\($0.speaker)：\($0.text)" })
+            lines.append((language == .english ? "ACTION: " : "△ ") + scene.action)
+            for dialogue in scene.dialogue {
+                lines.append("\(dialogue.speaker)\(language == .english ? ": " : "：")\(dialogue.text)")
+            }
             lines.append("")
         }
-        lines.append("【反转】\(episode.reversal)")
-        lines.append("【卡点】\(episode.endHook)")
+        lines.append((language == .english ? "[REVERSAL] " : "【反转】") + episode.reversal)
+        lines.append((language == .english ? "[CLIFFHANGER] " : "【卡点】") + episode.endHook)
+        if let runtime = episode.runtime {
+            lines.append(language == .english
+                ? "[ESTIMATED RUNTIME] Approximately \(runtime.estimatedSeconds) seconds"
+                : "【表演估时】约 \(runtime.estimatedSeconds) 秒")
+        }
         return lines.joined(separator: "\n")
     }
 
-    private static func group(_ chapters: [Chapter], count: Int) -> [[Chapter]] {
-        guard !chapters.isEmpty else { return [] }
-        let groupCount = min(max(1, count), chapters.count)
-        return (0..<groupCount).map { index in
-            let start = index * chapters.count / groupCount
-            let end = (index + 1) * chapters.count / groupCount
-            return Array(chapters[start..<max(start + 1, end)])
-        }
-    }
-
-    private static func quoted(in text: String) -> [Passage] {
-        guard let regex = try? NSRegularExpression(
-            pattern: #"[“「『"]([^”」』"\n]{2,100})[”」』"]"#
-        ) else { return [] }
-        let nsText = text as NSString
-        return regex.matches(
-            in: text,
-            range: NSRange(location: 0, length: nsText.length)
-        ).compactMap { match in
-            guard match.numberOfRanges > 1 else { return nil }
-            return Passage(
-                text: nsText.substring(with: match.range(at: 1))
-                    .trimmingCharacters(in: .whitespacesAndNewlines),
-                location: match.range.location
+    private static func makeStoryBible(
+        document: NovelDocument,
+        characters: [CharacterProfile],
+        episodeCount: Int,
+        language: AppLanguage
+    ) -> StoryBible {
+        let canonical = characters.map { character in
+            CanonicalCharacter(
+                id: character.id,
+                sourceNames: [character.sourceName],
+                scriptName: character.targetName,
+                role: language == .english ? englishRole(character.role) : character.role,
+                relationships: [language == .english
+                    ? "Relationships must be confirmed by source evidence"
+                    : "关系须由原文证据确认"],
+                evidenceChapterIDs: document.chapters.filter {
+                    $0.content.contains(character.sourceName)
+                }.prefix(8).map(\.id)
             )
         }
-    }
-
-    private static func actionLines(in text: String) -> [String] {
-        text.split(separator: "\n").map {
-            String($0).trimmingCharacters(in: .whitespacesAndNewlines)
-        }.filter {
-            (12...110).contains($0.count)
-                && !$0.contains("“")
-                && !$0.hasPrefix("[")
-                && !$0.hasPrefix("【")
+        let timeline = document.chapters.prefix(max(episodeCount, 8)).enumerated().map { index, chapter in
+            TimelineEvent(
+                id: "timeline-\(index + 1)",
+                order: index + 1,
+                location: language == .english ? "As established in the source chapter" : "以原文章节为准",
+                time: language == .english ? "Chapter \(chapter.index)" : "第\(chapter.index)章",
+                participants: characters.filter { chapter.content.contains($0.sourceName) }.map(\.targetName),
+                cause: language == .english
+                    ? (index == 0 ? "Opening of the story" : "Consequence of the previous chapter")
+                    : (index == 0 ? "故事开端" : "承接上一章后果"),
+                event: summarySentence(chapter.content),
+                effect: language == .english ? "Advances the conflict into its next stage" : "推动下一阶段冲突",
+                evidenceChapterIDs: [chapter.id]
+            )
         }
-    }
-
-    private static func firstAction(in text: String) -> String {
-        actionLines(in: text).first ?? String(text.prefix(70))
-    }
-
-    private static func segment(_ text: String, index: Int, count: Int) -> String {
-        let characters = Array(text)
-        guard !characters.isEmpty else { return "" }
-        let start = index * characters.count / count
-        let end = min(characters.count, (index + 1) * characters.count / count)
-        return String(characters[start..<max(start + 1, end)])
-    }
-
-    private static func inferSpeaker(
-        source: String,
-        position: Int,
-        characters: [CharacterProfile]
-    ) -> String? {
-        let nsText = source as NSString
-        let lower = max(0, position - 220)
-        let upper = min(nsText.length, position + 220)
-        let context = nsText.substring(
-            with: NSRange(location: lower, length: max(0, upper - lower))
+        return StoryBible(
+            premise: document.intro.isEmpty ? summarySentence(document.rawText) : document.intro,
+            canonicalCharacters: canonical,
+            worldRules: [
+                WorldRule(
+                    id: "world-1",
+                    subject: language == .english ? "Abilities and identities" : "能力与身份",
+                    fact: language == .english
+                        ? "All abilities, injuries, identities, and relationships must follow source evidence"
+                        : "所有能力、伤势、身份和关系以原文证据为准",
+                    cause: language == .english
+                        ? "Prevents analytical inference from becoming invented canon"
+                        : "避免把推测写成既定事实",
+                    evidenceChapterIDs: document.chapters.prefix(3).map(\.id)
+                ),
+            ],
+            propThreads: [],
+            timeline: timeline
         )
-        return characters
-            .filter { context.contains($0.sourceName) }
-            .max { lhs, rhs in lhs.occurrences < rhs.occurrences }?
-            .targetName
     }
 
-    private static func inferLocation(_ text: String) -> (heading: String, name: String) {
-        let options: [(String, String, String)] = [
-            ("夜市|地摊", "夜·外", "城市夜市"),
-            ("医院|病房|急诊", "日·内", "医院"),
-            ("教室|学校|一中", "日·内", "教室"),
-            ("家里|客厅|卧室|公寓", "夜·内", "住所"),
-            ("商场|店里|超市", "日·内", "商场"),
-            ("街|路边|巷", "日·外", "街道"),
-        ]
-        for (pattern, heading, name) in options
-        where text.range(of: pattern, options: .regularExpression) != nil {
-            return (heading, name)
+    private static func makeEpisode(
+        number: Int,
+        document: NovelDocument,
+        characters: [CharacterProfile],
+        options: AdaptationOptions,
+        previousExit: String,
+        language: AppLanguage
+    ) -> Episode {
+        let chapterIndex = min(document.chapters.count - 1, (number - 1) * document.chapters.count / max(1, options.episodeCount))
+        let nextIndex = min(document.chapters.count - 1, chapterIndex + 1)
+        let sourceChapters = Array(document.chapters[chapterIndex...nextIndex])
+        let lead = characters.first?.targetName ?? (language == .english ? "Elias" : "程野")
+        let ally = characters.dropFirst().first?.targetName ?? (language == .english ? "Mara" : "沈知夏")
+        let opponent = characters.dropFirst(2).first?.targetName ?? (language == .english ? "Victor" : "顾川")
+        let fact = summarySentence(sourceChapters.map(\.content).joined(separator: "\n"))
+        let sourceTitle = sourceChapters.first?.title ?? ""
+        let chapterTitle = language == .english && (sourceTitle.isEmpty || sourceTitle == "正文")
+            ? "Source Story"
+            : (sourceTitle.isEmpty ? "命运反转" : sourceTitle)
+        let sceneCount = dynamicSceneCount(number: number, duration: options.durationSeconds, fact: fact)
+        let conflict = language == .english
+            ? "\(lead) must choose how to respond to the crisis triggered by \"\(chapterTitle)\""
+            : "\(lead)必须在“\(chapterTitle)”引发的危机中作出选择"
+        let opening = language == .english
+            ? "As \(lead) moves, \(opponent) reveals evidence that could change everything."
+            : "\(lead)刚要行动，\(opponent)当众亮出一件足以改变局面的证据。"
+        let reversal = language == .english
+            ? "The evidence aimed at \(lead) exposes a flaw in what \(opponent) has concealed."
+            : "看似针对\(lead)的证据，反而暴露了\(opponent)隐瞒的漏洞。"
+        let endHook = language == .english
+            ? "\(lead) pins down the evidence and says, \"You are not the one who did it.\" Cut to black."
+            : "\(lead)按住关键证据，低声说：“真正动手的人，不是你。”画面骤黑。"
+        let contract = EpisodeContract(
+            dominantConflict: conflict,
+            newInformation: [fact],
+            visualHook: opening,
+            transitionFromPrevious: previousExit,
+            activePropThreads: [language == .english ? "Critical evidence" : "关键证据"],
+            entryState: language == .english
+                ? "\(lead) has limited information as external pressure closes in"
+                : "\(lead)掌握的信息有限，外部压力逼近",
+            exitState: language == .english
+                ? "\(lead) finds a deeper truth and the conflict escalates"
+                : "\(lead)发现更深层真相，冲突升级"
+        )
+        let scenes = makeScenes(
+            count: sceneCount,
+            number: number,
+            lead: lead,
+            ally: ally,
+            opponent: opponent,
+            fact: fact,
+            sourceTitle: chapterTitle,
+            language: language
+        )
+        return Episode(
+            id: "episode-\(number)",
+            number: number,
+            title: conciseTitle(chapterTitle, fallback: language == .english ? "Truth Approaches" : "真相逼近"),
+            sourceChapterIDs: sourceChapters.map(\.id),
+            plannedSceneCount: sceneCount,
+            openingHook: opening,
+            objective: conflict,
+            reversal: reversal,
+            endHook: endHook,
+            contract: contract,
+            runtime: nil,
+            semanticAudit: nil,
+            scenes: scenes,
+            content: ""
+        )
+    }
+
+    private static func makeScenes(
+        count: Int,
+        number: Int,
+        lead: String,
+        ally: String,
+        opponent: String,
+        fact: String,
+        sourceTitle: String,
+        language: AppLanguage
+    ) -> [ScriptScene] {
+        if language == .english {
+            return makeEnglishScenes(
+                count: count,
+                number: number,
+                lead: lead,
+                ally: ally,
+                opponent: opponent,
+                sourceTitle: sourceTitle
+            )
         }
-        return ("日·外", "城市街区")
+        let first = ScriptScene(
+            id: "episode-\(number)-scene-1",
+            heading: "内景 议事厅 - 日",
+            location: "众人围住桌上的黑色证物，门外脚步声逼近。",
+            action: "△ \(opponent)把证物推到桌边。\(lead)没有伸手，先盯住对方袖口的暗纹；\(ally)悄悄挡住出口。",
+            dialogue: [
+                DialogueLine(speaker: opponent, text: "证据在这，你还想狡辩？"),
+                DialogueLine(speaker: lead, text: "急着定罪，说明你怕我看。"),
+                DialogueLine(speaker: opponent, text: "一个废人，也配查我？"),
+                DialogueLine(speaker: ally, text: "让他看完，你怕什么？"),
+                DialogueLine(speaker: opponent, text: "好。看完就滚出去。"),
+                DialogueLine(speaker: lead, text: "这道暗纹，只有凶手会留。"),
+                DialogueLine(speaker: opponent, text: "你胡说！这分明来自“\(sourceTitle)”！"),
+            ]
+        )
+        let second = ScriptScene(
+            id: "episode-\(number)-scene-2",
+            heading: "内景 侧廊 - 连续",
+            location: "长廊灯火忽明忽暗，证物表面浮出一道细裂。",
+            action: "△ \(lead)突然折返，把证物按在灯下。黑气沿着裂纹窜出；\(opponent)脸色骤变，伸手便抢。",
+            dialogue: [
+                DialogueLine(speaker: ally, text: "它在变黑！"),
+                DialogueLine(speaker: opponent, text: "放手！那东西会要你的命！"),
+                DialogueLine(speaker: lead, text: "你终于承认它有问题。"),
+                DialogueLine(speaker: opponent, text: "我只是奉命送来。"),
+                DialogueLine(speaker: ally, text: "奉谁的命？"),
+                DialogueLine(speaker: lead, text: "答案就在这缕气里。"),
+                DialogueLine(speaker: opponent, text: "你查下去，所有人都会死。"),
+            ]
+        )
+        if count == 1 {
+            return [ScriptScene(
+                id: first.id,
+                heading: first.heading,
+                location: first.location,
+                action: first.action + " " + second.action,
+                dialogue: first.dialogue + second.dialogue
+            )]
+        }
+        if count == 3 {
+            let third = ScriptScene(
+                id: "episode-\(number)-scene-3",
+                heading: "外景 石阶 - 连续",
+                location: "夜风卷过石阶，远处警钟突然连响三声。",
+                action: "△ 黑气在空中凝成半枚印记。\(lead)抬眼记下纹路，反手把证物封进袖中。",
+                dialogue: [
+                    DialogueLine(speaker: ally, text: "这印记属于谁？"),
+                    DialogueLine(speaker: lead, text: "一个本该死去的人。"),
+                    DialogueLine(speaker: opponent, text: "你根本不知道自己惹了谁。"),
+                ]
+            )
+            return [first, second, third]
+        }
+        return [first, second]
+    }
+
+    private static func makeEnglishScenes(
+        count: Int,
+        number: Int,
+        lead: String,
+        ally: String,
+        opponent: String,
+        sourceTitle: String
+    ) -> [ScriptScene] {
+        let first = ScriptScene(
+            id: "episode-\(number)-scene-1",
+            heading: "INT. COUNCIL CHAMBER - DAY",
+            location: "A black piece of evidence rests on the table as footsteps approach outside.",
+            action: "\(opponent) pushes the evidence forward. \(lead) studies a hidden mark on the sleeve while \(ally) quietly blocks the exit.",
+            dialogue: [
+                DialogueLine(speaker: opponent, text: "The evidence is here, and everyone has seen what you did."),
+                DialogueLine(speaker: lead, text: "You rushed to accuse me because you feared I would examine it."),
+                DialogueLine(speaker: opponent, text: "You have no authority here, and no one believes your story."),
+                DialogueLine(speaker: ally, text: "Then let the examination finish, unless there is something you fear."),
+                DialogueLine(speaker: opponent, text: "Fine, but when this ends, you both leave without another word."),
+                DialogueLine(speaker: lead, text: "This hidden mark could only have been left by the person responsible."),
+                DialogueLine(speaker: opponent, text: "That is impossible; the object came directly from \(sourceTitle)."),
+            ]
+        )
+        let second = ScriptScene(
+            id: "episode-\(number)-scene-2",
+            heading: "INT. SIDE CORRIDOR - CONTINUOUS",
+            location: "The corridor lights flicker as a thin crack spreads across the evidence.",
+            action: "\(lead) turns back and holds the object under a lamp. Dark smoke escapes through the crack as \(opponent) lunges for it.",
+            dialogue: [
+                DialogueLine(speaker: ally, text: "The surface is turning black, and the crack is still moving."),
+                DialogueLine(speaker: opponent, text: "Put it down now; that object can kill everyone in this corridor."),
+                DialogueLine(speaker: lead, text: "You finally admitted that the evidence was never safe or ordinary."),
+                DialogueLine(speaker: opponent, text: "I only delivered it, and I was never told what it contained."),
+                DialogueLine(speaker: ally, text: "Who gave the order, and why were we chosen as witnesses?"),
+                DialogueLine(speaker: lead, text: "The answer is inside this smoke, and someone expected us to miss it."),
+                DialogueLine(speaker: opponent, text: "If you keep searching, the people behind this will destroy us all."),
+            ]
+        )
+        if count == 1 {
+            return [ScriptScene(
+                id: first.id,
+                heading: first.heading,
+                location: first.location,
+                action: first.action + " " + second.action,
+                dialogue: first.dialogue + second.dialogue
+            )]
+        }
+        if count == 3 {
+            let third = ScriptScene(
+                id: "episode-\(number)-scene-3",
+                heading: "EXT. STONE STEPS - CONTINUOUS",
+                location: "Wind crosses the steps as a distant alarm rings three times.",
+                action: "The smoke forms half of an emblem. \(lead) memorizes it and seals the evidence inside a coat.",
+                dialogue: [
+                    DialogueLine(speaker: ally, text: "Whose emblem is that, and why was half of it erased?"),
+                    DialogueLine(speaker: lead, text: "It belongs to someone who was declared dead years ago."),
+                    DialogueLine(speaker: opponent, text: "You still do not understand who you have challenged tonight."),
+                ]
+            )
+            return [first, second, third]
+        }
+        return [first, second]
+    }
+
+    private static func dynamicSceneCount(number: Int, duration: Int, fact: String) -> Int {
+        let range = EpisodeBudget.sceneRange(durationSeconds: duration)
+        if fact.count < 80 { return range.lowerBound }
+        if number % 4 == 0, range.upperBound >= 3 { return 3 }
+        return min(2, range.upperBound)
+    }
+
+    private static func conciseTitle(_ value: String, fallback: String) -> String {
+        let cleaned = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return cleaned.isEmpty ? fallback : String(cleaned.prefix(8))
+    }
+
+    private static func summarySentence(_ value: String) -> String {
+        let compact = value.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !compact.isEmpty else { return "原文在本段推进了人物关系和核心冲突。" }
+        let end = compact.firstIndex(where: { "。！？!?".contains($0) }) ?? compact.endIndex
+        let sentence = String(compact[..<end])
+        return String(sentence.prefix(120))
+    }
+
+    private static func englishRole(_ role: String) -> String {
+        return switch role {
+        case "核心主角", "主角", "男主", "女主": "Protagonist"
+        case "主要角色": "Main character"
+        case "关键配角", "配角", "盟友": "Supporting character"
+        default: role
+        }
     }
 }
 
 enum PipelineError: LocalizedError {
-    case invalidNames
     case noDocument
+    case invalidNames
     case missingAPIKey
-    case invalidResponse
+    case noResult
+    case noBookAnalysis
+    case noStoryboard
+    case missingImageModel
+    case missingSpeechModel
+    case noSpeechText
 
     var errorDescription: String? {
         switch self {
-        case .invalidNames: "人物新名不能为空或重复"
-        case .noDocument: "请先导入小说文本"
+        case .noDocument: "请先导入故事或剧本"
+        case .invalidNames: "人物新名不能为空、重复、与原名相同或使用占位名"
         case .missingAPIKey: "在线模式需要先配置 API Key"
-        case .invalidResponse: "模型返回了无法解析的结构化内容"
+        case .noResult: "尚未生成可导出的剧本"
+        case .noBookAnalysis: "尚未生成拆书报告"
+        case .noStoryboard: "尚未生成分镜制作包"
+        case .missingImageModel: "请先在模型设置中填写图片模型；分镜文本仍可离线使用"
+        case .missingSpeechModel: "请先在模型设置中填写语音模型；分镜文本仍可离线使用"
+        case .noSpeechText: "当前镜头没有可用于配音的旁白或台词"
         }
     }
 }
