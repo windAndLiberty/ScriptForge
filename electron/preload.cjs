@@ -23,4 +23,5 @@ contextBridge.exposeInMainWorld("desktopAPI", {
   synthesizeSpeech: (payload) => ipcRenderer.invoke("media:speech", payload),
   readProjectMedia: (payload) => ipcRenderer.invoke("media:read", payload),
   getVersion: () => ipcRenderer.invoke("app:version"),
+  setUiScale: (value) => ipcRenderer.invoke("app:set-ui-scale", value),
 });

@@ -384,6 +384,53 @@ export interface BookAnalysisResult {
   outputLanguage?: "Simplified Chinese" | "English";
 }
 
+export interface SingleChapterStoryBoard {
+  worldName: string;
+  worldBackground: string;
+  coreEntries: string;
+  forbiddenWords: string;
+}
+
+export interface SingleChapterScriptVersion {
+  id: string;
+  createdAt: string;
+  content: string;
+  source: "generated" | "ai_revision" | "manual";
+  instruction?: string;
+}
+
+export interface SingleChapterConversationMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+  versionId?: string;
+}
+
+export interface SingleChapterComparison {
+  oldVersionId: string;
+  newVersionId: string;
+  reviewVersionId: string;
+}
+
+export interface SingleChapterWorkflow {
+  selectedChapterId?: string;
+  renameConfirmed: boolean;
+  stage:
+    | "characters"
+    | "ready"
+    | "first_pass"
+    | "second_pass"
+    | "review"
+    | "failed";
+  storyBoard: SingleChapterStoryBoard;
+  firstPass?: string;
+  versions: SingleChapterScriptVersion[];
+  activeVersionId?: string;
+  comparison?: SingleChapterComparison;
+  messages: SingleChapterConversationMessage[];
+}
+
 export interface StoredProject {
   schemaVersion?: 5;
   id: string;
@@ -397,6 +444,7 @@ export interface StoredProject {
   bookAnalysis?: BookAnalysisResult | null;
   productionPackage?: ProductionPackage | null;
   creativeWorkspace?: CreativeWorkspace;
+  singleChapterWorkflow?: SingleChapterWorkflow;
   phase: PipelinePhase;
   updatedAt: string;
 }

@@ -5,6 +5,7 @@ const { readDocument, SUPPORTED_EXTENSIONS } = require("./document-import.cjs");
 const { ProjectStore } = require("./project-store.cjs");
 const { appendApiPath, normalizeApiRoot } = require("./endpoint.cjs");
 const { makeDocx } = require("./docx-export.cjs");
+const { applyUiScale } = require("./ui-scale.cjs");
 const {
   apiErrorMessage,
   authHeaders,
@@ -38,7 +39,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1540,
     height: 960,
-    minWidth: 1180,
+    minWidth: 1080,
     minHeight: 720,
     backgroundColor: "#f5f2eb",
     icon: path.join(__dirname, "../build/icon-aura.png"),
@@ -352,6 +353,8 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle("app:version", () => app.getVersion());
+  ipcMain.handle("app:set-ui-scale", (event, value) =>
+    applyUiScale(event.sender, value));
 
   createWindow();
 

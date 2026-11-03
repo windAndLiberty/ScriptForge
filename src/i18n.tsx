@@ -21,6 +21,7 @@ const english: Record<string, string> = {
   "显示设置": "Display settings",
   "缩小界面": "Zoom out",
   "放大界面": "Zoom in",
+  "重置缩放": "Reset zoom",
   "切换主题": "Switch theme",
   "图片模型（可选）": "Image model (optional)",
   "语音模型（可选）": "Speech model (optional)",
@@ -64,6 +65,7 @@ const english: Record<string, string> = {
   "已重置到初始首页；原项目已保存在项目档案":
     "Reset complete; the previous project is saved in Projects",
   "导入小说": "Import Novel",
+  "导入章节": "Import Chapter",
   "导出成稿": "Export Script",
   "改编管线运行中": "Pipeline running",
   "结构化改编管线": "Structured adaptation pipeline",
@@ -75,15 +77,37 @@ const english: Record<string, string> = {
   "知道了": "Dismiss",
   "模型设置已安全保存": "Model settings saved securely",
   "把长篇故事，": "Forge long-form stories",
+  "把一个章节，": "Turn one chapter",
+  "改编成": "into a ",
+  "完整短剧剧本。": "complete micro-drama script.",
+  "确认人物改名后，使用同一个主模型依次完成小说初改与视频化再改，再通过对话持续调整成稿。":
+    "Confirm cast renames, run two fixed passes on the same primary model, then keep revising the finished script through conversation.",
   "锻造成": "into ",
   "能拍的短剧。": "shootable micro dramas.",
   "不再把整本小说塞进一次提示词。先建立故事事实、人物圣经和改名表，再规划分集、逐集生成并自动质检。":
     "Stop forcing an entire novel into one prompt. Build story facts, a character bible, and a rename map before planning, drafting, and validating each episode.",
   "导入小说文本": "Import Novel Text",
+  "导入单章文本": "Import Chapter Text",
+  "支持常见文档格式，也可直接拖入窗口":
+    "Supports common document formats and drag-and-drop",
   "支持 UTF-8 编码的 TXT / MD 文件，可直接拖入窗口":
     "Supports UTF-8 TXT / MD files and drag-and-drop",
   "可靠的数据流": "RELIABLE DATA FLOW",
   "章节切片": "Chapter Segmentation",
+  "人物确认": "Confirm Cast",
+  "手动改名或由主模型生成，确认后才能继续":
+    "Rename manually or with the primary model, then confirm to continue",
+  "小说初改": "First Pass",
+  "固定爆款开头与结尾留钩结构":
+    "Fixed viral opening and cliffhanger ending structure",
+  "视频化再改": "Video Pass",
+  "以上一步输出为输入继续精简":
+    "Use the previous output as the next input",
+  "审阅调整": "Review & Revise",
+  "在旧版和新版之间选择下一轮基线":
+    "Choose the previous or new version as the next baseline",
+  "单章 · 已成稿": "Single chapter · Draft ready",
+  "单章 · 待生成": "Single chapter · Not generated",
   "完整处理长文，不再截断前 8000 字":
     "Process the full manuscript instead of truncating at 8,000 characters",
   "事实与人物": "Facts & Characters",

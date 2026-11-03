@@ -103,6 +103,13 @@ import {
 import { AuthorStudio } from "./creative/AuthorStudio";
 import { emptyCreativeWorkspace, type CreativeWorkspace } from "./creative/types";
 import { StoryboardWorkspace } from "./StoryboardWorkspace";
+import { normalizeUiScale, stepUiScale } from "./uiScale";
+import { SingleChapterStudio } from "./SingleChapterStudio";
+import {
+  activeSingleChapterScript,
+  emptySingleChapterWorkflow,
+  normalizeSingleChapterWorkflow,
+} from "./pipeline/singleChapter";
 
 type PrimaryView = "book" | "creative" | "studio" | "projects" | "prompts";
 
@@ -157,6 +164,7 @@ function createProject(): StoredProject {
     productionPackage: null,
     bookAnalysis: null,
     creativeWorkspace: emptyCreativeWorkspace(),
+    singleChapterWorkflow: emptySingleChapterWorkflow(),
     phase: "idle",
     updatedAt: new Date().toISOString(),
   };
@@ -184,6 +192,10 @@ function normalizeStoredProject(value: StoredProject): StoredProject {
     result: null,
     bookAnalysis: sanitizeBookAnalysisResult(value?.bookAnalysis),
     creativeWorkspace: value?.creativeWorkspace || emptyCreativeWorkspace(),
+    singleChapterWorkflow: normalizeSingleChapterWorkflow(
+      value?.singleChapterWorkflow,
+      document?.chapters[0]?.id,
+    ),
   };
   normalized.result = sanitizeAdaptationResult(
     value?.result,
@@ -286,7 +298,7 @@ export default function App() {
     (localStorage.getItem("scriptforge.appearance.v1") as "light" | "dark") || "dark",
   );
   const [uiScale, setUiScale] = useState(() =>
-    Math.max(0.85, Math.min(1.3, Number(localStorage.getItem("scriptforge.ui-scale.v1")) || 1)),
+    normalizeUiScale(localStorage.getItem("scriptforge.ui-scale.v1")),
   );
   const [selectedChapter, setSelectedChapter] = useState(0);
   const [selectedEpisode, setSelectedEpisode] = useState(0);
@@ -318,9 +330,16 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = appearance;
-    document.documentElement.style.setProperty("--ui-scale", String(uiScale));
     localStorage.setItem("scriptforge.appearance.v1", appearance);
     localStorage.setItem("scriptforge.ui-scale.v1", String(uiScale));
+    if (window.desktopAPI) {
+      document.documentElement.style.zoom = "1";
+      void window.desktopAPI.setUiScale(uiScale).catch(() => {
+        document.documentElement.style.zoom = String(uiScale);
+      });
+    } else {
+      document.documentElement.style.zoom = String(uiScale);
+    }
   }, [appearance, uiScale]);
 
   useEffect(() => {
@@ -446,7 +465,18 @@ export default function App() {
     try {
       setError("");
       const document = parseNovelText(text, fileName);
-      const characters = extractCharacters(document);
+      const firstChapter = document.chapters[0];
+      const characters = extractCharacters(
+        firstChapter
+          ? {
+              ...document,
+              title: firstChapter.title || document.title,
+              rawText: firstChapter.content,
+              charCount: firstChapter.charCount,
+              chapters: [firstChapter],
+            }
+          : document,
+      );
       const options = {
         ...DEFAULT_OPTIONS,
         episodeCount: Math.min(
@@ -470,6 +500,7 @@ export default function App() {
         options,
         phase: "characters",
         creativeWorkspace: preserveCreative || emptyCreativeWorkspace(),
+        singleChapterWorkflow: emptySingleChapterWorkflow(firstChapter?.id),
       });
       setSelectedChapter(0);
       setSelectedEpisode(0);
@@ -520,7 +551,6 @@ export default function App() {
           });
         }).catch((caught) => setError(cleanAppError(caught, t("章节版本写入失败"))));
       }
-      void runAutomaticNaming(document, characters, options);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : t("文本导入失败"));
     }
@@ -718,11 +748,14 @@ export default function App() {
   };
 
   const exportScript = async () => {
-    if (!project.result) {
+    const singleChapterScript = activeSingleChapterScript(
+      project.singleChapterWorkflow,
+    );
+    if (!singleChapterScript) {
       setError(t("暂无可导出的剧本"));
       return;
     }
-    const content = projectExport(project.result, project, t);
+    const content = singleChapterScript;
     if (window.desktopAPI) {
       const path = await window.desktopAPI.saveTextFile({
         fileName: project.name,
@@ -1083,13 +1116,6 @@ export default function App() {
             {t("项目档案")}
             <span className="nav-count">{recentProjectCount}</span>
           </button>
-          <button
-            className={`nav-item ${primaryView === "prompts" ? "active" : ""}`}
-            onClick={() => setPrimaryView("prompts")}
-          >
-            <Library size={17} />
-            {t("提示词资产")}
-          </button>
         </nav>
 
         <div className="sidebar-section">
@@ -1108,10 +1134,9 @@ export default function App() {
               <strong>{project.document ? project.document.title : t("尚未导入")}</strong>
               <span>
                 {project.document
-                  ? t("{{chapters}}章 · {{episodes}}集", {
-                      chapters: project.document.chapters.length,
-                      episodes: project.result?.episodes.length || "—",
-                    })
+                  ? activeSingleChapterScript(project.singleChapterWorkflow)
+                    ? t("单章 · 已成稿")
+                    : t("单章 · 待生成")
                   : t("导入小说后开始")}
               </span>
             </div>
@@ -1209,9 +1234,9 @@ export default function App() {
               </button>
             </div>
             <div className="accessibility-controls" aria-label={t("显示设置")}>
-              <button onClick={() => setUiScale((value) => Math.max(0.85, Number((value - 0.1).toFixed(2))))} title={t("缩小界面")} disabled={uiScale <= 0.85}><ZoomOut size={15}/></button>
-              <span>{Math.round(uiScale * 100)}%</span>
-              <button onClick={() => setUiScale((value) => Math.min(1.3, Number((value + 0.1).toFixed(2))))} title={t("放大界面")} disabled={uiScale >= 1.3}><ZoomIn size={15}/></button>
+              <button onClick={() => setUiScale((value) => stepUiScale(value, -1))} title={t("缩小界面")} disabled={uiScale <= 0.85}><ZoomOut size={15}/></button>
+              <button className="scale-value" onClick={() => setUiScale(1)} title={t("重置缩放")}>{Math.round(uiScale * 100)}%</button>
+              <button onClick={() => setUiScale((value) => stepUiScale(value, 1))} title={t("放大界面")} disabled={uiScale >= 1.3}><ZoomIn size={15}/></button>
               <button onClick={() => setAppearance((value) => value === "dark" ? "light" : "dark")} title={t("切换主题")}>
                 {appearance === "dark" ? <Sun size={15}/> : <Moon size={15}/>}<span className="visually-hidden">{t("切换主题")}</span>
               </button>
@@ -1228,7 +1253,7 @@ export default function App() {
             )}
             <button className="button secondary" onClick={openFile}>
               <Import size={16} />
-              {t("导入小说")}
+              {t(primaryView === "studio" ? "导入章节" : "导入小说")}
             </button>
             {primaryView !== "creative" && <button
               className="button dark"
@@ -1238,7 +1263,7 @@ export default function App() {
               disabled={
                 primaryView === "book"
                   ? !project.bookAnalysis
-                  : !project.result
+                  : !activeSingleChapterScript(project.singleChapterWorkflow)
               }
             >
               <Download size={16} />
@@ -1308,138 +1333,16 @@ export default function App() {
         ) : !project.document ? (
           <EmptyWorkspace onImport={openFile} />
         ) : (
-          <>
-            <section className="pipeline-strip">
-              <div className="pipeline-title">
-                <div className={`pulse ${running ? "running" : ""}`} />
-                <div>
-                  <strong>{t(running ? "改编管线运行中" : "结构化改编管线")}</strong>
-                  <span>{progressDetail || t("人物表已就绪，角色名称可继续手动修改")}</span>
-                </div>
-              </div>
-              <div className="phase-rail">
-                {PHASES.map((phase, index) => {
-                  const phaseIndex = PHASE_ORDER.indexOf(phase.id);
-                  const completed =
-                    project.phase === "completed" || currentPhaseIndex > phaseIndex;
-                  const active = project.phase === phase.id;
-                  return (
-                    <div
-                      key={phase.id}
-                      className={`phase ${completed ? "done" : ""} ${active ? "active" : ""}`}
-                    >
-                      <span>{completed ? <Check size={12} /> : index + 1}</span>
-                      {t(phase.label)}
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="progress-bar">
-                <span style={{ width: `${progress}%` }} />
-              </div>
-            </section>
-
-            <section className={`workspace-grid ${activeTab === "storyboard" ? "storyboard-mode" : ""}`}>
-              <SourcePanel
-                project={project}
-                selectedChapter={selectedChapter}
-                onSelectChapter={setSelectedChapter}
-                selectedChapterData={selectedChapterData}
-                onImport={openFile}
-              />
-
-              <section className="studio-panel panel">
-                <div className="studio-toolbar">
-                  <div className="tabs">
-                    <button
-                      className={activeTab === "outline" ? "active" : ""}
-                      onClick={() => setActiveTab("outline")}
-                    >
-                      {t("分集设计")}
-                    </button>
-                    <button
-                      className={activeTab === "script" ? "active" : ""}
-                      onClick={() => setActiveTab("script")}
-                      disabled={!project.result}
-                    >
-                      {t("剧本编辑")}
-                    </button>
-                    <button
-                      className={activeTab === "storyboard" ? "active" : ""}
-                      onClick={() => setActiveTab("storyboard")}
-                      disabled={!project.result}
-                    >
-                      {t("分镜制作")}
-                    </button>
-                    <button
-                      className={activeTab === "bible" ? "active" : ""}
-                      onClick={() => setActiveTab("bible")}
-                      disabled={!project.result?.storyBible}
-                    >
-                      {t("全剧圣经")}
-                    </button>
-                    <button
-                      className={activeTab === "quality" ? "active" : ""}
-                      onClick={() => setActiveTab("quality")}
-                      disabled={!project.result}
-                    >
-                      {t("质检报告")}
-                    </button>
-                  </div>
-                  <button className="icon-button" aria-label={t("搜索")}>
-                    <Search size={17} />
-                  </button>
-                </div>
-
-                {activeTab === "outline" && (
-                  <OutlineWorkspace
-                    project={project}
-                    useOnline={useOnline}
-                    settings={settings}
-                    running={running}
-                    onUseOnline={setUseOnline}
-                    onUpdateOptions={updateOptions}
-                    onRun={runPipeline}
-                    onOpenSettings={() => setSettingsOpen(true)}
-                  />
-                )}
-                {activeTab === "script" && project.result && (
-                  <ScriptWorkspace
-                    project={project}
-                    selectedEpisode={selectedEpisode}
-                    onSelectEpisode={setSelectedEpisode}
-                    episode={selectedEpisodeData}
-                    onChangeContent={updateEpisodeContent}
-                  />
-                )}
-                {activeTab === "bible" && project.result?.storyBible && (
-                  <BibleWorkspace result={project.result} />
-                )}
-                {activeTab === "storyboard" && project.result && (
-                  <StoryboardWorkspace
-                    project={project}
-                    locale={locale}
-                    settings={settings}
-                    promptAssets={promptAssets}
-                    onPackage={(productionPackage) =>
-                      setProject((current) => ({ ...current, productionPackage }))
-                    }
-                    onError={setError}
-                    onNotice={setToast}
-                  />
-                )}
-                {activeTab === "quality" && project.result && (
-                  <QualityWorkspace result={project.result} />
-                )}
-              </section>
-
-              <CharacterPanel
-                project={project}
-                onUpdateCharacter={updateCharacter}
-                onOpenQuality={() => setActiveTab("quality")}
-              />
-            </section>
-          </>
+          <SingleChapterStudio
+            project={project}
+            settings={settings}
+            locale={locale}
+            onChange={setProject}
+            onImport={openFile}
+            onOpenSettings={() => setSettingsOpen(true)}
+            onError={setError}
+            onNotice={setToast}
+          />
         )}
       </main>
 
@@ -2524,20 +2427,20 @@ function EmptyWorkspace({ onImport }: { onImport: () => void }) {
   return (
     <section className="empty-workspace">
       <div className="empty-copy">
-        <span className="kicker">NOVEL → MICRO DRAMA</span>
+        <span className="kicker">ONE CHAPTER → ONE SCRIPT</span>
         <h1>
-          {t("把长篇故事，")}
+          {t("把一个章节，")}
           <br />
-          {t("锻造成")}<span>{t("能拍的短剧。")}</span>
+          {t("改编成")}<span>{t("完整短剧剧本。")}</span>
         </h1>
         <p>
-          {t("不再把整本小说塞进一次提示词。先建立故事事实、人物圣经和改名表，再规划分集、逐集生成并自动质检。")}
+          {t("确认人物改名后，使用同一个主模型依次完成小说初改与视频化再改，再通过对话持续调整成稿。")}
         </p>
         <button className="button primary large" onClick={onImport}>
           <UploadCloud size={19} />
-          {t("导入小说文本")}
+          {t("导入单章文本")}
         </button>
-        <small>{t("支持 UTF-8 编码的 TXT / MD 文件，可直接拖入窗口")}</small>
+        <small>{t("支持常见文档格式，也可直接拖入窗口")}</small>
       </div>
       <div className="empty-pipeline-card">
         <div className="card-cap">
@@ -2545,10 +2448,10 @@ function EmptyWorkspace({ onImport }: { onImport: () => void }) {
           <span>LOCAL FIRST</span>
         </div>
         {[
-          ["01", t("章节切片"), t("完整处理长文，不再截断前 8000 字")],
-          ["02", t("事实与人物"), t("证据可回溯，统一维护角色与关系")],
-          ["03", t("分集与成稿"), t("先规划后写作，连续性上下文逐集传递")],
-          ["04", t("自动质检"), t("旧名、钩子、时长、结构和风险可量化")],
+          ["01", t("人物确认"), t("手动改名或由主模型生成，确认后才能继续")],
+          ["02", t("小说初改"), t("固定爆款开头与结尾留钩结构")],
+          ["03", t("视频化再改"), t("以上一步输出为输入继续精简")],
+          ["04", t("审阅调整"), t("在旧版和新版之间选择下一轮基线")],
         ].map((item) => (
           <div className="dataflow-row" key={item[0]}>
             <span>{item[0]}</span>

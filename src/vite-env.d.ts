@@ -59,6 +59,7 @@ interface DesktopAPI {
   synthesizeSpeech: (payload: { projectId: string; episodeId: string; shotId: string; text: string }) => Promise<string>;
   readProjectMedia: (payload: { projectId: string; relativePath: string }) => Promise<string>;
   getVersion: () => Promise<string>;
+  setUiScale: (value: number) => Promise<number>;
 }
 
 interface Window {

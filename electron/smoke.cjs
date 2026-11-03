@@ -1,10 +1,17 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const fsSync = require("node:fs");
 const fs = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
+const { applyUiScale } = require("./ui-scale.cjs");
 
 app.commandLine.appendSwitch("disable-gpu");
+if (/^(?:1|1\.5)$/.test(process.env.SCRIPT_FORGE_DEVICE_SCALE_FACTOR || "")) {
+  app.commandLine.appendSwitch(
+    "force-device-scale-factor",
+    process.env.SCRIPT_FORGE_DEVICE_SCALE_FACTOR,
+  );
+}
 
 const smokeUserDataDir = fsSync.mkdtempSync(
   path.join(os.tmpdir(), "scriptforge-smoke-"),
@@ -134,6 +141,28 @@ function reloadWindow(window) {
 }
 
 app.whenReady().then(async () => {
+  ipcMain.handle("app:set-ui-scale", (event, value) =>
+    applyUiScale(event.sender, value));
+  ipcMain.handle("project:list", () => []);
+  ipcMain.handle("project:save", (_event, project) => ({ project }));
+  ipcMain.handle("settings:get", () => ({
+    provider: "openai",
+    protocol: "responses",
+    authMode: "bearer",
+    structuredOutput: "json_schema",
+    baseUrl: "https://api.openai.com/v1",
+    model: "gpt-5.6-terra",
+    flashModel: "",
+    imageModel: "",
+    speechModel: "",
+    speechVoice: "alloy",
+    consentedEndpointHost: "",
+    sendReasoning: true,
+    reasoningEffort: "low",
+    hasApiKey: false,
+    hasFlashModel: false,
+    apiKeyHint: "",
+  }));
   const window = new BrowserWindow({
     width: 1440,
     height: 900,
@@ -144,6 +173,7 @@ app.whenReady().then(async () => {
     backgroundColor: "#efede7",
     icon: path.join(__dirname, "../build/icon-aura.png"),
     webPreferences: {
+      preload: path.join(__dirname, "preload.cjs"),
       backgroundThrottling: false,
       contextIsolation: true,
       nodeIntegration: false,
@@ -161,10 +191,95 @@ app.whenReady().then(async () => {
   await reloadWindow(window);
   await capture(window, "ui-workbench.png");
   await window.webContents.executeJavaScript(
-    'localStorage.setItem("scriptforge.locale.v1", "en-US")',
+    `localStorage.setItem("scriptforge.locale.v1", "en-US");
+     localStorage.setItem("scriptforge.ui-scale.v1", "1")`,
   );
   await reloadWindow(window);
+  await new Promise((resolve) => setTimeout(resolve, 200));
   await capture(window, "ui-workbench-en.png");
+  const zoomResult = await window.webContents.executeJavaScript(`(async () => {
+    const before = {
+      devicePixelRatio: window.devicePixelRatio,
+      innerWidth: window.innerWidth,
+    };
+    const zoomIn = document.querySelector('.accessibility-controls button[title="Zoom in"]');
+    zoomIn?.click();
+    zoomIn?.click();
+    zoomIn?.click();
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    return {
+      before,
+      after: {
+        devicePixelRatio: window.devicePixelRatio,
+        innerWidth: window.innerWidth,
+        label: document.querySelector(".accessibility-controls .scale-value")?.textContent,
+      },
+    };
+  })()`);
+  if (
+    zoomResult.after.label !== "130%" ||
+    zoomResult.after.innerWidth >= zoomResult.before.innerWidth
+  ) {
+    throw new Error(`Native zoom smoke check failed: ${JSON.stringify(zoomResult)}`);
+  }
+  window.setSize(1080, 720);
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  const compactZoomLayout = await window.webContents.executeJavaScript(`({
+    label: document.querySelector(".accessibility-controls .scale-value")?.textContent,
+    viewport: [window.innerWidth, window.innerHeight],
+    appWidth: document.querySelector(".app-shell")?.getBoundingClientRect().width,
+    sidebarWidth: document.querySelector(".sidebar")?.getBoundingClientRect().width,
+    horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    phaseOverflowMode: getComputedStyle(document.querySelector(".phase-rail")).overflowX,
+  })`);
+  if (
+    compactZoomLayout.label !== "130%" ||
+    compactZoomLayout.sidebarWidth > 70 ||
+    compactZoomLayout.horizontalOverflow ||
+    compactZoomLayout.phaseOverflowMode !== "auto"
+  ) {
+    throw new Error(
+      `Compact 130% zoom layout smoke check failed: ${JSON.stringify(compactZoomLayout)}`,
+    );
+  }
+  await capture(window, "ui-scale-130-1080x720-en.png");
+  window.setSize(1440, 900);
+  await window.webContents.executeJavaScript(`(async () => {
+    const zoomOut = document.querySelector('.accessibility-controls button[title="Zoom out"]');
+    zoomOut?.click();
+    zoomOut?.click();
+    zoomOut?.click();
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  })()`);
+  window.setSize(1080, 720);
+  const minimumZoomResult = await window.webContents.executeJavaScript(`(async () => {
+    const beforeWidth = window.innerWidth;
+    const zoomOut = document.querySelector('.accessibility-controls button[title="Zoom out"]');
+    zoomOut?.click();
+    zoomOut?.click();
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    return {
+      beforeWidth,
+      afterWidth: window.innerWidth,
+      label: document.querySelector(".accessibility-controls .scale-value")?.textContent,
+      horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    };
+  })()`);
+  if (
+    minimumZoomResult.label !== "85%" ||
+    minimumZoomResult.afterWidth <= minimumZoomResult.beforeWidth ||
+    minimumZoomResult.horizontalOverflow
+  ) {
+    throw new Error(
+      `Minimum zoom smoke check failed: ${JSON.stringify(minimumZoomResult)}`,
+    );
+  }
+  await capture(window, "ui-scale-85-1080x720-en.png");
+  await window.webContents.executeJavaScript(`(async () => {
+    document.querySelector('.accessibility-controls .scale-value')?.click();
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  })()`);
+  window.setSize(1440, 900);
   const settingsCompatibilityChecked = await window.webContents.executeJavaScript(`(async () => {
     const button = [...document.querySelectorAll(".sidebar-bottom button")].find((item) =>
       item.textContent.includes("Model & Preferences")

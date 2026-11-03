@@ -15,6 +15,7 @@
     "test": "vitest run",
     "acceptance": "tsx scripts/acceptance.ts",
     "smoke:desktop": "electron electron/smoke.cjs",
+    "smoke:desktop:150dpi": "cross-env SCRIPT_FORGE_DEVICE_SCALE_FACTOR=1.5 electron electron/smoke.cjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {
